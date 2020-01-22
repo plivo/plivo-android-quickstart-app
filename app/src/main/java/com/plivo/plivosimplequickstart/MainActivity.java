@@ -1,6 +1,7 @@
 package com.plivo.plivosimplequickstart;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,7 +10,9 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -93,6 +96,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (getCurrentFocus() != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+        return super.dispatchTouchEvent(ev);
     }
 
     private void init() {
@@ -378,14 +390,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         showOutCallUI(STATE.IDLE, null);
     }
 
-    public void onClickBtnFeedback(View view) {
-        showRatingWindow();
-    }
-
-    public void onClickSubmitFeedback(View view) {
-        submitCallQualityFeedback();
-    }
-
     public void onClickSkip(View view){
         setContentView(R.layout.activity_main);
         updateUI(STATE.IDLE, null);
@@ -406,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
         else {
 
-            if(findViewById(R.id.call_btn) ==null || findViewById(R.id.feedback) == null ||  findViewById(R.id.logged_in_as) == null || findViewById(R.id.logging_in_label)==null){
+            if(findViewById(R.id.call_btn) ==null ||  findViewById(R.id.logged_in_as) == null || findViewById(R.id.logging_in_label)==null){
                 if (data != null) {
                     if (data instanceof Outgoing) {
                         // handle outgoing
@@ -418,7 +422,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 }
             }else {
                 findViewById(R.id.call_btn).setEnabled(true);
-                findViewById(R.id.feedback).setEnabled(true);
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText("Logged in as:");
                 ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
 
@@ -447,14 +450,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     @Override
-    public void onLogout() {
-        runOnUiThread(() -> {
-            Toast.makeText(this, R.string.logout_success, Toast.LENGTH_SHORT).show();
-            finish();
-        });
-    }
-
-    @Override
     public void onIncomingCall(Incoming data, PlivoBackEnd.STATE callState) {
         runOnUiThread(() -> updateUI(callState, data));
     }
@@ -467,14 +462,5 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onIncomingDigit(String digit) {
         runOnUiThread(() -> Toast.makeText(this, String.format(getString(R.string.dtmf_received), digit), Toast.LENGTH_SHORT).show());
-    }
-
-    @Override
-    public void mediaMetrics(HashMap messageTemplate){
-        if(messageTemplate!=null && messageTemplate.containsKey("level") && messageTemplate.containsKey("type") && messageTemplate.containsKey("active")) {
-            if((Boolean)messageTemplate.get("active")) {
-                runOnUiThread(() -> Toast.makeText(this, String.format(messageTemplate.get("level").toString() + " | " + messageTemplate.get("type").toString()), Toast.LENGTH_LONG).show());
-            }
-        }
     }
 }

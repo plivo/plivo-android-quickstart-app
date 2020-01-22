@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="35dp"
         android:text="Logging in..."
+        android:textColor="@color/colorBlack"
         android:textSize="@dimen/font_size"
         app:layout_constraintHorizontal_bias="0.046"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -25,50 +26,66 @@
         android:layout_height="wrap_content"
         android:text=""
         android:textAllCaps="false"
+        android:textColor="@color/colorBlack"
         android:textSize="@dimen/font_size"
         app:layout_constraintHorizontal_bias="0.100"
         app:layout_constraintLeft_toLeftOf="@+id/logging_in_label"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logging_in_label" />
 
-    <androidx.appcompat.widget.AppCompatButton
+    <ImageView
+        android:id="@+id/appicon"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toTopOf="@+id/call_btn"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.445"
+        app:srcCompat="@drawable/plivo_icon" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/call_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/text_border"
+        android:ems="15"
+        android:gravity="center"
+        android:hint="@string/call_hint"
+        android:lines="2"
+        android:textIsSelectable="true"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appicon" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/call_hint_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="18dp"
+        android:text="Call SIP URI or Phone Number"
+        android:textColor="@color/colorBlack"
+        android:textSize="@dimen/font_size"
+        app:layout_constraintEnd_toEndOf="@+id/call_text"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/call_text" />
+
+    <ImageButton
         android:id="@+id/call_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:enabled="false"
+        android:layout_marginBottom="8dp"
+        android:background="#0000"
         android:onClick="onClickBtnMakeCall"
-        android:text="@string/make_call"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/feedback"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginBottom="234dp"
         android:enabled="false"
-        android:onClick="onClickBtnFeedback"
-        android:text="feedback"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.509"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appicon"
-        app:layout_constraintVertical_bias="0.662" />
-
-    <ImageView
-        android:id="@+id/appicon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="9dp"
-        android:layout_marginTop="152dp"
-        android:layout_marginBottom="179dp"
-        app:layout_constraintBottom_toTopOf="@+id/feedback"
-        app:layout_constraintStart_toEndOf="@+id/logging_in_label"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/plivo_icon" />
+        app:srcCompat="@drawable/call_start" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
