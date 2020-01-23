@@ -79,7 +79,7 @@
         android:id="@+id/call_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="28dp"
         android:background="#0000"
         android:onClick="onClickBtnMakeCall"
         android:enabled="false"

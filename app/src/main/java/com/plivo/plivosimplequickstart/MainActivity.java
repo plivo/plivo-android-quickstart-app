@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
@@ -54,11 +56,14 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private int tick;
 
+    private ActionBar actionBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -131,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
      * @param outgoing
      */
     private void showOutCallUI(STATE state, Outgoing outgoing) {
+
         if (alertDialog != null) alertDialog.dismiss();
 
         String title = state.name() + " " + (outgoing != null ? Utils.to(outgoing.getToContact()) : "");
@@ -152,21 +158,27 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
 
         if (showAlert) {
-            alertDialog = new AlertDialog.Builder(this)
-                    .setTitle(title)
-                    .setView(R.layout.dialog_outgoing_content_view)
-                    .setCancelable(cancelable)
-                    .setNeutralButton(btnText, (dialog, which) -> {
-                        if (state == STATE.IDLE) {
-                            makeCall();
-                        } else {
-                            cancelTimer();
-                            outgoing.hangup();
-                        }
-                    })
-                    .show();
+//            alertDialog = new AlertDialog.Builder(this)
+//                    .setTitle(title)
+//                    .setView(R.layout.dialog_outgoing_content_view)
+//                    .setCancelable(cancelable)
+//                    .setNeutralButton(btnText, (dialog, which) -> {
+//                        if (state == STATE.IDLE) {
+//                            makeCall();
+//                        } else {
+//                            cancelTimer();
+//                            outgoing.hangup();
+//                        }
+//                    })
+//                    .show();
+//
+//            if (state == STATE.ANSWERED) startTimer();
+            EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
+            String phoneNum = phoneNumberText.getText().toString();
+            setContentView(R.layout.call);
+            TextView callerName = (TextView) findViewById(R.id.caller_name);
+            callerName.setText(phoneNum);
 
-            if (state == STATE.ANSWERED) startTimer();
         }
 
         if (alertDialog != null) {
@@ -387,12 +399,52 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void onClickBtnMakeCall(View view) {
+        EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
+        String phoneNumber = phoneNumberText.getText().toString();
+        if (phoneNumber.matches("")) {
+            Toast.makeText(this, "Enter sip uri or phone number", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        hideSupportActionBar(view);
         showOutCallUI(STATE.IDLE, null);
+    }
+
+    public void onClickBtnEndCall(View view) {
+        unHideSupportActionBar(view);
+        setContentView(R.layout.activity_main);
+        updateUI(STATE.IDLE, null);
+    }
+
+    public void onClickBtnSpeaker(View view) {
+        ImageButton btn = (ImageButton)findViewById(R.id.speaker);
+        btn.setImageResource(R.drawable.speaker_selected);
+    }
+
+    public void onClickBtnHold(View view) {
+        ImageButton btn = (ImageButton)findViewById(R.id.hold);
+        btn.setImageResource(R.drawable.hold_selected);
+    }
+
+    public void onClickBtnMute(View view) {
+        ImageButton btn = (ImageButton)findViewById(R.id.mute);
+        btn.setImageResource(R.drawable.mute_selected);
     }
 
     public void onClickSkip(View view){
         setContentView(R.layout.activity_main);
         updateUI(STATE.IDLE, null);
+    }
+
+    public void hideSupportActionBar(View view) {
+        actionBar.hide();
+        actionBar.setDisplayHomeAsUpEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
+    }
+
+    public void unHideSupportActionBar(View view) {
+        actionBar.show();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowTitleEnabled(true);
     }
 
     private void updateUI(PlivoBackEnd.STATE state, Object data) {
@@ -421,9 +473,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     }
                 }
             }else {
-                findViewById(R.id.call_btn).setEnabled(true);
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText("Logged in as:");
                 ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
+                findViewById(R.id.call_btn).setEnabled(true);
 
                 if (data != null) {
                     if (data instanceof Outgoing) {
@@ -450,6 +502,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     @Override
+    public void onLogout() {
+
+    }
+
+    @Override
     public void onIncomingCall(Incoming data, PlivoBackEnd.STATE callState) {
         runOnUiThread(() -> updateUI(callState, data));
     }
@@ -462,5 +519,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onIncomingDigit(String digit) {
         runOnUiThread(() -> Toast.makeText(this, String.format(getString(R.string.dtmf_received), digit), Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void mediaMetrics(HashMap messageTemplate){
+
     }
 }
