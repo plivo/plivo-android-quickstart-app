@@ -233,88 +233,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
         }
     }
-    public void showRatingWindow(){
-        RatingBar ratingBar;
-        TextView star;
-        setContentView(R.layout.rating);
-        ratingBar = (RatingBar) findViewById(R.id.star);
-        star = (TextView) findViewById(R.id.star_count);
-        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-            @Override
-            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                float ratedValue;
-                ratedValue = ratingBar.getRating();
-                star.setText("Your Rating : " + (int)ratedValue + "/5");
-                LinearLayout one = (LinearLayout) findViewById(R.id.LinearLayout);
-
-                if (ratedValue==5) {
-                    EditText comments = (EditText) findViewById(R.id.comments);
-                    comments.getText().clear();
-                    one.setVisibility(View.GONE);
-                }
-                else{
-                    one.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-    }
-    public void submitCallQualityFeedback(){
-        Boolean addLog= ((CheckBox) findViewById(R.id.add_log)).isChecked();
-        ArrayList <String> issueList = new ArrayList<String>();
-        if (((CheckBox) findViewById(R.id.audio_lag)).isChecked()){
-            issueList.add( (((CheckBox) findViewById(R.id.audio_lag)).getText()).toString());
-        }
-        if (((CheckBox) findViewById(R.id.broken_audio)).isChecked()){
-            issueList.add( (((CheckBox) findViewById(R.id.broken_audio)).getText()).toString());
-        }
-        if (((CheckBox) findViewById(R.id.call_dropped)).isChecked()){
-            issueList.add( (((CheckBox) findViewById(R.id.call_dropped)).getText()).toString());
-        }
-        if (((CheckBox) findViewById(R.id.high_connect_time)).isChecked()){
-            issueList.add( (((CheckBox) findViewById(R.id.high_connect_time)).getText()).toString());
-        }
-        if (((CheckBox) findViewById(R.id.low_audio_level)).isChecked()){
-            issueList.add( (((CheckBox) findViewById(R.id.low_audio_level)).getText()).toString());
-        }
-        if (((CheckBox) findViewById(R.id.callerid_issues)).isChecked()){
-            issueList.add( (((CheckBox) findViewById(R.id.callerid_issues)).getText()).toString());
-        }
-        if (((CheckBox) findViewById(R.id.echo)).isChecked()){
-            issueList.add( (((CheckBox) findViewById(R.id.echo)).getText()).toString());
-        }
-        RatingBar ratingBar = (RatingBar) findViewById(R.id.star);
-        Integer ratedValue = (int) (ratingBar.getRating());
-        String comments = ((EditText) findViewById(R.id.comments)).getText().toString();
-        if(ratedValue==5) {
-            issueList.clear();
-            addLog=false;
-        }
-        if (ratedValue==0){
-            alertDialog = new AlertDialog.Builder(this)
-                    .setTitle("Star rating can't be empty")
-                    .setCancelable(true)
-                    .setNeutralButton("Ok", (dialog, which) -> {
-                        showRatingWindow();
-                    })
-                    .show();
-        }
-        else if (ratedValue<5 && issueList.size()==0){
-            alertDialog = new AlertDialog.Builder(this)
-                    .setTitle("Atleast one issue is mandatory for feedback")
-                    .setCancelable(true)
-                    .setNeutralButton("Ok", (dialog, which) -> {
-                        showRatingWindow();
-                    })
-                    .show();
-
-        }
-        else {
-            ((App) getApplication()).backend().submitCallQualityFeedback(ratedValue, addLog, comments, issueList);
-            setContentView(R.layout.activity_main);
-            updateUI(STATE.IDLE, null);
-        }
-
-    }
 
     public void onClickBtnMakeCall(View view) {
         EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
@@ -461,7 +379,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     showInCallUI(state, (Incoming) data);
                 }
             }
-            showRatingWindow();
         }
         else {
 
