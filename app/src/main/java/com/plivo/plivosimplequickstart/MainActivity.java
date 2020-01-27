@@ -3,6 +3,7 @@ package com.plivo.plivosimplequickstart;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -57,6 +58,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private int tick;
 
     private ActionBar actionBar;
+
+    private boolean isSpeakerOn=false, isHoldOn=false, isMuteOn=false;
+
+    private Object callData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,78 +142,25 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
      */
     private void showOutCallUI(STATE state, Outgoing outgoing) {
 
-        if (alertDialog != null) alertDialog.dismiss();
+        String title = state.name();
 
-        String title = state.name() + " " + (outgoing != null ? Utils.to(outgoing.getToContact()) : "");
-        CharSequence btnText = getString(R.string.call);
-        boolean cancelable = true;
-        boolean showAlert = false;
-        switch (state) {
-            case IDLE:
-                title = getString(R.string.enter_outgoing);
-                showAlert = true;
-                break;
-
-            case ANSWERED:
-            case RINGING:
-                cancelable = false;
-                showAlert = true;
-                btnText = getString(R.string.end_call);
-                break;
-        }
-
-        if (showAlert) {
-//            alertDialog = new AlertDialog.Builder(this)
-//                    .setTitle(title)
-//                    .setView(R.layout.dialog_outgoing_content_view)
-//                    .setCancelable(cancelable)
-//                    .setNeutralButton(btnText, (dialog, which) -> {
-//                        if (state == STATE.IDLE) {
-//                            makeCall();
-//                        } else {
-//                            cancelTimer();
-//                            outgoing.hangup();
-//                        }
-//                    })
-//                    .show();
-//
-//            if (state == STATE.ANSWERED) startTimer();
+        if (state == STATE.IDLE) {
             EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
             String phoneNum = phoneNumberText.getText().toString();
             setContentView(R.layout.call);
             TextView callerName = (TextView) findViewById(R.id.caller_name);
+            TextView callerState = (TextView) findViewById(R.id.caller_state);
             callerName.setText(phoneNum);
-
+            callerState.setText(title);
+            makeCall(phoneNum);
         }
-
-        if (alertDialog != null) {
-            // DTMF handle
-            AppCompatEditText editBox = alertDialog.findViewById(R.id.edit_number);
-            if (editBox != null) {
-                editBox.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                    @Override
-                    public void afterTextChanged(Editable s) {}
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        if (state != STATE.ANSWERED || outgoing == null) return;
-
-                        if (!TextUtils.isEmpty(s) && before < count) {
-                            outgoing.sendDigits(Character.toString(s.charAt(s.length() - 1)));
-                        }
-                    }
-                });
-            }
-
-            // stop timer
-            alertDialog.setOnDismissListener(dialog -> {
-                if (state == STATE.ANSWERED) cancelTimer();
-            });
+        if (state == STATE.RINGING) {
+            TextView callerState = (TextView) findViewById(R.id.caller_state);
+            callerState.setText("Ringing...");
         }
-
+        if(state == STATE.ANSWERED) {
+            startTimer();
+        }
     }
 
     /**
@@ -286,17 +238,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             @Override
             public void run() {
                 runOnUiThread(() -> {
-                    if (alertDialog != null) {
-                        int hours = (int) TimeUnit.SECONDS.toHours(tick);
-                        int minutes = (int) TimeUnit.SECONDS.toMinutes(tick-=TimeUnit.HOURS.toSeconds(hours));
-                        int seconds = (int) (tick-TimeUnit.MINUTES.toSeconds(minutes));
-                        String text = hours > 0 ? String.format(HH_MM_SS, hours, minutes, seconds) : String.format(MM_SS, minutes, seconds);
-                        AppCompatTextView timerTextView = alertDialog.findViewById(R.id.timer_text);
-                        if (timerTextView != null) {
-                            timerTextView.setVisibility(View.VISIBLE);
-                            timerTextView.setText(text);
-                            tick++;
-                        }
+                    int hours = (int) TimeUnit.SECONDS.toHours(tick);
+                    int minutes = (int) TimeUnit.SECONDS.toMinutes(tick-=TimeUnit.HOURS.toSeconds(hours));
+                    int seconds = (int) (tick-TimeUnit.MINUTES.toSeconds(minutes));
+                    String text = hours > 0 ? String.format(HH_MM_SS, hours, minutes, seconds) : String.format(MM_SS, minutes, seconds);
+                    TextView timerTextView = (TextView) findViewById(R.id.caller_state);
+                    if (timerTextView != null) {
+                        timerTextView.setVisibility(View.VISIBLE);
+                        timerTextView.setText(text);
+                        tick++;
                     }
                 });
             }
@@ -308,10 +258,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         tick = 0;
     }
 
-    private void makeCall() {
+    private void makeCall(String phoneNum) {
         Outgoing outgoing = ((App) getApplication()).backend().getOutgoing();
         if (outgoing != null) {
-            outgoing.call(((AppCompatEditText) alertDialog.findViewById(R.id.edit_number)).getText().toString());
+            outgoing.call(phoneNum);
 
         }
     }
@@ -411,23 +361,106 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public void onClickBtnEndCall(View view) {
         unHideSupportActionBar(view);
+        endCall();
         setContentView(R.layout.activity_main);
         updateUI(STATE.IDLE, null);
     }
 
+    public void endCall() {
+        if (callData != null) {
+            if (callData instanceof Outgoing) {
+                ((Outgoing) callData).hangup();
+            } else {
+                ((Incoming) callData).hangup();
+            }
+        }
+    }
+
     public void onClickBtnSpeaker(View view) {
-        ImageButton btn = (ImageButton)findViewById(R.id.speaker);
-        btn.setImageResource(R.drawable.speaker_selected);
+        AudioManager audioManager =(AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        ImageButton btn = (ImageButton) findViewById(R.id.speaker);
+        if(isSpeakerOn) {
+            isSpeakerOn=false;
+            btn.setImageResource(R.drawable.speaker);
+            audioManager.setMode(AudioManager.MODE_IN_CALL);
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+        }
+        else {
+            isSpeakerOn=true;
+            btn.setImageResource(R.drawable.speaker_selected);
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+            audioManager.setMode(AudioManager.MODE_IN_CALL);
+        }
+        audioManager.setSpeakerphoneOn(isSpeakerOn);
     }
 
     public void onClickBtnHold(View view) {
-        ImageButton btn = (ImageButton)findViewById(R.id.hold);
-        btn.setImageResource(R.drawable.hold_selected);
+        ImageButton btn = (ImageButton) findViewById(R.id.hold);
+        if(isHoldOn) {
+            isHoldOn=false;
+            btn.setImageResource(R.drawable.hold);
+            unHoldCall();
+        }
+        else {
+            isHoldOn=true;
+            btn.setImageResource(R.drawable.hold_selected);
+            holdCall();
+        }
     }
 
+    public void holdCall() {
+        if (callData != null) {
+            if (callData instanceof Outgoing) {
+                ((Outgoing) callData).hold();
+            } else {
+                ((Incoming) callData).hold();
+            }
+        }
+    }
+
+    public void unHoldCall() {
+        if (callData != null) {
+            if (callData instanceof Outgoing) {
+                ((Outgoing) callData).unhold();
+            } else {
+                ((Incoming) callData).unhold();
+            }
+        }
+    }
+
+
     public void onClickBtnMute(View view) {
-        ImageButton btn = (ImageButton)findViewById(R.id.mute);
-        btn.setImageResource(R.drawable.mute_selected);
+        ImageButton btn = (ImageButton) findViewById(R.id.mute);
+        if(isMuteOn) {
+            isMuteOn=false;
+            btn.setImageResource(R.drawable.mute);
+            unMuteCall();
+        }
+        else {
+            isMuteOn=true;
+            btn.setImageResource(R.drawable.mute_selected);
+            muteCall();
+        }
+    }
+
+    public void muteCall() {
+        if (callData != null) {
+            if (callData instanceof Outgoing) {
+                ((Outgoing) callData).mute();
+            } else {
+                ((Incoming) callData).mute();
+            }
+        }
+    }
+
+    public void unMuteCall() {
+        if (callData != null) {
+            if (callData instanceof Outgoing) {
+                ((Outgoing) callData).unmute();
+            } else {
+                ((Incoming) callData).unmute();
+            }
+        }
     }
 
     public void onClickSkip(View view){
@@ -448,6 +481,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void updateUI(PlivoBackEnd.STATE state, Object data) {
+        callData = data;
         if(state.equals(STATE.REJECTED) || state.equals(STATE.HANGUP) || state.equals(STATE.INVALID)){
             if (data != null) {
                 if (data instanceof Outgoing) {
