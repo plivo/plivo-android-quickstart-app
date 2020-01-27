@@ -171,19 +171,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private void showInCallUI(STATE state, Incoming incoming) {
         if (alertDialog != null) alertDialog.dismiss();
 
-        String title = state.name() + " " + (incoming != null ? Utils.from(incoming.getFromContact(), incoming.getFromSip()) : "");
+        String title = "Incoming Call\n" + (incoming != null ? Utils.from(incoming.getFromContact(), incoming.getFromSip()) : "");
 
         switch (state) {
             case ANSWERED:
-                alertDialog = new AlertDialog.Builder(this)
-                        .setTitle(title)
-                        .setView(R.layout.dialog_outgoing_content_view)
-                        .setCancelable(false)
-                        .setNeutralButton(R.string.end_call, (dialog, which) -> {
-                            cancelTimer();
-                            incoming.hangup();
-                        })
-                        .show();
+                EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
+                String phoneNum = phoneNumberText.getText().toString();
+                setContentView(R.layout.call);
+                TextView callerName = (TextView) findViewById(R.id.caller_name);
+                callerName.setText(phoneNum);
                 startTimer();
                 break;
 
@@ -199,34 +195,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                         })
                         .show();
                 break;
-        }
-
-        if (alertDialog != null) {
-            // DTMF handle
-            AppCompatEditText editBox = alertDialog.findViewById(R.id.edit_number);
-            if (editBox != null) {
-                editBox.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                    @Override
-                    public void afterTextChanged(Editable s) {}
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        if (state != STATE.ANSWERED || incoming == null) return;
-
-                        if (!TextUtils.isEmpty(s) && before < count) {
-                            incoming.sendDigits(Character.toString(s.charAt(s.length() - 1)));
-                        }
-                    }
-                });
-            }
-
-            // stop timer
-            alertDialog.setOnDismissListener(dialog -> {
-                if (state == STATE.ANSWERED) cancelTimer();
-            });
         }
     }
 
@@ -361,6 +329,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public void onClickBtnEndCall(View view) {
         unHideSupportActionBar(view);
+        cancelTimer();
         endCall();
         setContentView(R.layout.activity_main);
         updateUI(STATE.IDLE, null);
