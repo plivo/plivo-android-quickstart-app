@@ -1,10 +1,8 @@
 package com.plivo.plivosimplequickstart;
 
 import android.content.Intent;
-
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-
 import java.util.HashMap;
 
 public class PlivoFCMService extends FirebaseMessagingService {

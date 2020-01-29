@@ -1,7 +1,6 @@
 package com.plivo.plivosimplequickstart;
 
 import android.text.TextUtils;
-
 import java.util.HashMap;
 
 public class Utils {

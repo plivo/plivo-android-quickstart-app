@@ -11,40 +11,21 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Parcelable;
 import android.os.Vibrator;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.RatingBar;
-import android.widget.TextView;
-
-import java.io.IOException;
-import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
@@ -101,14 +82,14 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         super.onNewIntent(intent);
         String action = intent.getAction();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if ("ANSWER_ACTION".equals(action)) {
+        if (Constants.ANSWER_ACTION.equals(action)) {
             answerCall();
-            notificationManager.cancel(0);
+            notificationManager.cancel(Constants.NOTIFICATION_ID);
             vibrator.cancel();
 
-        } else if ("REJECT_ACTION".equals(action)) {
+        } else if(Constants.REJECT_ACTION.equals(action)) {
             rejectCall();
-            notificationManager.cancel(0);
+            notificationManager.cancel(Constants.NOTIFICATION_ID);
             vibrator.cancel();
         }
     }
@@ -187,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
         if (state == STATE.RINGING) {
             TextView callerState = (TextView) findViewById(R.id.caller_state);
-            callerState.setText("Ringing...");
+            callerState.setText(Constants.RINGING_LABEL);
         }
         if(state == STATE.ANSWERED) {
             startTimer();
@@ -223,18 +204,18 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 updateUI(STATE.IDLE, null);
                 break;
             case REJECTED:
-                removeNotification(0);
+                removeNotification(Constants.NOTIFICATION_ID);
                 break;
         }
     }
 
     private void notificationDialog(String title, Incoming incoming) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        String NOTIFICATION_CHANNEL_ID = "PlivoVoiceQuickStart";
+        String NOTIFICATION_CHANNEL_ID = Constants.NOTIFICATION_CHANNEL;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             @SuppressLint("WrongConstant") NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "My Notifications", NotificationManager.IMPORTANCE_MAX);
             // Configure the notification channel.
-            notificationChannel.setDescription("Incoming call");
+            notificationChannel.setDescription(Constants.NOTIFICATION_DESCRIPTION);
             notificationChannel.enableLights(true);
             notificationChannel.setLightColor(Color.RED);
             notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
@@ -243,10 +224,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
 
         Intent answerIntent = new Intent(this, MainActivity.class);
-        answerIntent.setAction("ANSWER_ACTION");
+        answerIntent.setAction(Constants.ANSWER_ACTION);
         PendingIntent AcceptIntent = PendingIntent.getActivity(this, 0, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
         Intent rejectIntent = new Intent(this, MainActivity.class);
-        rejectIntent.setAction("REJECT_ACTION");
+        rejectIntent.setAction(Constants.REJECT_ACTION);
         PendingIntent RejectIntent = PendingIntent.getActivity(this, 0, rejectIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
@@ -255,15 +236,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 .setCategory(Notification.CATEGORY_CALL)
                 .setWhen(System.currentTimeMillis())
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setTicker("PlivoVoiceQuickStart")
+                .setTicker(Constants.NOTIFICATION_CHANNEL)
                 .setPriority(Notification.PRIORITY_MAX)
-                .setContentTitle("Incoming Call")
+                .setContentTitle(Constants.NOTIFICATION_DESCRIPTION)
                 .setContentText(title)
                 .addAction(android.R.drawable.ic_menu_delete, getString(R.string.reject), RejectIntent)
                 .addAction(android.R.drawable.ic_menu_call, getString(R.string.answer), AcceptIntent)
                 .setOngoing(true)
                 .setVibrate(new long[] { 0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
-                .setContentInfo("Incoming Call");
+                .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
         notificationManager.notify(0, notificationBuilder.build());
 
         vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
@@ -308,7 +289,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Outgoing outgoing = ((App) getApplication()).backend().getOutgoing();
         if (outgoing != null) {
             outgoing.call(phoneNum);
-
         }
     }
 
@@ -316,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
         String phoneNumber = phoneNumberText.getText().toString();
         if (phoneNumber.matches("")) {
-            Toast.makeText(this, "Enter sip uri or phone number", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, Constants.OUTGOING_CALL_DIAL_HINT, Toast.LENGTH_SHORT).show();
             return;
         }
         showOutCallUI(STATE.IDLE, null);
@@ -474,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     }
                 }
             }else {
-                ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText("Logged in as:");
+                ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
                 ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
                 findViewById(R.id.call_btn).setEnabled(true);
 

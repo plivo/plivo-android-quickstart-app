@@ -1,14 +1,11 @@
 package com.plivo.plivosimplequickstart;
 
 import android.util.Log;
-
-import com.plivo.endpoint.FeedbackCallback;
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PlivoBackEnd implements EventListener {
@@ -55,44 +52,22 @@ public class PlivoBackEnd implements EventListener {
         return endpoint.createOutgoingCall();
     }
 
-    public void submitCallQualityFeedback(Integer starRating,Boolean sendConsoleLogs,String note , ArrayList<String> issueList){
-        String callUUID = endpoint.getLastCallUUID();
-        endpoint.submitCallQualityFeedback(callUUID,starRating, issueList, note, sendConsoleLogs, new FeedbackCallback() {
-            @Override
-            public void onFailure(int statuscode) {
-                Log.i(TAG,"Satus code : "+Integer.toString(statuscode));
-            }
-
-            @Override
-            public void onSuccess(String response) {
-                Log.i(TAG,"Success "+response);
-            }
-
-            @Override
-            public void onValidationFail(String validationErrorMessage) {
-                Log.i(TAG,"Validation Failed : "+validationErrorMessage);
-
-            }
-
-        });
-    }
-
     // Plivo SDK callbacks
     @Override
     public void onLogin() {
-        Log.d(TAG, "onLogin success");
+        Log.d(TAG, Constants.LOGIN_SUCCESS);
         if (listener != null) listener.onLogin(true);
     }
 
     @Override
     public void onLogout() {
-        Log.d(TAG, "onLogout success");
+        Log.d(TAG, Constants.LOGOUT_SUCCESS);
         if (listener != null) listener.onLogout();
     }
 
     @Override
     public void onLoginFailed() {
-        Log.e(TAG, "onLoginFailed");
+        Log.e(TAG, Constants.LOGIN_FAILED);
         if (listener != null) listener.onLogin(false);
     }
 
@@ -103,55 +78,55 @@ public class PlivoBackEnd implements EventListener {
 
     @Override
     public void onIncomingCall(Incoming incoming) {
-        Log.d(TAG, "onIncomingCall Ringing");
+        Log.d(TAG, Constants.INCOMING_CALL_RINGING);
         if (listener != null) listener.onIncomingCall(incoming, STATE.RINGING);
     }
 
     @Override
     public void onIncomingCallHangup(Incoming incoming) {
-        Log.d(TAG, "onIncomingCallHangup");
+        Log.d(TAG, Constants.INCOMING_CALL_HANGUP);
         if (listener != null) listener.onIncomingCall(incoming, STATE.HANGUP);
     }
 
     @Override
     public void onIncomingCallRejected(Incoming incoming) {
-        Log.d(TAG, "onIncomingCallRejected");
+        Log.d(TAG, Constants.INCOMING_CALL_REJECTED);
         if (listener != null) listener.onIncomingCall(incoming, STATE.REJECTED);
     }
 
     @Override
     public void onOutgoingCall(Outgoing outgoing) {
-        Log.d(TAG, "onOutgoingCall Ringing");
+        Log.d(TAG, Constants.OUTGOING_CALL_RINGING);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.RINGING);
     }
 
     @Override
     public void onOutgoingCallAnswered(Outgoing outgoing) {
-        Log.d(TAG, "onOutgoingCall Answered");
+        Log.d(TAG, Constants.OUTGOING_CALL_ANSWERED);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.ANSWERED);
     }
 
     @Override
     public void onOutgoingCallRejected(Outgoing outgoing) {
-        Log.d(TAG, "onOutgoingCall Rejected");
+        Log.d(TAG, Constants.OUTGOING_CALL_REJECTED);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.REJECTED);
     }
 
     @Override
     public void onOutgoingCallHangup(Outgoing outgoing) {
-        Log.d(TAG, "onOutgoingCall Hangup");
+        Log.d(TAG, Constants.OUTGOING_CALL_HANGUP);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.HANGUP);
     }
 
     @Override
     public void onOutgoingCallInvalid(Outgoing outgoing) {
-        Log.d(TAG, "onOutgoingCall Invalid");
+        Log.d(TAG, Constants.OUTGOING_CALL_INVALID);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.INVALID);
     }
 
     @Override
     public void mediaMetrics(HashMap messageTemplate){
-        Log.d(TAG, "mediaMetrics called");
+        Log.d(TAG, Constants.MEDIAMETRICS);
         Log.i(TAG, messageTemplate.toString());
         if (listener != null ) listener.mediaMetrics(messageTemplate);
     }
