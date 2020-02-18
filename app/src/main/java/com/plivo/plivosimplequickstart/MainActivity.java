@@ -423,11 +423,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
     }
 
-    public void onClickSkip(View view){
-        setContentView(R.layout.activity_main);
-        updateUI(STATE.IDLE, null);
-    }
-
     private void updateUI(PlivoBackEnd.STATE state, Object data) {
         callData = data;
         if(state.equals(STATE.REJECTED) || state.equals(STATE.HANGUP) || state.equals(STATE.INVALID)){
