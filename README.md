@@ -21,11 +21,9 @@ To get started with the quickstart application follow these steps. Steps 1-3 wil
 
 4. [Run the app](#bullet4)
 
-5. [Plivo iOS SDK V2 with Push Kit integration](#bullet5)
+5. [Making an outgoing call](#bullet5)
 
-6. [Making an outgoing call](#bullet6)
-
-7. [Receive an incoming call](#bullet7)
+6. [Receive an incoming call](#bullet6)
 
 
 ### <a name="bullet1"></a>1. Install the Plivo Android SDK using gradle
@@ -107,42 +105,6 @@ Build and run the app.
 After successful login make VoiceCalls.
 
 
-### <a name="bullet5"></a>5. Plivo Android SDK V2 with Push Kit integration
-
-To enable Pushkit Integration in the SDK:
-login with registerToken, create FirebaseMessagingService class and implement relayVoipPushNotification method
-```
-//Register pushkit token using the login method as mentioned above
-public void login(String username, String password, String fcmToken) {
-   endpoint.login(username, password, fcmToken);
-}
-
-//Create a FirebaseMessagingService class and call relayIncomingPushData method
-public class PlivoFCMService extends FirebaseMessagingService {
-    @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
-        super.onMessageReceived(remoteMessage);
-        if (remoteMessage.getData() != null) {
-            ((App) getApplication()).backend().relayIncomingPushData(new HashMap<>(remoteMessage.getData()));
-            startActivity(new Intent(this, MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            );
-        }
-    }
-}
-
-//receive and pass on (incoming call information or a message) to SDK using relayVoipPushNotification method.
-public void relayIncomingPushData(HashMap<String, String> incomingData) {
-    if (incomingData != null && !incomingData.isEmpty()) {
-        endpoint.relayVoipPushNotification(incomingData);
-    }
-}
-```
-please refer to below link on Generating VoIP Certificate. 
-
-[Generating VoIP Certificate](https://www.plivo.com/docs/sdk/client/android/reference#setting-up-push-notification)
-
-
 ### <a name="bullet6"></a>5. Making an outgoing call
 
 Create PlivoOutgoingCall object , then make a call with destination and headers 
@@ -209,7 +171,8 @@ public void relayIncomingPushData(HashMap<String, String> incomingData) {
 
 incomingData is the Map object forwarded by the firebase push notification. This will enable the application to receive incoming calls even the app is not in foreground.
 ```
-please refer to below link on Generating VoIP Certificate. 
+please refer to below link on Generating VoIP Certificate.
+
 [Generating VoIP Certificate](https://www.plivo.com/docs/sdk/client/android/reference#setting-up-push-notification)
 
 You are now ready to receive incoming calls. 
