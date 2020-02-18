@@ -105,7 +105,7 @@ Build and run the app.
 After successful login make VoiceCalls.
 
 
-### <a name="bullet6"></a>5. Making an outgoing call
+### <a name="bullet5"></a>5. Making an outgoing call
 
 Create PlivoOutgoingCall object , then make a call with destination and headers 
 ```
@@ -138,7 +138,7 @@ public boolean callH(String dest, Map<String, String> headers);
 ```
 
 
-### <a name="bullet7"></a>6. Receive an incoming call
+### <a name="bullet6"></a>6. Receive an incoming call
 
 To enable Pushkit Integration in the SDK:
 Login with registerToken, create FirebaseMessagingService class and implement relayVoipPushNotification method
