@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/call_background"
+    android:orientation="vertical"
+    android:padding="@dimen/margin_s">
+
+
+    <ImageView
+        android:id="@+id/user_icon"
+        android:layout_width="125dp"
+        android:layout_height="125dp"
+        android:layout_marginTop="150dp"
+        android:layout_marginEnd="140dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/user_icon" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/caller_name"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="77dp"
+        android:text=""
+        android:textAllCaps="false"
+        android:textColor="@color/colorGrey"
+        android:textSize="25dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/caller_state"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/user_icon" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/caller_state"
+        android:layout_width="225dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text=""
+        android:textAllCaps="false"
+        android:textColor="@color/colorGrey"
+        android:textSize="@dimen/font_size"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/caller_name" />
+
+    <ImageButton
+        android:id="@+id/speaker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="18dp"
+        android:background="#0000"
+        android:onClick="onClickBtnSpeaker"
+        app:layout_constraintEnd_toStartOf="@+id/hold"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/caller_state"
+        app:srcCompat="@drawable/speaker" />
+
+    <ImageButton
+        android:id="@+id/hold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="21dp"
+        android:background="#0000"
+        android:enabled="false"
+        android:onClick="onClickBtnHold"
+        app:layout_constraintEnd_toStartOf="@+id/mute"
+        app:layout_constraintStart_toEndOf="@+id/speaker"
+        app:layout_constraintTop_toBottomOf="@+id/caller_state"
+        app:srcCompat="@drawable/hold" />
+
+    <ImageButton
+        android:id="@+id/mute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="30dp"
+        android:background="#0000"
+        android:enabled="false"
+        android:onClick="onClickBtnMute"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/hold"
+        app:layout_constraintTop_toBottomOf="@+id/caller_state"
+        app:srcCompat="@drawable/mute" />
+
+    <ImageButton
+        android:id="@+id/end_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        android:background="#0000"
+        android:onClick="onClickBtnEndCall"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@drawable/call_end" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
