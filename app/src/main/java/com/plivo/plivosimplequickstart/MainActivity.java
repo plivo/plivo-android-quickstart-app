@@ -303,8 +303,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void onClickBtnEndCall(View view) {
+        AudioManager audioManager =(AudioManager)getSystemService(Context.AUDIO_SERVICE);
         cancelTimer();
         endCall();
+        isSpeakerOn = false;
+        isHoldOn = false;
+        isMuteOn = false;
+        audioManager.setSpeakerphoneOn(isSpeakerOn);
         setContentView(R.layout.activity_main);
         updateUI(STATE.IDLE, null);
     }
