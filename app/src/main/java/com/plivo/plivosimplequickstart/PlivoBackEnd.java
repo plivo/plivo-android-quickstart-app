@@ -89,6 +89,11 @@ public class PlivoBackEnd implements EventListener {
     }
 
     @Override
+    public void onIncomingCallInvalid(Incoming incoming) {
+
+    }
+
+    @Override
     public void onIncomingCallRejected(Incoming incoming) {
         Log.d(TAG, Constants.INCOMING_CALL_REJECTED);
         if (listener != null) listener.onIncomingCall(incoming, STATE.REJECTED);
