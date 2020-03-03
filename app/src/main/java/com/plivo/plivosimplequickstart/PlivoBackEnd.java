@@ -36,6 +36,11 @@ public class PlivoBackEnd implements EventListener {
 
     public void login(String newToken) {
         endpoint.login(Utils.USERNAME, Utils.PASSWORD, newToken);
+        Utils.setDeviceToken(newToken);
+    }
+
+    public boolean loginForIncoming(String newToken) {
+        return endpoint.login(Utils.USERNAME, Utils.PASSWORD, newToken);
     }
 
     public void logout() {
