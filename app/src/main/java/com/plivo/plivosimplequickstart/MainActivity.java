@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         setContentView(R.layout.activity_main);
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+        vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -129,6 +130,21 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         return super.dispatchTouchEvent(ev);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
     private void init() {
         registerBackendListener();
         loginWithToken();
@@ -136,11 +152,18 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private void registerBackendListener() {
         ((App) getApplication()).backend().setListener(this);
+        Utils.setBackendListener(this);
     }
 
     private void loginWithToken() {
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                ((App) getApplication()).backend().login(instanceIdResult.getToken()));
+        if (Utils.getLoggedinStatus()) {
+            updateUI(STATE.IDLE, null);
+            callData = Utils.getIncoming();
+            showInCallUI(STATE.RINGING, Utils.getIncoming());
+        } else {
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));
+        }
     }
 
     private void logout() {
@@ -246,8 +269,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 .setVibrate(new long[] { 0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
                 .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
         notificationManager.notify(0, notificationBuilder.build());
-
-        vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(new long[] { 1000, 1000, 1000, 1000, 1000},3);
     }
 
@@ -484,7 +505,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogout() {
-
     }
 
     @Override

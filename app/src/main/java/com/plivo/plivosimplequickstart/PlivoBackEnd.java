@@ -61,6 +61,7 @@ public class PlivoBackEnd implements EventListener {
     @Override
     public void onLogin() {
         Log.d(TAG, Constants.LOGIN_SUCCESS);
+        Utils.setLoggedinStatus(true);
         if (listener != null) listener.onLogin(true);
     }
 
@@ -84,6 +85,7 @@ public class PlivoBackEnd implements EventListener {
     @Override
     public void onIncomingCall(Incoming incoming) {
         Log.d(TAG, Constants.INCOMING_CALL_RINGING);
+        Utils.setIncoming(incoming);
         if (listener != null) listener.onIncomingCall(incoming, STATE.RINGING);
     }
 
