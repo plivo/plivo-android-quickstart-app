@@ -3,7 +3,7 @@ package com.plivo.plivosimplequickstart;
 public class Constants {
     public static final String ANSWER_ACTION = "ANSWER_ACTION";
     public static final String REJECT_ACTION = "REJECT_ACTION";
-    public static final String LOGIN_ACTION = "LOGIN_ACTION";
+    public static final String LAUNCH_ACTION = "LAUNCH_ACTION";
     public static final int NOTIFICATION_ID = 0;
     public static final String RINGING_LABEL = "Ringing...";
     public static final String NOTIFICATION_CHANNEL = "PlivoVoiceQuickStart";

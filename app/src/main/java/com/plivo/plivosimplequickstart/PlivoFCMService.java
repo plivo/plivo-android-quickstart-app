@@ -53,9 +53,9 @@ public class PlivoFCMService extends FirebaseMessagingService {
             notificationManager.createNotificationChannel(notificationChannel);
         }
 
-        Intent loginIntent = new Intent(this, MainActivity.class);
-        loginIntent.setAction(Constants.LOGIN_ACTION);
-        PendingIntent LoginIntent = PendingIntent.getActivity(this, 0, loginIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+        Intent launchIntent = new Intent(this, MainActivity.class);
+        launchIntent.setAction(Constants.LAUNCH_ACTION);
+        PendingIntent LaunchIntent = PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         notificationBuilder.setAutoCancel(true)
@@ -65,7 +65,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
                 .setTicker(Constants.NOTIFICATION_CHANNEL)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setContentTitle(Constants.NOTIFICATION_DESCRIPTION)
-                .addAction(android.R.drawable.ic_menu_call, getString(R.string.login), LoginIntent)
+                .addAction(android.R.drawable.ic_menu_call, getString(R.string.launch), LaunchIntent)
                 .setOngoing(true)
                 .setVibrate(new long[] { 0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
                 .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
