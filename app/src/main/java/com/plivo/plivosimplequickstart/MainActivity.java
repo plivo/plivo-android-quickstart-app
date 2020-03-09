@@ -178,23 +178,31 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private void showOutCallUI(STATE state, Outgoing outgoing) {
 
         String title = state.name();
-
-        if (state == STATE.IDLE) {
-            EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
-            String phoneNum = phoneNumberText.getText().toString();
-            setContentView(R.layout.call);
-            TextView callerName = (TextView) findViewById(R.id.caller_name);
-            TextView callerState = (TextView) findViewById(R.id.caller_state);
-            callerName.setText(phoneNum);
-            callerState.setText(title);
-            makeCall(phoneNum);
-        }
-        if (state == STATE.RINGING) {
-            TextView callerState = (TextView) findViewById(R.id.caller_state);
-            callerState.setText(Constants.RINGING_LABEL);
-        }
-        if(state == STATE.ANSWERED) {
-            startTimer();
+        TextView callerState;
+        switch (state) {
+            case IDLE:
+                EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
+                String phoneNum = phoneNumberText.getText().toString();
+                setContentView(R.layout.call);
+                TextView callerName = (TextView) findViewById(R.id.caller_name);
+                callerState = (TextView) findViewById(R.id.caller_state);
+                callerName.setText(phoneNum);
+                callerState.setText(title);
+                makeCall(phoneNum);
+                break;
+            case RINGING:
+                callerState = (TextView) findViewById(R.id.caller_state);
+                callerState.setText(Constants.RINGING_LABEL);
+                break;
+            case ANSWERED:
+                startTimer();
+                break;
+            case HANGUP:
+            case REJECTED:
+                cancelTimer();
+                setContentView(R.layout.activity_main);
+                updateUI(STATE.IDLE, null);
+                break;
         }
     }
 
@@ -222,7 +230,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
             case HANGUP:
                 cancelTimer();
-                endCall();
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
