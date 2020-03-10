@@ -10,6 +10,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         Utils.options.put("context",getApplicationContext());
+        Utils.options.put("sharedContext",getApplicationContext());
         backend = PlivoBackEnd.newInstance();
         backend.init(BuildConfig.DEBUG);
     }

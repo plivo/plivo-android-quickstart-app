@@ -15,7 +15,6 @@ public class Utils {
     static final String HH_MM_SS = "%02d:%02d:%02d";
     static final String MM_SS = "%02d:%02d";
 
-    static String deviceToken = "";
     private static SharedPreferences mSharedPreferences;
     private static Context context;
     private static PlivoBackEnd.BackendListener listener;
@@ -28,16 +27,15 @@ public class Utils {
     }};
 
     static String getDeviceToken() {
-        context = (Context) options.get("context");
+        context = (Context) options.get("sharedContext");
         mSharedPreferences = context.getSharedPreferences("plivo_refs", Context.MODE_PRIVATE);
-        return mSharedPreferences.getString("token1", "");
+        return mSharedPreferences.getString("token", "");
     }
 
     static void setDeviceToken(String newDeviceToken) {
-        deviceToken = newDeviceToken;
-        context = (Context) options.get("context");
+        context = (Context) options.get("sharedContext");
         mSharedPreferences = context.getSharedPreferences("plivo_refs", Context.MODE_PRIVATE);
-        mSharedPreferences.edit().putString("token1", newDeviceToken).apply();
+        mSharedPreferences.edit().putString("token", newDeviceToken).apply();
     }
 
     static PlivoBackEnd.BackendListener getBackendListener() {
