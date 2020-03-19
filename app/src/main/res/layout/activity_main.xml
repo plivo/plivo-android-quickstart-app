@@ -43,6 +43,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.445"
+        android:background="@drawable/image_rounded"
         app:srcCompat="@drawable/plivo_icon" />
 
     <androidx.appcompat.widget.AppCompatEditText
