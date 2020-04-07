@@ -159,7 +159,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         if (Utils.getLoggedinStatus()) {
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
-            showInCallUI(STATE.RINGING, Utils.getIncoming());
+            if(callData != null) {
+                showInCallUI(STATE.RINGING, Utils.getIncoming());
+            }
         } else {
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().login(instanceIdResult.getToken()));
