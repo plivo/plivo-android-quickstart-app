@@ -6,12 +6,12 @@
 The Plivo Android SDK v2 allows you to make outgoing and receive incoming calls in your Android application.
 To get started with this quickstart application follow these steps.
     - **Outgoing Call:** Follow the below steps to start making outbound calls
-        - [Install the Plivo Android SDK using gradle](#bullet1)
-        - [Create Endpoints](#bullet2)
-        - [Register and Unregister Endpoint](#bullet3)
-        - [Run the app](#bullet4)
-        - [Making an outgoing call](#bullet5)
-    **Incoming Call:** You can enable the application to receive incoming calls in the form of push notifications using Firebase.
+         - [Install the Plivo Android SDK using gradle](#bullet1)
+         - [Create Endpoints](#bullet2)
+         - [Register and Unregister Endpoint](#bullet3)
+         - [Run the app](#bullet4)
+         - [Making an outgoing call](#bullet5)
+    - **Incoming Call:** You can enable the application to receive incoming calls in the form of push notifications using Firebase.
     
     
 ### System Requirements
@@ -182,6 +182,8 @@ incomingData is the Map object forwarded by the firebase push notification. This
 incomingData is the Map object forwarded by the firebase push notification. This will enable the application to receive incoming calls even if the app is not in the foreground.
 
 Please refer to this [guide](https://www.plivo.com/docs/sdk/client/android/reference#setting-up-push-notification) to learn about Generating VoIP Certificate
+
+![plivo-android-quickstart-app](ReadMeImages/incoming.png)
 
 License
 
