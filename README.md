@@ -1,32 +1,27 @@
 # Plivo Voice Quickstart for Android
 
 
-
-![plivo-android-quickstart-app](ReadMeImages/app.png)
-
+### Introduction
 
 The Plivo Android SDK v2 allows you to make outgoing and receive incoming calls in your Android application.
+To get started with this quickstart application follow these steps.
+- **Outgoing Call:** Follow the below steps to start making outbound calls
+    - [Install the Plivo Android SDK using gradle](#bullet1)
+    - [Create Endpoints](#bullet2)
+    - [Register and Unregister Endpoint](#bullet3)
+    - [Run the app](#bullet4)
+    - [Making an outgoing call](#bullet5)
+- **Incoming Call:** You can enable the application to receive incoming calls in the form of push notifications using Firebase.
+    
+    
+### System Requirements
 
-Compatible with Android version 6 and above.
-
-Plivo Android SDK now supports IPv6 networks. Users can make and receive calls when their device is connected to a network that uses IPv4, IPv6, or both versions of the protocol.
-
-To get started with the quickstart application follow these steps. Steps 1-3 will enable the application to make a call. The remaining steps 4-5 will enable the application to receive incoming calls in the form of push notifications using Firebase.
-
-1. [Install the Plivo Android SDK using gradle](#bullet1)
-
-2. [Create Endpoints](#bullet2)
-
-3. [Register and Unregister Endpoint](#bullet3)
-
-4. [Run the app](#bullet4)
-
-5. [Making an outgoing call](#bullet5)
-
-6. [Receive an incoming call](#bullet6)
+   - Android SDK supports x86, x86_64, arm64-v8a, armeabi-v7a architectures and Android OS 6 & above.
+   - You can use Android Studio or Eclipse to build this quickstart app.
+   - Plivo Android SDK supports IPv6 networks. Users can make and receive calls when their device is connected to a network that uses IPv4, IPv6, or both versions of the protocol.
 
 
-### <a name="bullet1"></a>1. Install the Plivo Android SDK using gradle
+### <a name="bullet1"></a> Install the Plivo Android SDK using gradle
 
 It's easy to install the Android sdk if you manage your dependencies using gradle. Simply add the following to your build.gradle under app folder and remove the aar file under plivo-android-quickstart-app/app/libs:
 ```
@@ -37,13 +32,31 @@ If you don't want to use gradle, simply build project since we already have aar 
 
 [SDK Reference](https://www.plivo.com/docs/sdk/client/android/reference) - More documentation related to the Voice Android SDK
 
-### <a name="bullet2"></a>2. Create Endpoints
 
-Signup and create endpoints with Plivo using below link
+### Sign up for an account
+Register [here](https://console.plivo.com/accounts/register/) to get your free Plivo account today.
 
-[Plivo Dashboard](https://manage.plivo.com/accounts/login/)
+Below are the steps that are to be followed to successfully Sign up for a free trial account.
+1. Sign up with your corporate email address
+2. You will receive an activation email from Plivo. Click on the link mentioned in the email to activate your account.
+3. Enter an sms enabled, non-VOIP number to complete the phone verification.
 
-### <a name="bullet3"></a>3. Register and Unregister Endpoints
+Sign up with your corporate email address
+
+![plivo-android-quickstart-app](ReadMeImages/signup.png)
+
+If you are facing any issues while creating a Plivo account, you can reach out to our [Support Team](https://support.plivo.com/support/home)
+
+
+### <a name="bullet2"></a> Create Endpoints
+
+You can create an endpoint from the Plivo Console and assign an application to make and receive calls after configuring the endpoint in the quickstart app.
+![plivo-android-quickstart-app](ReadMeImages/endpoints.png)
+
+**Note:** You can make use of the demo 'Direct Dial' app in your account for the endpoint which will allow you to make and receive calls for testing purposes.
+
+
+### <a name="bullet3"></a> Register and Unregister Endpoints
 
 Implement SIP register to Plivo Communication Server
 
@@ -94,19 +107,17 @@ public void onLoginFailed() {
 }
 ```
 
-### <a name="bullet4"></a>4. Run the app
 
-Clone and open plivo-android-quickstart-app. 
-
-Change sip endpoint username and password in [Utils](https://github.com/plivo/plivo-android-quickstart-app/blob/refactoring/app/src/main/java/com/plivo/plivosimplequickstart/Utils.java).
-
-Build and run the app.  
-
-After successful login make VoiceCalls.
+### <a name="bullet4"></a> Run the app
+   - Clone the [repo](https://github.com/plivo/plivo-android-quickstart-app) and open plivo-android-quickstart-app.
+   - Change sip endpoint username and password in [Utils](https://github.com/plivo/plivo-android-quickstart-app/blob/refactoring/app/src/main/java/com/plivo/plivosimplequickstart/Utils.java).
+   - Build and run the app.  
+   - After successful login make VoiceCalls.
 
 
-### <a name="bullet5"></a>5. Making an outgoing call
+### <a name="bullet5"></a> Making an outgoing call
 
+###### Make an outgoing call with destination & headers:
 Create PlivoOutgoingCall object , then make a call with destination and headers 
 ```
 public Outgoing getOutgoing() {
@@ -121,24 +132,21 @@ private void makeCall(String phoneNum) {
 }
 ```
 
-Make an outbound call
-
-Calling this method on the PlivoOutgoing object with the SIP URI
-would initiate an outbound call.
+###### Make an outgoing call with destination:
+Calling this method on the PlivoOutgoing object with the SIP URI would initiate an outbound call.
 ```
 public boolean call(String dest);
 ```
 
-Make an outbound call with custom SIP headers
-
-Calling this method on the PlivoOutgoing object with the SIP URI
-would initiate an outbound call with custom SIP headers.
+###### Make an outgoing call with destination & custom SIP headers:
+Calling this method on the PlivoOutgoing object with the SIP URI would initiate an outbound call with custom SIP headers.
 ```
 public boolean callH(String dest, Map<String, String> headers);
 ```
+![plivo-android-quickstart-app](ReadMeImages/outgoing.png)
 
 
-### <a name="bullet6"></a>6. Receive an incoming call
+### Receive an incoming call
 
 To enable Pushkit Integration in the SDK:
 Login with registerToken, create FirebaseMessagingService class and implement relayVoipPushNotification method
@@ -171,11 +179,11 @@ public void relayIncomingPushData(HashMap<String, String> incomingData) {
 
 incomingData is the Map object forwarded by the firebase push notification. This will enable the application to receive incoming calls even the app is not in foreground.
 ```
-please refer to below link on Generating VoIP Certificate.
+incomingData is the Map object forwarded by the firebase push notification. This will enable the application to receive incoming calls even if the app is not in the foreground.
 
-[Generating VoIP Certificate](https://www.plivo.com/docs/sdk/client/android/reference#setting-up-push-notification)
+Please refer to this [guide](https://www.plivo.com/docs/sdk/client/android/reference#setting-up-push-notification) to learn about Generating VoIP Certificate
 
-You are now ready to receive incoming calls. 
+![plivo-android-quickstart-app](ReadMeImages/incoming.png)
 
 License
 
