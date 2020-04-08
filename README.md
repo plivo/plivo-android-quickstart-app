@@ -5,7 +5,7 @@
 
 The Plivo Android SDK v2 allows you to make outgoing and receive incoming calls in your Android application.
 To get started with this quickstart application follow these steps.
-    **Outgoing Call:** Follow the below steps to start making outbound calls
+    - **Outgoing Call:** Follow the below steps to start making outbound calls
         - [Install the Plivo Android SDK using gradle](#bullet1)
         - [Create Endpoints](#bullet2)
         - [Register and Unregister Endpoint](#bullet3)
@@ -42,6 +42,7 @@ Below are the steps that are to be followed to successfully Sign up for a free t
 3. Enter an sms enabled, non-VOIP number to complete the phone verification.
 
 Sign up with your corporate email address
+
 ![plivo-android-quickstart-app](ReadMeImages/signup.png)
 
 If you are facing any issues while creating a Plivo account, you can reach out to our [Support Team](https://support.plivo.com/support/home)
