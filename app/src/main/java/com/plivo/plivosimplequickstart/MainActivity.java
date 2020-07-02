@@ -8,9 +8,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -32,6 +34,7 @@ import androidx.core.content.PermissionChecker;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.plivo.endpoint.Incoming;
+import com.plivo.endpoint.NetworkChangeReceiver;
 import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
 
@@ -57,6 +60,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private Object callData;
 
     private Vibrator vibrator;
+
+    NetworkChangeReceiver networkReceiver = new NetworkChangeReceiver();
+    IntentFilter intentFilter = new IntentFilter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,11 +143,24 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     protected void onResume() {
+        try {
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            this.registerReceiver(networkReceiver, intentFilter);
+        }catch (Exception exception){
+            exception.printStackTrace();
+        }
         super.onResume();
     }
 
     @Override
     protected void onPause() {
+        try{
+            if(networkReceiver != null) {
+                unregisterReceiver(networkReceiver);
+            }
+        } catch (Exception exception){
+            exception.printStackTrace();
+        }
         super.onPause();
     }
 
