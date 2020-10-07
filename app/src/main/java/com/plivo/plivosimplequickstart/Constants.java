@@ -16,6 +16,7 @@ public class Constants {
     public static final String INCOMING_CALL_RINGING = "onIncomingCall Ringing";
     public static final String INCOMING_CALL_HANGUP = "onIncomingCallHangup";
     public static final String INCOMING_CALL_REJECTED = "onIncomingCallRejected";
+    public static final String OUTGOING_CALL_PROGRESS = "onOutgoingCall Progress";
     public static final String OUTGOING_CALL_RINGING = "onOutgoingCall Ringing";
     public static final String OUTGOING_CALL_ANSWERED = "onOutgoingCall Answered";
     public static final String OUTGOING_CALL_REJECTED = "onOutgoingCall Rejected";
