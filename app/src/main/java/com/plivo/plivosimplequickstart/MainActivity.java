@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 import static com.plivo.plivosimplequickstart.Utils.HH_MM_SS;
 import static com.plivo.plivosimplequickstart.Utils.MM_SS;
 
-public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
+public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener{
     private static final int PERMISSIONS_REQUEST_CODE = 21;
 
     private Timer callTimer;
@@ -147,7 +147,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private void init() {
         registerBackendListener();
-        loginWithToken();
+        //loginWithToken();
+        updateUI(STATE.IDLE, null);
+        callData = Utils.getIncoming();
+        if(callData != null) {
+            showInCallUI(STATE.RINGING, Utils.getIncoming());
+        }
     }
 
     private void registerBackendListener() {
@@ -155,18 +160,18 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Utils.setBackendListener(this);
     }
 
-    private void loginWithToken() {
-        if (Utils.getLoggedinStatus()) {
-            updateUI(STATE.IDLE, null);
-            callData = Utils.getIncoming();
-            if(callData != null) {
-                showInCallUI(STATE.RINGING, Utils.getIncoming());
-            }
-        } else {
-            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));
-        }
-    }
+//    private void loginWithToken() {
+//        if (Utils.getLoggedinStatus()) {
+//            updateUI(STATE.IDLE, null);
+//            callData = Utils.getIncoming();
+//            if(callData != null) {
+//                showInCallUI(STATE.RINGING, Utils.getIncoming());
+//            }
+//        } else {
+//            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+//                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));
+//        }
+//    }
 
     private void logout() {
         ((App) getApplication()).backend().logout();
