@@ -108,7 +108,7 @@ public class PlivoBackEnd implements EventListener {
 
     @Override
     public void onOutgoingCall(Outgoing outgoing) {
-        Log.d(TAG, Constants.OUTGOING_CALL_PROGRESS);
+        Log.d(TAG, Constants.OUTGOING_CALL);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.PROGRESS);
     }
 
