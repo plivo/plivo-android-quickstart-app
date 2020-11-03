@@ -12,7 +12,7 @@ public class PlivoBackEnd implements EventListener {
 
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
-    enum STATE { IDLE, RINGING, ANSWERED, HANGUP, REJECTED, INVALID }
+    enum STATE { IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID }
 
     private Endpoint endpoint;
 
@@ -108,6 +108,12 @@ public class PlivoBackEnd implements EventListener {
 
     @Override
     public void onOutgoingCall(Outgoing outgoing) {
+        Log.d(TAG, Constants.OUTGOING_CALL);
+        if (listener != null) listener.onOutgoingCall(outgoing, STATE.PROGRESS);
+    }
+
+    @Override
+    public void onOutgoingCallRinging(Outgoing outgoing) {
         Log.d(TAG, Constants.OUTGOING_CALL_RINGING);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.RINGING);
     }
