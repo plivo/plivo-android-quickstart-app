@@ -9,8 +9,8 @@ import java.util.HashMap;
 
 public class Utils {
     // endpoint username & password
-    static final String USERNAME = "newone180628100344";
-    static final String PASSWORD = "12345";
+    static final String USERNAME = "";
+    static final String PASSWORD = "";
 
     static final String HH_MM_SS = "%02d:%02d:%02d";
     static final String MM_SS = "%02d:%02d";
