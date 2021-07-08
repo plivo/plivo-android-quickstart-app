@@ -18,10 +18,12 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -31,11 +33,13 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +62,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private Vibrator vibrator;
 
+    static String  username= null;
+    static String  password= null;
+    static Boolean isLoggedIn = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -84,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         String action = intent.getAction();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Constants.ANSWER_ACTION.equals(action)) {
+            System.out.println("answering");
             answerCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
             vibrator.cancel();
@@ -113,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                logout();
                 finish();
                 return true;
 
@@ -145,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         super.onPause();
     }
 
+
     private void init() {
         registerBackendListener();
         loginWithToken();
@@ -155,16 +169,19 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Utils.setBackendListener(this);
     }
 
-    private void loginWithToken() {
+    public void loginWithToken() {
+
         if (Utils.getLoggedinStatus()) {
+            System.out.println("here i am");
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
+            System.out.println(callData);
             if(callData != null) {
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
             }
         } else {
-            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));
+//           FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, instanceIdResult ->
+//                    ((App) getApplication()).backend().login(instanceIdResult.getToken(),username,password));
         }
     }
 
@@ -318,7 +335,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private void makeCall(String phoneNum) {
         Outgoing outgoing = ((App) getApplication()).backend().getOutgoing();
         if (outgoing != null) {
-            outgoing.call(phoneNum);
+            Map<String, String> extraHeaders = new HashMap<>();
+
+            outgoing.call("newone180628100344");
         }
     }
 
@@ -485,7 +504,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 }
             }else {
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
-                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
+                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 findViewById(R.id.call_btn).setEnabled(true);
 
                 if (data != null) {
@@ -505,15 +524,20 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void onLogin(boolean success) {
         runOnUiThread(() -> {
             if (success) {
+                isLoggedIn= true;
+                Toast.makeText(MainActivity.this,"Login successful", Toast.LENGTH_LONG).show();
                 updateUI(STATE.IDLE, null);
             } else {
                 Toast.makeText(this, R.string.login_failed, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(intent);
             }
         });
     }
 
     @Override
     public void onLogout() {
+        isLoggedIn = false;
     }
 
     @Override
