@@ -89,4 +89,19 @@
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@drawable/call_start" />
 
+    <Button
+        android:id="@+id/btlogout"
+        android:layout_width="65dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:height="5dp"
+        android:background="@drawable/rounded_button"
+        android:onClick="onClickLogout"
+        android:text="Logout"
+        android:textSize="10sp"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

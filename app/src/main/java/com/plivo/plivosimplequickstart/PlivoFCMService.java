@@ -31,7 +31,6 @@ public class PlivoFCMService extends FirebaseMessagingService {
                 return;
             }
             if (((App) getApplication()).backend().loginForIncoming(deviceToken,MainActivity.username,MainActivity.password)) {
-                System.out.println("here");
                 ((App) getApplication()).backend().relayIncomingPushData(new HashMap<>(remoteMessage.getData()));
             }
             startActivity(new Intent(this, MainActivity.class)
@@ -39,7 +38,6 @@ public class PlivoFCMService extends FirebaseMessagingService {
             );
 
             if (Utils.getBackendListener() == null) {
-                System.out.println("inside backend");
                 notificationDialog();
             }
         }
