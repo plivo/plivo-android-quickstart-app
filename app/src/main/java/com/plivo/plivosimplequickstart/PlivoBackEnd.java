@@ -34,13 +34,13 @@ public class PlivoBackEnd implements EventListener {
         this.listener = listener;
     }
 
-    public void login(String newToken, String username, String password) {
-        endpoint.login(username, password, newToken);
+    public void login(String newToken) {
+        endpoint.login(Utils.USERNAME, Utils.PASSWORD, newToken);
         Utils.setDeviceToken(newToken);
     }
 
-    public boolean loginForIncoming(String newToken,String username, String password) {
-        return endpoint.login(username, password, newToken);
+    public boolean loginForIncoming(String newToken) {
+        return endpoint.login(Utils.USERNAME, Utils.PASSWORD, newToken);
     }
 
     public void logout() {
@@ -122,7 +122,6 @@ public class PlivoBackEnd implements EventListener {
     public void onOutgoingCallAnswered(Outgoing outgoing) {
         Log.d(TAG, Constants.OUTGOING_CALL_ANSWERED);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.ANSWERED);
-        outgoing.sendDigits("1");
     }
 
     @Override
