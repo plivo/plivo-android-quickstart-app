@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Vibrator;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -25,7 +26,11 @@ public class PlivoFCMService extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
         if (remoteMessage.getData() != null) {
             String deviceToken = Utils.getDeviceToken();
-            if (((App) getApplication()).backend().loginForIncoming(deviceToken)) {
+            if (!MainActivity.isLoggedIn){
+                System.out.println("Not logged in");
+                return;
+            }
+            if (((App) getApplication()).backend().loginForIncoming(deviceToken,MainActivity.username,MainActivity.password)) {
                 ((App) getApplication()).backend().relayIncomingPushData(new HashMap<>(remoteMessage.getData()));
             }
             startActivity(new Intent(this, MainActivity.class)
