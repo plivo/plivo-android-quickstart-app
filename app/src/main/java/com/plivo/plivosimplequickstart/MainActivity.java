@@ -18,12 +18,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -33,13 +31,11 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
 
 import com.google.firebase.iid.FirebaseInstanceId;
-
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -62,11 +58,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private Vibrator vibrator;
 
-    static String  username= null;
-    static String  password= null;
-    static Boolean isLoggedIn = false;
-    Button eLogout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,8 +65,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        eLogout = findViewById(R.id.btlogout);
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -95,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         String action = intent.getAction();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Constants.ANSWER_ACTION.equals(action)) {
-            System.out.println("answering");
             answerCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
             vibrator.cancel();
@@ -121,6 +109,17 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -139,32 +138,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     protected void onResume() {
         super.onResume();
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Constants.ANSWER_ACTION.equals(action)) {
-            System.out.println("answering");
-            answerCall();
-            notificationManager.cancel(Constants.NOTIFICATION_ID);
-            vibrator.cancel();
-
-        } else if(Constants.REJECT_ACTION.equals(action)) {
-            rejectCall();
-            notificationManager.cancel(Constants.NOTIFICATION_ID);
-            vibrator.cancel();
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        // do nothing.
     }
 
     @Override
     protected void onPause() {
         super.onPause();
     }
-
 
     private void init() {
         registerBackendListener();
@@ -176,8 +155,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Utils.setBackendListener(this);
     }
 
-    public void loginWithToken() {
-
+    private void loginWithToken() {
         if (Utils.getLoggedinStatus()) {
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
@@ -185,8 +163,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
             }
         } else {
-//           FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, instanceIdResult ->
-//                    ((App) getApplication()).backend().login(instanceIdResult.getToken(),username,password));
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));
         }
     }
 
@@ -340,8 +318,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private void makeCall(String phoneNum) {
         Outgoing outgoing = ((App) getApplication()).backend().getOutgoing();
         if (outgoing != null) {
-            Map<String, String> extraHeaders = new HashMap<>();
-
             outgoing.call(phoneNum);
         }
     }
@@ -462,10 +438,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
     }
 
-    public void onClickLogout(View view) {
-        logout();
-    }
-
     public void muteCall() {
         if (callData != null) {
             if (callData instanceof Outgoing) {
@@ -513,9 +485,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 }
             }else {
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
-                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
+                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
                 findViewById(R.id.call_btn).setEnabled(true);
-
 
                 if (data != null) {
                     if (data instanceof Outgoing) {
@@ -534,24 +505,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void onLogin(boolean success) {
         runOnUiThread(() -> {
             if (success) {
-                isLoggedIn= true;
-                Toast.makeText(MainActivity.this,"Login successful", Toast.LENGTH_LONG).show();
-                eLogout.setEnabled(true);
                 updateUI(STATE.IDLE, null);
             } else {
                 Toast.makeText(this, R.string.login_failed, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                startActivity(intent);
             }
         });
     }
 
     @Override
     public void onLogout() {
-        isLoggedIn = false;
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
     }
 
     @Override
