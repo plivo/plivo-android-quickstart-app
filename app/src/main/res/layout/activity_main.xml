@@ -46,6 +46,26 @@
         android:background="@drawable/image_rounded"
         app:srcCompat="@drawable/plivo_icon" />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tracking_hint_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/tracking_hint"
+        android:textColor="@color/colorBlack"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintStart_toStartOf="@id/call_text"
+        app:layout_constraintTop_toBottomOf="@+id/appicon" />
+
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/tracking_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/tracking_hint_label"
+        app:layout_constraintEnd_toEndOf="@+id/call_text"
+        app:layout_constraintTop_toTopOf="@+id/tracking_hint_label" />
+
     <androidx.appcompat.widget.AppCompatEditText
         android:id="@+id/call_text"
         android:layout_width="wrap_content"
@@ -60,7 +80,7 @@
         app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appicon" />
+        app:layout_constraintTop_toBottomOf="@+id/tracking_switch" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/call_hint_label"

@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
 
@@ -167,6 +168,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     ((App) getApplication()).backend().login(instanceIdResult.getToken()));
         }
     }
+
+    private void registerTrackingSwitchListener() {
+        SwitchCompat trackingSwitch = (SwitchCompat) findViewById(R.id.tracking_switch);
+        trackingSwitch.setChecked(Utils.getTrackingStatus());
+        trackingSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> Utils.setTrackingStatus(isChecked));
+    }
+
 
     private void logout() {
         ((App) getApplication()).backend().logout();
@@ -487,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
                 ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
                 findViewById(R.id.call_btn).setEnabled(true);
-
+                registerTrackingSwitchListener();
                 if (data != null) {
                     if (data instanceof Outgoing) {
                         // handle outgoing

@@ -9,8 +9,8 @@ import java.util.HashMap;
 
 public class Utils {
     // endpoint username & password
-    static final String USERNAME = "username";
-    static final String PASSWORD = "password";
+    static final String USERNAME = "rahultestsrtp81976437394819510";
+    static final String PASSWORD = "12345";
 
     static final String HH_MM_SS = "%02d:%02d:%02d";
     static final String MM_SS = "%02d:%02d";
@@ -25,6 +25,15 @@ public class Utils {
     {{
         put("enableTracking",true);
     }};
+
+    static boolean getTrackingStatus() {
+        return (boolean) options.get("enableTracking");
+    }
+
+    static void setTrackingStatus(boolean value) {
+        options.put("enableTracking", value);
+    }
+
 
     static String getDeviceToken() {
         context = (Context) options.get("sharedContext");

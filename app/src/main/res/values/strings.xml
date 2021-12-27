@@ -15,4 +15,5 @@
     <string name="launch">Launch</string>
     <string name="dtmf_received">DTMF rx %s</string>
     <string name="call_hint">sip uri or phone number</string>
+    <string name="tracking_hint">Enable Tracking</string>
 </resources>
