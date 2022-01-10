@@ -339,6 +339,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isSpeakerOn = false;
         isHoldOn = false;
         isMuteOn = false;
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         audioManager.setSpeakerphoneOn(isSpeakerOn);
         setContentView(R.layout.activity_main);
         updateUI(STATE.IDLE, null);

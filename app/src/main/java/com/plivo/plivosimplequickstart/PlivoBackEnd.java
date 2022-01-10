@@ -1,5 +1,6 @@
 package com.plivo.plivosimplequickstart;
 
+import android.content.Context;
 import android.util.Log;
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
@@ -9,13 +10,11 @@ import com.plivo.endpoint.Outgoing;
 import java.util.HashMap;
 
 public class PlivoBackEnd implements EventListener {
-
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
-    enum STATE { IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID }
+    enum STATE { IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID;}
 
     private Endpoint endpoint;
-
     private BackendListener listener;
 
     static PlivoBackEnd newInstance() {
@@ -23,7 +22,11 @@ public class PlivoBackEnd implements EventListener {
     }
 
     public void init(boolean log) {
-        endpoint = Endpoint.newInstance(log, this);
+        HashMap options = new HashMap<>();
+        options.put("enableTracking", true);
+        options.put("context", Utils.options.get("context"));
+
+        endpoint = Endpoint.newInstance(log, options, this);
 
         //Iniatiate SDK with Options, "enableTracking" and "context"(To get network related information)
 
