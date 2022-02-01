@@ -36,6 +36,7 @@ import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -318,6 +319,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private void makeCall(String phoneNum) {
         Outgoing outgoing = ((App) getApplication()).backend().getOutgoing();
         if (outgoing != null) {
+            Map<String, String> headers = new HashMap<String, String>();
+            headers.put("X-PH-Header1","Value1");
+            headers.put("X-PH-Header2","Value2");
             outgoing.call(phoneNum);
         }
     }
