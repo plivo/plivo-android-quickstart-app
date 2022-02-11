@@ -8,9 +8,14 @@ import com.plivo.endpoint.Incoming;
 import java.util.HashMap;
 
 public class Utils {
+    /*
+     You can define Username & password inside local.properties like below
+     plivo.username="Your endpoint username"
+     plivo.password="Your endpoint password"
+    */
     // endpoint username & password
-    static final String USERNAME = "username";
-    static final String PASSWORD = "password";
+    static final String USERNAME = BuildConfig.Username;
+    static final String PASSWORD = BuildConfig.Password;
 
     static final String HH_MM_SS = "%02d:%02d:%02d";
     static final String MM_SS = "%02d:%02d";
