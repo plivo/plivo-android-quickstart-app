@@ -346,9 +346,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void onClickBtnEndCall(View view) {
+        endCall();
+    }
+
+    private void endCallRituals() {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         cancelTimer();
-        endCall();
         isSpeakerOn = false;
         isHoldOn = false;
         isMuteOn = false;
@@ -536,7 +539,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onOutgoingCall(Outgoing data, PlivoBackEnd.STATE callState) {
-        runOnUiThread(() -> updateUI(callState, data));
+        runOnUiThread(() -> {
+            if (callState == STATE.HANGUP)
+                endCallRituals();
+            updateUI(callState, data);
+        });
     }
 
     @Override
