@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     static String username = null;
     static String password = null;
+    Outgoing outgoing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -326,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void makeCall(String phoneNum) {
-        Outgoing outgoing = ((App) getApplication()).backend().getOutgoing();
+        outgoing = ((App) getApplication()).backend().getOutgoing();
         if (outgoing != null) {
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("X-PH-Header1", "Value1");
@@ -362,12 +363,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void endCall() {
-        if (callData != null) {
-            if (callData instanceof Outgoing) {
-                ((Outgoing) callData).hangup();
-            } else {
-                ((Incoming) callData).hangup();
-            }
+        if (outgoing != null) {
+            outgoing.hangup();
+        } else if (callData != null && callData instanceof Incoming) {
+            ((Incoming) callData).hangup();
         }
     }
 
