@@ -243,6 +243,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
             case HANGUP:
                 cancelTimer();
+                removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
@@ -371,12 +372,24 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void answerCall() {
-        if (callData != null) {
-            if (callData instanceof Incoming) {
-                ((Incoming) callData).answer();
-                updateUI(STATE.ANSWERED, callData);
-            }
+        Log.d("TAG", "answerCall: inside answer");
+//        Log.d("TAG", callData);
+        if (Utils.getIncoming() == null) {
+            Log.d("TAG", "answerCall: inside answer, call data is null");
         }
+        if (Utils.getIncoming() != null) {
+            Utils.getIncoming().answer();
+            updateUI(STATE.ANSWERED, Utils.getIncoming());
+        }
+//        if (callData != null) {
+//            if (callData instanceof Incoming) {
+//
+//                ((Incoming) callData).answer();
+//                updateUI(STATE.ANSWERED, callData);
+//            }
+//        } else {
+//
+//        }
     }
 
     public void rejectCall() {
@@ -533,7 +546,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onIncomingCall(Incoming data, PlivoBackEnd.STATE callState) {
-        runOnUiThread(() -> updateUI(callState, data));
+
+        runOnUiThread(() -> {
+            if (data != null) {
+                Log.d("TAG", "incoming data is not null");
+            }
+            updateUI(callState, data);
+        });
     }
 
     @Override
