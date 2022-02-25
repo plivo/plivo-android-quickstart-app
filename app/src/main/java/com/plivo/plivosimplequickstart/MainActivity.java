@@ -212,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
             case HANGUP:
             case REJECTED:
+            case INVALID:
                 cancelTimer();
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
@@ -332,7 +333,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("X-PH-Header1", "Value1");
             headers.put("X-PH-Header2", "Value2");
-            outgoing.call(phoneNum, headers);
+            if(!outgoing.call(phoneNum, headers)){
+                updateUI(STATE.INVALID,outgoing);
+            }
         }
     }
 
