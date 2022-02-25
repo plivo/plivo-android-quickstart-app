@@ -371,11 +371,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void answerCall() {
-        if (callData != null) {
-            if (callData instanceof Incoming) {
-                ((Incoming) callData).answer();
-                updateUI(STATE.ANSWERED, callData);
-            }
+        if (Utils.getIncoming() != null) {
+            Utils.getIncoming().answer();
+            updateUI(STATE.ANSWERED, callData);
         }
     }
 
