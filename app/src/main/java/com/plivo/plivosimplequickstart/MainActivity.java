@@ -374,7 +374,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public void answerCall() {
         Log.d("TAG", "answerCall: inside answer");
-//        Log.d("TAG", callData);
         if (Utils.getIncoming() == null) {
             Log.d("TAG", "answerCall: inside answer, call data is null");
         }
@@ -382,15 +381,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             Utils.getIncoming().answer();
             updateUI(STATE.ANSWERED, Utils.getIncoming());
         }
-//        if (callData != null) {
-//            if (callData instanceof Incoming) {
-//
-//                ((Incoming) callData).answer();
-//                updateUI(STATE.ANSWERED, callData);
-//            }
-//        } else {
-//
-//        }
     }
 
     public void rejectCall() {
