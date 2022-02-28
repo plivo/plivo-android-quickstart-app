@@ -213,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             case HANGUP:
             case REJECTED:
                 cancelTimer();
+                outgoing = null;
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
@@ -366,8 +367,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void endCall() {
         if (outgoing != null) {
             outgoing.hangup();
-        } else if (callData != null && callData instanceof Incoming) {
-            ((Incoming) callData).hangup();
+        } else if (Utils.getIncoming() != null) {
+            Utils.getIncoming().hangup();
         }
     }
 
@@ -550,6 +551,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         runOnUiThread(() -> {
             if (data != null) {
                 Log.d("TAG", "incoming data is not null");
+            }
+            if (outgoing != null) {
+                outgoing = null;
             }
             updateUI(callState, data);
         });
