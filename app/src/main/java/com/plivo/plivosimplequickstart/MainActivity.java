@@ -214,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             case REJECTED:
             case INVALID:
                 cancelTimer();
+                outgoing = null;
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
@@ -244,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
             case HANGUP:
                 cancelTimer();
+                removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
@@ -368,15 +370,19 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void endCall() {
         if (outgoing != null) {
             outgoing.hangup();
-        } else if (callData != null && callData instanceof Incoming) {
-            ((Incoming) callData).hangup();
+        } else if (Utils.getIncoming() != null) {
+            Utils.getIncoming().hangup();
         }
     }
 
     public void answerCall() {
+        Log.d("TAG", "answerCall: inside answer");
+        if (Utils.getIncoming() == null) {
+            Log.d("TAG", "answerCall: inside answer, call data is null");
+        }
         if (Utils.getIncoming() != null) {
             Utils.getIncoming().answer();
-            updateUI(STATE.ANSWERED, callData);
+            updateUI(STATE.ANSWERED, Utils.getIncoming());
         }
     }
 
@@ -534,7 +540,16 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onIncomingCall(Incoming data, PlivoBackEnd.STATE callState) {
-        runOnUiThread(() -> updateUI(callState, data));
+
+        runOnUiThread(() -> {
+            if (data != null) {
+                Log.d("TAG", "incoming data is not null");
+            }
+            if (outgoing != null) {
+                outgoing = null;
+            }
+            updateUI(callState, data);
+        });
     }
 
     @Override
