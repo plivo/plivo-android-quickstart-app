@@ -8,90 +8,115 @@
     android:orientation="vertical"
     android:padding="@dimen/margin_s">
 
-
-    <ImageView
-        android:id="@+id/user_icon"
-        android:layout_width="125dp"
-        android:layout_height="125dp"
-        android:layout_marginTop="150dp"
-        android:layout_marginEnd="140dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_call"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/user_icon" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/caller_name"
-        android:layout_width="wrap_content"
-        android:layout_height="45dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="77dp"
-        android:text=""
-        android:textAllCaps="false"
-        android:textColor="@color/colorGrey"
-        android:textSize="25dp"
-        android:gravity="center"
-        app:layout_constraintBottom_toTopOf="@+id/caller_state"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_icon" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/caller_state"
-        android:layout_width="225dp"
-        android:layout_height="36dp"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:text=""
-        android:textAllCaps="false"
-        android:textColor="@color/colorGrey"
-        android:textSize="@dimen/font_size"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/caller_name" />
+        <ImageView
+            android:id="@+id/user_icon"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
+            android:layout_marginTop="150dp"
+            android:layout_marginEnd="140dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/user_icon" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/caller_name"
+            android:layout_width="wrap_content"
+            android:layout_height="45dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="77dp"
+            android:gravity="center"
+            android:text=""
+            android:textAllCaps="false"
+            android:textColor="@color/colorGrey"
+            android:textSize="25dp"
+            app:layout_constraintBottom_toTopOf="@+id/caller_state"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/user_icon" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/caller_state"
+            android:layout_width="225dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text=""
+            android:textAllCaps="false"
+            android:textColor="@color/colorGrey"
+            android:textSize="@dimen/font_size"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/caller_name" />
+
+        <ImageButton
+            android:id="@+id/speaker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="28dp"
+            android:layout_marginEnd="18dp"
+            android:background="#0000"
+            android:onClick="onClickBtnSpeaker"
+            app:layout_constraintEnd_toStartOf="@+id/hold"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/caller_state"
+            app:srcCompat="@drawable/speaker" />
+
+        <ImageButton
+            android:id="@+id/hold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:layout_marginEnd="21dp"
+            android:background="#0000"
+            android:enabled="false"
+            android:onClick="onClickBtnHold"
+            app:layout_constraintEnd_toStartOf="@+id/mute"
+            app:layout_constraintStart_toEndOf="@+id/speaker"
+            app:layout_constraintTop_toBottomOf="@+id/caller_state"
+            app:srcCompat="@drawable/hold" />
+
+        <ImageButton
+            android:id="@+id/mute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:layout_marginEnd="30dp"
+            android:background="#0000"
+            android:enabled="false"
+            android:onClick="onClickBtnMute"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/hold"
+            app:layout_constraintTop_toBottomOf="@+id/caller_state"
+            app:srcCompat="@drawable/mute" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageButton
-        android:id="@+id/speaker"
+        android:id="@+id/keypad"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="18dp"
-        android:background="#0000"
-        android:onClick="onClickBtnSpeaker"
-        app:layout_constraintEnd_toStartOf="@+id/hold"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/caller_state"
-        app:srcCompat="@drawable/speaker" />
-
-    <ImageButton
-        android:id="@+id/hold"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="21dp"
-        android:background="#0000"
+        android:background="@drawable/image_rounded_border"
         android:enabled="false"
-        android:onClick="onClickBtnHold"
-        app:layout_constraintEnd_toStartOf="@+id/mute"
-        app:layout_constraintStart_toEndOf="@+id/speaker"
-        app:layout_constraintTop_toBottomOf="@+id/caller_state"
-        app:srcCompat="@drawable/hold" />
-
-    <ImageButton
-        android:id="@+id/mute"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="30dp"
-        android:background="#0000"
-        android:enabled="false"
-        android:onClick="onClickBtnMute"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/hold"
-        app:layout_constraintTop_toBottomOf="@+id/caller_state"
-        app:srcCompat="@drawable/mute" />
+        android:onClick="onClickBtnKeypad"
+        android:padding="10dp"
+        android:layout_marginBottom="36dp"
+        app:layout_constraintBottom_toTopOf="@+id/end_btn"
+        app:layout_constraintEnd_toEndOf="@+id/cl_call"
+        app:layout_constraintStart_toStartOf="@+id/cl_call"
+        android:visibility="gone"
+        app:srcCompat="@drawable/keypad_deactivated" />
 
     <ImageButton
         android:id="@+id/end_btn"
@@ -104,6 +129,230 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@drawable/call_end" />
+
+
+
+    <LinearLayout
+        android:id="@+id/ll_keypad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="150dp"
+        android:visibility="gone">
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/dial_numbers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text=""
+            android:textAllCaps="false"
+            android:textColor="@color/colorWhite"
+            android:textSize="32dp"
+            android:layout_marginBottom="24dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="onClickKeypadButton"
+                android:text="1"
+                android:tag="1"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="2"
+                android:onClick="onClickKeypadButton"
+                android:textStyle="bold"
+                android:tag="2"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:foreground="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="3"
+                android:onClick="onClickKeypadButton"
+                android:textStyle="bold"
+                android:tag="3"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="4"
+                android:tag="4"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="onClickKeypadButton"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="5"
+                android:tag="5"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="onClickKeypadButton"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="6"
+                android:tag="6"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="onClickKeypadButton"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="7"
+                android:tag="7"
+                android:textStyle="bold"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="onClickKeypadButton"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="8"
+                android:tag="8"
+                android:textStyle="bold"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="onClickKeypadButton"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="9"
+                android:tag="9"
+                android:textStyle="bold"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="onClickKeypadButton"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_height="wrap_content"
+                android:text="#"
+                android:tag="#"
+                android:textStyle="bold"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="onClickKeypadButton"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="0"
+                android:tag="0"
+                android:textStyle="bold"
+                android:foreground="?attr/selectableItemBackground"
+                android:onClick="onClickKeypadButton"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:text="*"
+                android:tag="*"
+                android:foreground="?attr/selectableItemBackground"
+                android:textStyle="bold"
+                android:onClick="onClickKeypadButton"
+                android:gravity="center"
+                android:textColor="@color/colorWhite"
+                android:textSize="36dp"/>
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
 
@@ -64,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     static String username = null;
     static String password = null;
     Outgoing outgoing;
+    boolean isKeyboardOpen = false;
+    String keypadData = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 callerState = (TextView) findViewById(R.id.caller_state);
                 callerName.setText(phoneNum);
                 callerState.setText(title);
+                ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.VISIBLE);
                 makeCall(phoneNum);
                 break;
             case RINGING:
@@ -237,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 setContentView(R.layout.call);
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
                 callerName.setText(phoneNum);
+                ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.GONE);
                 startTimer();
                 break;
 
@@ -244,12 +250,18 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 notificationDialog(title, incoming);
                 break;
             case HANGUP:
+                keypadData = "";
+                isKeyboardOpen = false;
+                ((TextView) findViewById(R.id.dial_numbers)).setText(keypadData);
                 cancelTimer();
                 removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
             case REJECTED:
+                keypadData = "";
+                isKeyboardOpen = false;
+                ((TextView) findViewById(R.id.dial_numbers)).setText(keypadData);
                 removeNotification(Constants.NOTIFICATION_ID);
                 break;
         }
@@ -361,6 +373,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isSpeakerOn = false;
         isHoldOn = false;
         isMuteOn = false;
+        isKeyboardOpen = false;
+        keypadData = "";
+        ((TextView) findViewById(R.id.dial_numbers)).setText("");
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         audioManager.setSpeakerphoneOn(isSpeakerOn);
         setContentView(R.layout.activity_main);
@@ -456,6 +471,39 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             btn.setImageResource(R.drawable.mute_selected);
             muteCall();
         }
+    }
+
+    public void onClickBtnKeypad(View view) {
+        ImageButton btn = (ImageButton) findViewById(R.id.keypad);
+        LinearLayout ll_keypad = (LinearLayout) findViewById(R.id.ll_keypad);
+        ConstraintLayout cl_call = (ConstraintLayout) findViewById(R.id.cl_call);
+
+        if (isKeyboardOpen) {
+            isKeyboardOpen = false;
+            ll_keypad.setVisibility(View.GONE);
+            cl_call.setVisibility(View.VISIBLE);
+            btn.setImageResource(R.drawable.keypad_deactivated);
+
+        } else {
+            isKeyboardOpen = true;
+            cl_call.setVisibility(View.GONE);
+            ll_keypad.setVisibility(View.VISIBLE);
+            btn.setImageResource(R.drawable.keypad_activated);
+
+        }
+    }
+
+    public void onClickKeypadButton(View v) {
+        TextView textView = (TextView) findViewById(R.id.dial_numbers);
+        String value = v.getTag().toString().trim();
+        keypadData += value;
+        textView.setText(keypadData);
+        if (outgoing != null) {
+            outgoing.sendDigits(value);
+        } else  if (Utils.getIncoming() != null) {
+            Utils.getIncoming().sendDigits(value);
+        }
+
     }
 
     public void muteCall() {
