@@ -250,18 +250,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 notificationDialog(title, incoming);
                 break;
             case HANGUP:
-                keypadData = "";
-                isKeyboardOpen = false;
-                ((TextView) findViewById(R.id.dial_numbers)).setText(keypadData);
                 cancelTimer();
                 removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
             case REJECTED:
-                keypadData = "";
-                isKeyboardOpen = false;
-                ((TextView) findViewById(R.id.dial_numbers)).setText(keypadData);
                 removeNotification(Constants.NOTIFICATION_ID);
                 break;
         }
