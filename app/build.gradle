@@ -1,14 +1,21 @@
 apply plugin: 'com.android.application'
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def username = properties.getProperty("plivo.username", "") ?: "\"\""
+def password = properties.getProperty("plivo.password", "") ?: "\"\""
+
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
     defaultConfig {
         applicationId "com.plivo.plivosimplequickstart"
-        minSdkVersion 19
-        targetSdkVersion 28
+        minSdkVersion 21
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "Username", username
+        buildConfigField "String", "Password", password
     }
     buildTypes {
         release {
@@ -19,6 +26,22 @@ android {
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
+    }
+
+    flavorDimensions "mode"
+    productFlavors {
+        stage {
+            dimension "mode"
+            buildConfigField 'String', 'SIP_DOMAIN', '"phone-dev.voice.plivodev.com"'
+        }
+        qa {
+            dimension "mode"
+            buildConfigField 'String', 'SIP_DOMAIN', '"phone-qa.voice.plivodev.com"'
+        }
+        prod {
+            dimension "mode"
+            buildConfigField 'String', 'SIP_DOMAIN', '"phone.plivo.com"'
+        }
     }
 
     splits {
@@ -38,9 +61,11 @@ dependencies {
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.plivo.endpoint:endpoint:2.0.19@aar'
+    //implementation 'com.plivo.endpoint:endpoint:2.0.19@aar'
+    implementation 'org.webrtc:google-webrtc:1.0.32006'
     implementation 'com.google.firebase:firebase-core:16.0.5'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    implementation project(path: ':PlivoEndpoint')
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

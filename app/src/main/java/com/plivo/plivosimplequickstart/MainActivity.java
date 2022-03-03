@@ -14,12 +14,15 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +30,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
 
@@ -36,6 +40,7 @@ import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +48,7 @@ import java.util.concurrent.TimeUnit;
 import static com.plivo.plivosimplequickstart.Utils.HH_MM_SS;
 import static com.plivo.plivosimplequickstart.Utils.MM_SS;
 
-public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener{
+public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
     private static final int PERMISSIONS_REQUEST_CODE = 21;
 
     private Timer callTimer;
@@ -52,11 +57,17 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private ActionBar actionBar;
 
-    private boolean isSpeakerOn=false, isHoldOn=false, isMuteOn=false;
+    private boolean isSpeakerOn = false, isHoldOn = false, isMuteOn = false;
 
     private Object callData;
 
     private Vibrator vibrator;
+
+    static String username = null;
+    static String password = null;
+    Outgoing outgoing;
+    boolean isKeyboardOpen = false;
+    String keypadData = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                 init();
             } else {
-                requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO }, PERMISSIONS_REQUEST_CODE);
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_CODE);
             }
         } else {
             init();
@@ -88,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             notificationManager.cancel(Constants.NOTIFICATION_ID);
             vibrator.cancel();
 
-        } else if(Constants.REJECT_ACTION.equals(action)) {
+        } else if (Constants.REJECT_ACTION.equals(action)) {
             rejectCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
             vibrator.cancel();
@@ -147,12 +158,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private void init() {
         registerBackendListener();
-        //loginWithToken();
-        updateUI(STATE.IDLE, null);
-        callData = Utils.getIncoming();
-        if(callData != null) {
-            showInCallUI(STATE.RINGING, Utils.getIncoming());
-        }
+        loginWithToken();
     }
 
     private void registerBackendListener() {
@@ -160,18 +166,22 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Utils.setBackendListener(this);
     }
 
-//    private void loginWithToken() {
-//        if (Utils.getLoggedinStatus()) {
-//            updateUI(STATE.IDLE, null);
-//            callData = Utils.getIncoming();
-//            if(callData != null) {
-//                showInCallUI(STATE.RINGING, Utils.getIncoming());
-//            }
-//        } else {
-//            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-//                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));
-//        }
-//    }
+    private void loginWithToken() {
+        if (Utils.getLoggedinStatus()) {
+            updateUI(STATE.IDLE, null);
+            callData = Utils.getIncoming();
+            if (callData != null) {
+                showInCallUI(STATE.RINGING, Utils.getIncoming());
+            }
+        } else {
+            /*FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));*/
+        }
+    }
+
+    public void onClickLogout(View view) {
+        logout();
+    }
 
     private void logout() {
         ((App) getApplication()).backend().logout();
@@ -195,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 callerState = (TextView) findViewById(R.id.caller_state);
                 callerName.setText(phoneNum);
                 callerState.setText(title);
+                ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.VISIBLE);
                 makeCall(phoneNum);
                 break;
             case RINGING:
@@ -206,7 +217,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
             case HANGUP:
             case REJECTED:
+            case INVALID:
                 cancelTimer();
+                outgoing = null;
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
@@ -229,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 setContentView(R.layout.call);
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
                 callerName.setText(phoneNum);
+                ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.GONE);
                 startTimer();
                 break;
 
@@ -237,6 +251,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
             case HANGUP:
                 cancelTimer();
+                removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
@@ -280,10 +295,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 .addAction(android.R.drawable.ic_menu_delete, getString(R.string.reject), RejectIntent)
                 .addAction(android.R.drawable.ic_menu_call, getString(R.string.answer), AcceptIntent)
                 .setOngoing(true)
-                .setVibrate(new long[] { 0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
+                .setVibrate(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
                 .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
         notificationManager.notify(0, notificationBuilder.build());
-        vibrator.vibrate(new long[] { 1000, 1000, 1000, 1000, 1000},3);
+        vibrator.vibrate(new long[]{1000, 1000, 1000, 1000, 1000}, 3);
     }
 
     private void removeNotification(int id) {
@@ -301,8 +316,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             public void run() {
                 runOnUiThread(() -> {
                     int hours = (int) TimeUnit.SECONDS.toHours(tick);
-                    int minutes = (int) TimeUnit.SECONDS.toMinutes(tick-=TimeUnit.HOURS.toSeconds(hours));
-                    int seconds = (int) (tick-TimeUnit.MINUTES.toSeconds(minutes));
+                    int minutes = (int) TimeUnit.SECONDS.toMinutes(tick -= TimeUnit.HOURS.toSeconds(hours));
+                    int seconds = (int) (tick - TimeUnit.MINUTES.toSeconds(minutes));
                     String text = hours > 0 ? String.format(HH_MM_SS, hours, minutes, seconds) : String.format(MM_SS, minutes, seconds);
                     TextView timerTextView = (TextView) findViewById(R.id.caller_state);
                     if (timerTextView != null) {
@@ -321,9 +336,14 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void makeCall(String phoneNum) {
-        Outgoing outgoing = ((App) getApplication()).backend().getOutgoing();
+        outgoing = ((App) getApplication()).backend().getOutgoing();
         if (outgoing != null) {
-            outgoing.call(phoneNum);
+            Map<String, String> headers = new HashMap<String, String>();
+            headers.put("X-PH-Header1", "Value1");
+            headers.put("X-PH-Header2", "Value2");
+            if(!outgoing.call(phoneNum, headers)){
+                updateUI(STATE.INVALID,outgoing);
+            }
         }
     }
 
@@ -338,33 +358,40 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void onClickBtnEndCall(View view) {
-        AudioManager audioManager =(AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        cancelTimer();
         endCall();
+    }
+
+    private void endCallRituals() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        cancelTimer();
         isSpeakerOn = false;
         isHoldOn = false;
         isMuteOn = false;
+        isKeyboardOpen = false;
+        keypadData = "";
+        ((TextView) findViewById(R.id.dial_numbers)).setText("");
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         audioManager.setSpeakerphoneOn(isSpeakerOn);
         setContentView(R.layout.activity_main);
         updateUI(STATE.IDLE, null);
     }
 
     public void endCall() {
-        if (callData != null) {
-            if (callData instanceof Outgoing) {
-                ((Outgoing) callData).hangup();
-            } else {
-                ((Incoming) callData).hangup();
-            }
+        if (outgoing != null) {
+            outgoing.hangup();
+        } else if (Utils.getIncoming() != null) {
+            Utils.getIncoming().hangup();
         }
     }
 
     public void answerCall() {
-        if (callData != null) {
-            if (callData instanceof Incoming) {
-                ((Incoming) callData).answer();
-                updateUI(STATE.ANSWERED, callData);
-            }
+        Log.d("TAG", "answerCall: inside answer");
+        if (Utils.getIncoming() == null) {
+            Log.d("TAG", "answerCall: inside answer, call data is null");
+        }
+        if (Utils.getIncoming() != null) {
+            Utils.getIncoming().answer();
+            updateUI(STATE.ANSWERED, Utils.getIncoming());
         }
     }
 
@@ -377,16 +404,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void onClickBtnSpeaker(View view) {
-        AudioManager audioManager =(AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         ImageButton btn = (ImageButton) findViewById(R.id.speaker);
-        if(isSpeakerOn) {
-            isSpeakerOn=false;
+        if (isSpeakerOn) {
+            isSpeakerOn = false;
             btn.setImageResource(R.drawable.speaker);
             audioManager.setMode(AudioManager.MODE_IN_CALL);
             audioManager.setMode(AudioManager.MODE_NORMAL);
-        }
-        else {
-            isSpeakerOn=true;
+        } else {
+            isSpeakerOn = true;
             btn.setImageResource(R.drawable.speaker_selected);
             audioManager.setMode(AudioManager.MODE_NORMAL);
             audioManager.setMode(AudioManager.MODE_IN_CALL);
@@ -396,13 +422,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public void onClickBtnHold(View view) {
         ImageButton btn = (ImageButton) findViewById(R.id.hold);
-        if(isHoldOn) {
-            isHoldOn=false;
+        if (isHoldOn) {
+            isHoldOn = false;
             btn.setImageResource(R.drawable.hold);
             unHoldCall();
-        }
-        else {
-            isHoldOn=true;
+        } else {
+            isHoldOn = true;
             btn.setImageResource(R.drawable.hold_selected);
             holdCall();
         }
@@ -431,16 +456,48 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public void onClickBtnMute(View view) {
         ImageButton btn = (ImageButton) findViewById(R.id.mute);
-        if(isMuteOn) {
-            isMuteOn=false;
+        if (isMuteOn) {
+            isMuteOn = false;
             btn.setImageResource(R.drawable.mute);
             unMuteCall();
-        }
-        else {
-            isMuteOn=true;
+        } else {
+            isMuteOn = true;
             btn.setImageResource(R.drawable.mute_selected);
             muteCall();
         }
+    }
+
+    public void onClickBtnKeypad(View view) {
+        ImageButton btn = (ImageButton) findViewById(R.id.keypad);
+        LinearLayout ll_keypad = (LinearLayout) findViewById(R.id.ll_keypad);
+        ConstraintLayout cl_call = (ConstraintLayout) findViewById(R.id.cl_call);
+
+        if (isKeyboardOpen) {
+            isKeyboardOpen = false;
+            ll_keypad.setVisibility(View.GONE);
+            cl_call.setVisibility(View.VISIBLE);
+            btn.setImageResource(R.drawable.keypad_deactivated);
+
+        } else {
+            isKeyboardOpen = true;
+            cl_call.setVisibility(View.GONE);
+            ll_keypad.setVisibility(View.VISIBLE);
+            btn.setImageResource(R.drawable.keypad_activated);
+
+        }
+    }
+
+    public void onClickKeypadButton(View v) {
+        TextView textView = (TextView) findViewById(R.id.dial_numbers);
+        String value = v.getTag().toString().trim();
+        keypadData += value;
+        textView.setText(keypadData);
+        if (outgoing != null) {
+            outgoing.sendDigits(value);
+        } else  if (Utils.getIncoming() != null) {
+            Utils.getIncoming().sendDigits(value);
+        }
+
     }
 
     public void muteCall() {
@@ -465,7 +522,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private void updateUI(PlivoBackEnd.STATE state, Object data) {
         callData = data;
-        if(state.equals(STATE.REJECTED) || state.equals(STATE.HANGUP) || state.equals(STATE.INVALID)){
+        if (state.equals(STATE.REJECTED) || state.equals(STATE.HANGUP) || state.equals(STATE.INVALID)) {
             if (data != null) {
                 if (data instanceof Outgoing) {
                     // handle outgoing
@@ -475,10 +532,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     showInCallUI(state, (Incoming) data);
                 }
             }
-        }
-        else {
+        } else {
 
-            if(findViewById(R.id.call_btn) ==null ||  findViewById(R.id.logged_in_as) == null || findViewById(R.id.logging_in_label)==null){
+            if (findViewById(R.id.call_btn) == null || findViewById(R.id.logged_in_as) == null || findViewById(R.id.logging_in_label) == null) {
                 if (data != null) {
                     if (data instanceof Outgoing) {
                         // handle outgoing
@@ -488,9 +544,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                         showInCallUI(state, (Incoming) data);
                     }
                 }
-            }else {
+            } else {
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
-                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
+                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
+                ((Button) findViewById(R.id.btlogout)).setText(Constants.LOG_OUT);
                 findViewById(R.id.call_btn).setEnabled(true);
 
                 if (data != null) {
@@ -519,16 +576,31 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogout() {
+        Utils.setLoggedinStatus(false);
+        finish();
     }
 
     @Override
     public void onIncomingCall(Incoming data, PlivoBackEnd.STATE callState) {
-        runOnUiThread(() -> updateUI(callState, data));
+
+        runOnUiThread(() -> {
+            if (data != null) {
+                Log.d("TAG", "incoming data is not null");
+            }
+            if (outgoing != null) {
+                outgoing = null;
+            }
+            updateUI(callState, data);
+        });
     }
 
     @Override
     public void onOutgoingCall(Outgoing data, PlivoBackEnd.STATE callState) {
-        runOnUiThread(() -> updateUI(callState, data));
+        runOnUiThread(() -> {
+            if (callState == STATE.HANGUP)
+                endCallRituals();
+            updateUI(callState, data);
+        });
     }
 
     @Override
@@ -537,7 +609,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     @Override
-    public void mediaMetrics(HashMap messageTemplate){
+    public void mediaMetrics(HashMap messageTemplate) {
 
     }
 }
