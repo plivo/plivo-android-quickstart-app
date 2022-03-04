@@ -205,7 +205,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 callerState = (TextView) findViewById(R.id.caller_state);
                 callerName.setText(phoneNum);
                 callerState.setText(title);
-                ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.VISIBLE);
                 makeCall(phoneNum);
                 break;
             case RINGING:
@@ -214,6 +213,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
             case ANSWERED:
                 startTimer();
+                ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.VISIBLE);
+                ((TextView) findViewById(R.id.dial_numbers)).setText("");
                 break;
             case HANGUP:
             case REJECTED:
@@ -369,7 +370,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isMuteOn = false;
         isKeyboardOpen = false;
         keypadData = "";
-        ((TextView) findViewById(R.id.dial_numbers)).setText("");
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         audioManager.setSpeakerphoneOn(isSpeakerOn);
         setContentView(R.layout.activity_main);
