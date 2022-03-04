@@ -386,20 +386,20 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public void answerCall() {
         Log.d("TAG", "answerCall: inside answer");
-        if (Utils.getIncoming() == null) {
-            Log.d("TAG", "answerCall: inside answer, call data is null");
-        }
+
         if (Utils.getIncoming() != null) {
             Utils.getIncoming().answer();
             updateUI(STATE.ANSWERED, Utils.getIncoming());
+        }else{
+            Log.d("TAG", "answerCall: inside answer, call data is null");
         }
     }
 
     public void rejectCall() {
-        if (callData != null) {
-            if (callData instanceof Incoming) {
-                ((Incoming) callData).reject();
-            }
+        if (Utils.getIncoming() != null) {
+            Utils.getIncoming().reject();
+        }else{
+            Log.d("TAG", "rejectCall: call data is null");
         }
     }
 
