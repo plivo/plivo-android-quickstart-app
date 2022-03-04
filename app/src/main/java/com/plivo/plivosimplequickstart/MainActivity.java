@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     protected void onStart() {
         super.onStart();
+        ((App) getApplication()).backend().registerListener(this);
     }
 
     @Override
