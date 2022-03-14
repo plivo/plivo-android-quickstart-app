@@ -201,6 +201,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
                 String phoneNum = phoneNumberText.getText().toString();
                 setContentView(R.layout.call);
+                ((ImageButton) findViewById(R.id.speaker)).setVisibility(View.GONE);
+                ((ImageButton) findViewById(R.id.mute)).setVisibility(View.GONE);
+                ((ImageButton) findViewById(R.id.hold)).setVisibility(View.GONE);
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
                 callerState = (TextView) findViewById(R.id.caller_state);
                 callerName.setText(phoneNum);
@@ -210,6 +213,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             case RINGING:
                 callerState = (TextView) findViewById(R.id.caller_state);
                 callerState.setText(Constants.RINGING_LABEL);
+                ((ImageButton) findViewById(R.id.speaker)).setVisibility(View.VISIBLE);
+                ((ImageButton) findViewById(R.id.mute)).setVisibility(View.VISIBLE);
+                ((ImageButton) findViewById(R.id.hold)).setVisibility(View.VISIBLE);
                 break;
             case ANSWERED:
                 startTimer();
