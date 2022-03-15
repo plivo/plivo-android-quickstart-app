@@ -47,6 +47,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.plivo.plivosimplequickstart.Utils.HH_MM_SS;
 import static com.plivo.plivosimplequickstart.Utils.MM_SS;
+import static com.plivo.plivosimplequickstart.Utils.startVibrating;
+import static com.plivo.plivosimplequickstart.Utils.stopVibrating;
 
 public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
     private static final int PERMISSIONS_REQUEST_CODE = 21;
@@ -61,21 +63,22 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private Object callData;
 
-    private Vibrator vibrator;
-
     static String username = null;
     static String password = null;
     Outgoing outgoing;
     boolean isKeyboardOpen = false;
     String keypadData = "";
 
+    public static boolean isInstantiated = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isInstantiated = true;
         setContentView(R.layout.activity_main);
+        Log.d("@@Incoming", "onCretae");
         actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+//        actionBar.setDisplayHomeAsUpEnabled(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -97,12 +100,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         if (Constants.ANSWER_ACTION.equals(action)) {
             answerCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
-            vibrator.cancel();
-
+            Utils.stopVibrating();
         } else if (Constants.REJECT_ACTION.equals(action)) {
             rejectCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
-            vibrator.cancel();
+            Utils.stopVibrating();
         }
     }
 
@@ -157,25 +159,49 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void init() {
+        Log.d("@@Incoming", "init");
         registerBackendListener();
         loginWithToken();
     }
 
     private void registerBackendListener() {
+        Log.d("@@Incoming", "registerBackendListener");
         ((App) getApplication()).backend().setListener(this);
         Utils.setBackendListener(this);
     }
 
     private void loginWithToken() {
-        if (Utils.getLoggedinStatus()) {
+        Log.d("@@Incoming", "loginWithToken");
+        if (Pref.newInstance(this).getBoolean(Constants.LOG_IN)) {
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
             if (callData != null) {
+                Log.d("@@Incoming", "loginWithToken | callData not null");
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
+            } else {
+                boolean isIncomingCallRinging = getIntent().getBooleanExtra(Constants.INCOMING_CALL_RINGING, false);
+                HashMap<String, String> pushMap = (HashMap<String, String>) getIntent().getSerializableExtra(Constants.MAP);
+                Log.d("@@Incoming", " flag = " + isIncomingCallRinging);
+
+                if (pushMap != null)
+                    Log.d("@@Incoming", " pushMap = " + pushMap.size());
+
+
+                Log.d("@@Incoming", "loginWithToken | callData null");
+                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
+                    if (isIncomingCallRinging) {
+                        if (((App) getApplication()).backend().loginForIncoming(instanceIdResult.getToken(), Utils.USERNAME, Utils.PASSWORD)) {
+                            Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | login success");
+                            ((App) getApplication()).backend().relayIncomingPushData(pushMap);
+                        }
+                    } else {
+                        ((App) getApplication()).backend().login(instanceIdResult.getToken(), Utils.USERNAME, Utils.PASSWORD);
+                    }
+                });
             }
         } else {
             /*FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));*/
+                    ((App) getApplication()).backend().login(instanceIdResult.getToken(), Utils.USERNAME, Utils.PASSWORD));*/
         }
     }
 
@@ -189,6 +215,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     /**
      * Display & Handle Outgoing Calls
+     *
      * @param state
      * @param outgoing
      */
@@ -235,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     /**
      * Display & Handle Incoming Calls
+     *
      * @param state
      * @param incoming
      */
@@ -242,19 +270,23 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
         String title = (incoming != null ? Utils.from(incoming.getFromContact(), incoming.getFromSip()) : "");
 
+        String callerId = com.plivo.endpoint.Utils.getEndpointFromUri(title);
+
         switch (state) {
             case ANSWERED:
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
                 String phoneNum = phoneNumberText.getText().toString();
                 setContentView(R.layout.call);
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
-                callerName.setText(phoneNum);
+                callerName.setText(callerId);
                 ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.GONE);
                 startTimer();
                 break;
 
             case RINGING:
-                notificationDialog(title, incoming);
+                boolean isIncomingCallRinging = getIntent().getBooleanExtra(Constants.INCOMING_CALL_RINGING, false);
+                if (!isIncomingCallRinging)
+                    notificationDialog(title, incoming);
                 break;
             case HANGUP:
                 cancelTimer();
@@ -305,11 +337,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 .setVibrate(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
                 .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
         notificationManager.notify(0, notificationBuilder.build());
-        vibrator.vibrate(new long[]{1000, 1000, 1000, 1000, 1000}, 3);
+        startVibrating(this);
     }
 
     private void removeNotification(int id) {
-        vibrator.cancel();
+        stopVibrating();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(id);
     }
@@ -348,8 +380,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("X-PH-Header1", "Value1");
             headers.put("X-PH-Header2", "Value2");
-            if(!outgoing.call(phoneNum, headers)){
-                updateUI(STATE.INVALID,outgoing);
+            if (!outgoing.call(phoneNum, headers)) {
+                updateUI(STATE.INVALID, outgoing);
             }
         }
     }
@@ -396,7 +428,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         if (Utils.getIncoming() != null) {
             Utils.getIncoming().answer();
             updateUI(STATE.ANSWERED, Utils.getIncoming());
-        }else{
+        } else {
             Log.d("TAG", "answerCall: inside answer, call data is null");
         }
     }
@@ -404,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void rejectCall() {
         if (Utils.getIncoming() != null) {
             Utils.getIncoming().reject();
-        }else{
+        } else {
             Log.d("TAG", "rejectCall: call data is null");
         }
     }
@@ -500,7 +532,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         textView.setText(keypadData);
         if (outgoing != null) {
             outgoing.sendDigits(value);
-        } else  if (Utils.getIncoming() != null) {
+        } else if (Utils.getIncoming() != null) {
             Utils.getIncoming().sendDigits(value);
         }
 
@@ -552,7 +584,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 }
             } else {
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
-                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
+                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
                 ((Button) findViewById(R.id.btlogout)).setText(Constants.LOG_OUT);
                 findViewById(R.id.call_btn).setEnabled(true);
 
@@ -583,6 +615,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onLogout() {
         Utils.setLoggedinStatus(false);
+        startActivity(new Intent(this,LoginActivity.class));
         finish();
     }
 

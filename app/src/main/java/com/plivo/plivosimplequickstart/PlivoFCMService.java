@@ -10,30 +10,47 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Vibrator;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.plivo.endpoint.Incoming;
+
 import java.util.HashMap;
 
 public class PlivoFCMService extends FirebaseMessagingService {
-    private Vibrator vibrator;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         if (remoteMessage.getData() != null) {
             String deviceToken = Utils.getDeviceToken();
-            if (((App) getApplication()).backend().loginForIncoming(deviceToken,MainActivity.username,MainActivity.password)) {
-                ((App) getApplication()).backend().relayIncomingPushData(new HashMap<>(remoteMessage.getData()));
+            HashMap<String, String> pushMap = new HashMap<>(remoteMessage.getData());
+
+            if (MainActivity.isInstantiated) {
+                if (((App) getApplication()).backend().loginForIncoming(deviceToken, Utils.USERNAME, Utils.PASSWORD)) {
+                    Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | login success");
+                    ((App) getApplication()).backend().relayIncomingPushData(pushMap);
+                }
             }
-            startActivity(new Intent(this, MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            );
+
+            Intent activityIntent = new Intent(this, MainActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            if (!MainActivity.isInstantiated) {
+                Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | MainActivity not instantiated");
+                activityIntent.putExtra(Constants.INCOMING_CALL_RINGING, true);
+                activityIntent.putExtra(Constants.MAP, pushMap);
+            }
+
+            Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | start MainActivity");
+            startActivity(activityIntent);
 
             if (Utils.getBackendListener() == null) {
-                notificationDialog();
+                Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | getBackendListener null");
+                notificationDialog(remoteMessage.getData().get("callerID"));
             }
         }
     }
@@ -48,7 +65,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
             notificationChannel.setDescription(Constants.NOTIFICATION_DESCRIPTION);
             notificationChannel.enableLights(true);
             notificationChannel.setLightColor(Color.RED);
-            notificationChannel.setVibrationPattern(new long[] { 0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500});
+            notificationChannel.setVibrationPattern(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500});
             notificationChannel.enableVibration(true);
             notificationManager.createNotificationChannel(notificationChannel);
         }
@@ -67,11 +84,50 @@ public class PlivoFCMService extends FirebaseMessagingService {
                 .setContentTitle(Constants.NOTIFICATION_DESCRIPTION)
                 .addAction(android.R.drawable.ic_menu_call, getString(R.string.launch), LaunchIntent)
                 .setOngoing(true)
-                .setVibrate(new long[] { 0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
+                .setVibrate(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
                 .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
         notificationManager.notify(0, notificationBuilder.build());
 
-        vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(new long[] { 1000, 1000, 1000, 1000, 1000},3);
+        Utils.startVibrating(this);
+    }
+
+    private void notificationDialog(String title) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        String NOTIFICATION_CHANNEL_ID = Constants.NOTIFICATION_CHANNEL;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            @SuppressLint("WrongConstant") NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "My Notifications", NotificationManager.IMPORTANCE_MAX);
+            // Configure the notification channel.
+            notificationChannel.setDescription(Constants.NOTIFICATION_DESCRIPTION);
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.RED);
+            notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
+            notificationChannel.enableVibration(true);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        Intent answerIntent = new Intent(this, MainActivity.class);
+        answerIntent.setAction(Constants.ANSWER_ACTION);
+        PendingIntent AcceptIntent = PendingIntent.getActivity(this, 0, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+        Intent rejectIntent = new Intent(this, MainActivity.class);
+        rejectIntent.setAction(Constants.REJECT_ACTION);
+        PendingIntent RejectIntent = PendingIntent.getActivity(this, 0, rejectIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+        notificationBuilder.setAutoCancel(true)
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE)
+                .setCategory(Notification.CATEGORY_CALL)
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setTicker(Constants.NOTIFICATION_CHANNEL)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setContentTitle(Constants.NOTIFICATION_DESCRIPTION)
+                .setContentText(title)
+                .addAction(android.R.drawable.ic_menu_delete, getString(R.string.reject), RejectIntent)
+                .addAction(android.R.drawable.ic_menu_call, getString(R.string.answer), AcceptIntent)
+                .setOngoing(true)
+                .setVibrate(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
+                .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
+        notificationManager.notify(0, notificationBuilder.build());
+        Utils.startVibrating(this);
     }
 }

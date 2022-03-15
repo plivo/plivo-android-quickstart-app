@@ -12,6 +12,7 @@ public class App extends Application {
         Utils.options.put("context",getApplicationContext());
         Utils.options.put("sharedContext",getApplicationContext());
         backend = PlivoBackEnd.newInstance();
+        backend.setContext(this);
         backend.init(BuildConfig.DEBUG);
     }
 
