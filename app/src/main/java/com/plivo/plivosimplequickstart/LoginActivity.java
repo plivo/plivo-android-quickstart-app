@@ -47,10 +47,20 @@ public class LoginActivity extends AppCompatActivity {
                     login(username, password);
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
-
+                    finish();
                 }
             }
         });
+
+        if (Pref.newInstance(this).getBoolean(Constants.LOG_IN)) {
+            MainActivity.username = Utils.USERNAME;
+            MainActivity.password = Utils.PASSWORD;
+
+//            login(Utils.USERNAME, Utils.PASSWORD);
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void login(String userName, String passWord) {
