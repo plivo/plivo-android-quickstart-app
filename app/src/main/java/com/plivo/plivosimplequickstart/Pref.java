@@ -19,15 +19,28 @@ public class Pref {
     }
 
 
-    public void setBoolean(String key, boolean value){
+    public void setBoolean(String key, boolean value) {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putBoolean(key, value);
         editor.apply();
     }
 
-    public boolean getBoolean(String key){
-       return sharedPref.getBoolean(key, false);
+    public boolean getBoolean(String key) {
+        return sharedPref.getBoolean(key, false);
+    }
+
+    public void setString(String key, String value) {
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(key, value);
+        editor.apply();
+    }
+
+    public String getString(String key) {
+        return sharedPref.getString(key, "");
     }
 
 
+    public void clear() {
+        sharedPref.edit().clear().apply();
+    }
 }

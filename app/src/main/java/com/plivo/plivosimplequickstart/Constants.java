@@ -27,4 +27,6 @@ public class Constants {
     public static final String OUTGOING_CALL_INVALID = "onOutgoingCall Invalid";
     public static final String MEDIAMETRICS = "mediaMetrics called";
     public static final String MAP = "hashmap";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
 }
