@@ -6,8 +6,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     String keypadData = "";
 
     public static boolean isInstantiated = false;
+    private BroadcastReceiver callIncomingReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d("@@Incoming", "onCretae");
         actionBar = getSupportActionBar();
 //        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
+        password = Pref.newInstance(MainActivity.this).getString(Constants.PASSWORD);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -98,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         String action = intent.getAction();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Constants.ANSWER_ACTION.equals(action)) {
+            Log.d("@@Incoming", "onNewIntent | ANSWER_ACTION");
             answerCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
             Utils.stopVibrating();
@@ -172,36 +179,17 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private void loginWithToken() {
         Log.d("@@Incoming", "loginWithToken");
-        if (Pref.newInstance(this).getBoolean(Constants.LOG_IN)) {
+        if (Utils.getLoggedinStatus()) {
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
             if (callData != null) {
                 Log.d("@@Incoming", "loginWithToken | callData not null");
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
-            } else {
-                boolean isIncomingCallRinging = getIntent().getBooleanExtra(Constants.INCOMING_CALL_RINGING, false);
-                HashMap<String, String> pushMap = (HashMap<String, String>) getIntent().getSerializableExtra(Constants.MAP);
-                Log.d("@@Incoming", " flag = " + isIncomingCallRinging);
-
-                if (pushMap != null)
-                    Log.d("@@Incoming", " pushMap = " + pushMap.size());
-
-
-                Log.d("@@Incoming", "loginWithToken | callData null");
-                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
-                    if (isIncomingCallRinging) {
-                        if (((App) getApplication()).backend().loginForIncoming(instanceIdResult.getToken(), Utils.USERNAME, Utils.PASSWORD)) {
-                            Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | login success");
-                            ((App) getApplication()).backend().relayIncomingPushData(pushMap);
-                        }
-                    } else {
-                        ((App) getApplication()).backend().login(instanceIdResult.getToken(), Utils.USERNAME, Utils.PASSWORD);
-                    }
-                });
             }
         } else {
-            /*FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().login(instanceIdResult.getToken(), Utils.USERNAME, Utils.PASSWORD));*/
+            Log.d("@@Incoming", "loginWithToken | is not logged in");
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().login(instanceIdResult.getToken(),username , password));
         }
     }
 
@@ -284,9 +272,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
 
             case RINGING:
-                boolean isIncomingCallRinging = getIntent().getBooleanExtra(Constants.INCOMING_CALL_RINGING, false);
-                if (!isIncomingCallRinging)
-                    notificationDialog(title, incoming);
+                notificationDialog(title, incoming);
                 break;
             case HANGUP:
                 cancelTimer();
@@ -426,6 +412,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d("TAG", "answerCall: inside answer");
 
         if (Utils.getIncoming() != null) {
+            Log.d("@@Incoming", "answerCall");
             Utils.getIncoming().answer();
             updateUI(STATE.ANSWERED, Utils.getIncoming());
         } else {
@@ -584,7 +571,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 }
             } else {
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
-                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(Utils.USERNAME);
+                ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 ((Button) findViewById(R.id.btlogout)).setText(Constants.LOG_OUT);
                 findViewById(R.id.call_btn).setEnabled(true);
 
@@ -615,7 +602,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onLogout() {
         Utils.setLoggedinStatus(false);
-        startActivity(new Intent(this,LoginActivity.class));
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 
@@ -651,4 +638,5 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void mediaMetrics(HashMap messageTemplate) {
 
     }
+
 }

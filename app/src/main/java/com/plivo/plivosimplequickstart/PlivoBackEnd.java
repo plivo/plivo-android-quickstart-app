@@ -24,6 +24,7 @@ public class PlivoBackEnd implements EventListener {
     }
 
     public void init(boolean log) {
+        Log.d("@@Incoming", "PlivoBackend | Init");
         HashMap options = new HashMap<>();
         options.put("enableTracking", true);
         options.put("context", Utils.options.get("context"));
@@ -40,6 +41,7 @@ public class PlivoBackEnd implements EventListener {
     }
 
     public void login(String newToken, String username, String password) {
+        Log.d("@@Incoming", "Endpoint login");
         endpoint.login(username, password, newToken);
         Utils.setDeviceToken(newToken);
     }
@@ -83,7 +85,7 @@ public class PlivoBackEnd implements EventListener {
     @Override
     public void onLogout() {
         Log.d(TAG, Constants.LOGOUT_SUCCESS);
-        Pref.newInstance(getContext()).setBoolean(Constants.LOG_IN, false);
+        Pref.newInstance(getContext()).clear();
         if (listener != null) listener.onLogout();
     }
 
