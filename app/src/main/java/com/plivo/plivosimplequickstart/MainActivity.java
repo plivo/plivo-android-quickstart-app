@@ -107,9 +107,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             return;
         }
         if (outgoing == null && Utils.getIncoming() == null) {
-            isBackPressed = true;
-            logout();
-            isBackPressed = false;
             super.onBackPressed();
         }
 
