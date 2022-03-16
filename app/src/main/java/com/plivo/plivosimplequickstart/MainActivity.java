@@ -54,6 +54,7 @@ import static com.plivo.plivosimplequickstart.Utils.stopVibrating;
 
 public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
     private static final int PERMISSIONS_REQUEST_CODE = 21;
+    private static final String TAG = MainActivity.class.getName();
 
     private Timer callTimer;
 
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     Outgoing outgoing;
     boolean isKeyboardOpen = false;
     String keypadData = "";
+    boolean isBackPressed = false;
 
     public static boolean isInstantiated = false;
     private BroadcastReceiver callIncomingReceiver;
@@ -94,6 +96,21 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             }
         } else {
             init();
+        }
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed Called");
+        if (isBackPressed) {
+            return;
+        }
+        if (outgoing == null && Utils.getIncoming() == null) {
+            isBackPressed = true;
+            logout();
+            isBackPressed = false;
+            super.onBackPressed();
         }
 
     }
@@ -241,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             case REJECTED:
             case INVALID:
                 cancelTimer();
-                outgoing = null;
+                this.outgoing = null;
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
@@ -279,9 +296,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
+                Utils.setIncoming(null);
                 break;
             case REJECTED:
                 removeNotification(Constants.NOTIFICATION_ID);
+                Utils.setIncoming(null);
                 break;
         }
     }
