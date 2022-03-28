@@ -29,7 +29,9 @@ public class PlivoFCMService extends FirebaseMessagingService {
             String deviceToken = Utils.getDeviceToken();
             HashMap<String, String> pushMap = new HashMap<>(remoteMessage.getData());
 
-            if (((App) getApplication()).backend().loginForIncoming(deviceToken, Utils.USERNAME, Utils.PASSWORD)) {
+            String username = Utils.USERNAME;
+            String password = Utils.PASSWORD;
+            if (((App) getApplication()).backend().loginForIncoming(deviceToken, username, password)) {
                 Log.d("@@Incoming", "onMessageReceived | relayIncomingPushData");
                 ((App) getApplication()).backend().relayIncomingPushData(pushMap);
             }
