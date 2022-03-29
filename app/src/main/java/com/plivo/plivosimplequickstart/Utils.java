@@ -2,7 +2,9 @@ package com.plivo.plivosimplequickstart;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Vibrator;
 import android.text.TextUtils;
+
 import com.plivo.endpoint.Incoming;
 
 import java.util.HashMap;
@@ -17,6 +19,8 @@ public class Utils {
     static final String USERNAME = BuildConfig.Username;
     static final String PASSWORD = BuildConfig.Password;
 
+    static final String PREFERENCE_KEY = "Plivo-Pref";
+
     static final String HH_MM_SS = "%02d:%02d:%02d";
     static final String MM_SS = "%02d:%02d";
 
@@ -26,9 +30,10 @@ public class Utils {
     private static Incoming incoming;
     private static boolean isLoggedIn = false;
 
-    public static HashMap<String, Object> options = new HashMap<String, Object>()
-    {{
-        put("enableTracking",true);
+    private static Vibrator vibrator;
+
+    public static HashMap<String, Object> options = new HashMap<String, Object>() {{
+        put("enableTracking", true);
     }};
 
     static String getDeviceToken() {
@@ -69,17 +74,27 @@ public class Utils {
     }
 
     static String from(String fromContact, String fromSip) {
-        String from = TextUtils.isEmpty(fromContact)?
-                TextUtils.isEmpty(fromSip)? "" : fromSip:
+        String from = TextUtils.isEmpty(fromContact) ?
+                TextUtils.isEmpty(fromSip) ? "" : fromSip :
                 fromContact;
         return from.contains("\"") ?
-                from.substring(from.indexOf("\"")+1, from.lastIndexOf("\"")):
+                from.substring(from.indexOf("\"") + 1, from.lastIndexOf("\"")) :
                 from;
 
     }
 
     static String to(String toSip) {
         return TextUtils.isEmpty(toSip) ? "" :
-                toSip.substring(toSip.indexOf(":")+1, toSip.indexOf("@"));
+                toSip.substring(toSip.indexOf(":") + 1, toSip.indexOf("@"));
+    }
+
+    static void startVibrating(Context context) {
+        if (vibrator == null)
+            vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(new long[]{1000, 1000, 1000, 1000, 1000}, 3);
+    }
+
+    static void stopVibrating() {
+        vibrator.cancel();
     }
 }

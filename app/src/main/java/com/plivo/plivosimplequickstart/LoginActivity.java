@@ -38,19 +38,25 @@ public class LoginActivity extends AppCompatActivity {
 
                 String username = eusername.getText().toString();
                 String password = epassword.getText().toString();
-                MainActivity.username = username;
-                MainActivity.password = password;
 
                 if (username.isEmpty() || password.isEmpty()) {
                     Toast.makeText(LoginActivity.this, "Please enter the username or password", Toast.LENGTH_LONG).show();
                 } else {
-                    login(username, password);
+                    Pref.newInstance(LoginActivity.this).setString(Constants.USERNAME, username);
+                    Pref.newInstance(LoginActivity.this).setString(Constants.PASSWORD, password);
+//                    login(username, password);
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
-
+                    finish();
                 }
             }
         });
+
+        if (Pref.newInstance(this).getBoolean(Constants.LOG_IN)) {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void login(String userName, String passWord) {

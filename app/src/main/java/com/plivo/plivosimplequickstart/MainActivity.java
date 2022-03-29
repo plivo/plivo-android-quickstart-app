@@ -6,8 +6,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -47,9 +49,12 @@ import java.util.concurrent.TimeUnit;
 
 import static com.plivo.plivosimplequickstart.Utils.HH_MM_SS;
 import static com.plivo.plivosimplequickstart.Utils.MM_SS;
+import static com.plivo.plivosimplequickstart.Utils.startVibrating;
+import static com.plivo.plivosimplequickstart.Utils.stopVibrating;
 
 public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
     private static final int PERMISSIONS_REQUEST_CODE = 21;
+    private static final String TAG = MainActivity.class.getName();
 
     private Timer callTimer;
 
@@ -61,21 +66,27 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     private Object callData;
 
-    private Vibrator vibrator;
-
     static String username = null;
     static String password = null;
     Outgoing outgoing;
     boolean isKeyboardOpen = false;
     String keypadData = "";
+    boolean isBackPressed = false;
+
+    public static boolean isInstantiated = false;
+    private BroadcastReceiver callIncomingReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isInstantiated = true;
         setContentView(R.layout.activity_main);
+        Log.d("@@Incoming", "onCretae");
         actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
+        password = Pref.newInstance(MainActivity.this).getString(Constants.PASSWORD);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
@@ -90,19 +101,31 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     @Override
+    public void onBackPressed() {
+        Log.d(TAG, "onBackPressed Called");
+        if (isBackPressed) {
+            return;
+        }
+        if (outgoing == null && Utils.getIncoming() == null) {
+            super.onBackPressed();
+        }
+
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         String action = intent.getAction();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Constants.ANSWER_ACTION.equals(action)) {
+            Log.d("@@Incoming", "onNewIntent | ANSWER_ACTION");
             answerCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
-            vibrator.cancel();
-
+            Utils.stopVibrating();
         } else if (Constants.REJECT_ACTION.equals(action)) {
             rejectCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
-            vibrator.cancel();
+            Utils.stopVibrating();
         }
     }
 
@@ -158,25 +181,30 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void init() {
+        Log.d("@@Incoming", "init");
         registerBackendListener();
         loginWithToken();
     }
 
     private void registerBackendListener() {
+        Log.d("@@Incoming", "registerBackendListener");
         ((App) getApplication()).backend().setListener(this);
         Utils.setBackendListener(this);
     }
 
     private void loginWithToken() {
+        Log.d("@@Incoming", "loginWithToken");
         if (Utils.getLoggedinStatus()) {
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
             if (callData != null) {
+                Log.d("@@Incoming", "loginWithToken | callData not null");
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
             }
         } else {
-            /*FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().login(instanceIdResult.getToken()));*/
+            Log.d("@@Incoming", "loginWithToken | is not logged in");
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().login(instanceIdResult.getToken(),username , password));
         }
     }
 
@@ -190,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     /**
      * Display & Handle Outgoing Calls
+     *
      * @param state
      * @param outgoing
      */
@@ -202,25 +231,32 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
                 String phoneNum = phoneNumberText.getText().toString();
                 setContentView(R.layout.call);
+                ((ImageButton) findViewById(R.id.speaker)).setVisibility(View.GONE);
+                ((ImageButton) findViewById(R.id.mute)).setVisibility(View.GONE);
+                ((ImageButton) findViewById(R.id.hold)).setVisibility(View.GONE);
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
                 callerState = (TextView) findViewById(R.id.caller_state);
                 callerName.setText(phoneNum);
                 callerState.setText(title);
-                ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.VISIBLE);
                 makeCall(phoneNum);
                 break;
             case RINGING:
                 callerState = (TextView) findViewById(R.id.caller_state);
                 callerState.setText(Constants.RINGING_LABEL);
+                ((ImageButton) findViewById(R.id.speaker)).setVisibility(View.VISIBLE);
+                ((ImageButton) findViewById(R.id.mute)).setVisibility(View.VISIBLE);
+                ((ImageButton) findViewById(R.id.hold)).setVisibility(View.VISIBLE);
                 break;
             case ANSWERED:
                 startTimer();
+                ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.VISIBLE);
+                ((TextView) findViewById(R.id.dial_numbers)).setText("");
                 break;
             case HANGUP:
             case REJECTED:
             case INVALID:
                 cancelTimer();
-                outgoing = null;
+                this.outgoing = null;
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
                 break;
@@ -229,6 +265,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     /**
      * Display & Handle Incoming Calls
+     *
      * @param state
      * @param incoming
      */
@@ -236,13 +273,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
         String title = (incoming != null ? Utils.from(incoming.getFromContact(), incoming.getFromSip()) : "");
 
+        String callerId = com.plivo.endpoint.Utils.getEndpointFromUri(title);
+
         switch (state) {
             case ANSWERED:
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
                 String phoneNum = phoneNumberText.getText().toString();
                 setContentView(R.layout.call);
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
-                callerName.setText(phoneNum);
+                callerName.setText(callerId);
                 ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.GONE);
                 startTimer();
                 break;
@@ -255,9 +294,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
                 updateUI(STATE.IDLE, null);
+                Utils.setIncoming(null);
                 break;
             case REJECTED:
                 removeNotification(Constants.NOTIFICATION_ID);
+                Utils.setIncoming(null);
                 break;
         }
     }
@@ -299,11 +340,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 .setVibrate(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
                 .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
         notificationManager.notify(0, notificationBuilder.build());
-        vibrator.vibrate(new long[]{1000, 1000, 1000, 1000, 1000}, 3);
+        startVibrating(this);
     }
 
     private void removeNotification(int id) {
-        vibrator.cancel();
+        stopVibrating();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(id);
     }
@@ -342,8 +383,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("X-PH-Header1", "Value1");
             headers.put("X-PH-Header2", "Value2");
-            if(!outgoing.call(phoneNum, headers)){
-                updateUI(STATE.INVALID,outgoing);
+            if (!outgoing.call(phoneNum, headers)) {
+                updateUI(STATE.INVALID, outgoing);
             }
         }
     }
@@ -370,7 +411,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isMuteOn = false;
         isKeyboardOpen = false;
         keypadData = "";
-        ((TextView) findViewById(R.id.dial_numbers)).setText("");
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         audioManager.setSpeakerphoneOn(isSpeakerOn);
         setContentView(R.layout.activity_main);
@@ -387,20 +427,21 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public void answerCall() {
         Log.d("TAG", "answerCall: inside answer");
-        if (Utils.getIncoming() == null) {
-            Log.d("TAG", "answerCall: inside answer, call data is null");
-        }
+
         if (Utils.getIncoming() != null) {
+            Log.d("@@Incoming", "answerCall");
             Utils.getIncoming().answer();
             updateUI(STATE.ANSWERED, Utils.getIncoming());
+        } else {
+            Log.d("TAG", "answerCall: inside answer, call data is null");
         }
     }
 
     public void rejectCall() {
-        if (callData != null) {
-            if (callData instanceof Incoming) {
-                ((Incoming) callData).reject();
-            }
+        if (Utils.getIncoming() != null) {
+            Utils.getIncoming().reject();
+        } else {
+            Log.d("TAG", "rejectCall: call data is null");
         }
     }
 
@@ -495,7 +536,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         textView.setText(keypadData);
         if (outgoing != null) {
             outgoing.sendDigits(value);
-        } else  if (Utils.getIncoming() != null) {
+        } else if (Utils.getIncoming() != null) {
             Utils.getIncoming().sendDigits(value);
         }
 
@@ -578,6 +619,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onLogout() {
         Utils.setLoggedinStatus(false);
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 
@@ -613,4 +655,5 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void mediaMetrics(HashMap messageTemplate) {
 
     }
+
 }

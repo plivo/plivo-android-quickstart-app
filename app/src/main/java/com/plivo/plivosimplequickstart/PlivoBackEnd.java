@@ -2,6 +2,7 @@ package com.plivo.plivosimplequickstart;
 
 import android.content.Context;
 import android.util.Log;
+
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.Incoming;
@@ -12,16 +13,18 @@ import java.util.HashMap;
 public class PlivoBackEnd implements EventListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
-    enum STATE { IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID;}
+    enum STATE {IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID;}
 
     private Endpoint endpoint;
     private BackendListener listener;
+    private Context context;
 
     static PlivoBackEnd newInstance() {
         return new PlivoBackEnd();
     }
 
     public void init(boolean log) {
+        Log.d("@@Incoming", "PlivoBackend | Init");
         HashMap options = new HashMap<>();
         options.put("enableTracking", true);
         options.put("context", Utils.options.get("context"));
@@ -37,7 +40,8 @@ public class PlivoBackEnd implements EventListener {
         this.listener = listener;
     }
 
-    public void login(String newToken,String username, String password) {
+    public void login(String newToken, String username, String password) {
+        Log.d("@@Incoming", "Endpoint login");
         endpoint.login(username, password, newToken);
         Utils.setDeviceToken(newToken);
     }
@@ -45,7 +49,9 @@ public class PlivoBackEnd implements EventListener {
     public void registerListener(Context context) {
         endpoint.registerNetworkChangeReceiver(context);
     }
-    public boolean loginForIncoming(String newToken,String username, String password) {
+
+    public boolean loginForIncoming(String newToken, String username, String password) {
+        Log.d("@@Incoming","loginForIncoming");
         return endpoint.login(username, password, newToken);
     }
 
@@ -63,17 +69,27 @@ public class PlivoBackEnd implements EventListener {
         return endpoint.createOutgoingCall();
     }
 
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
     // Plivo SDK callbacks
     @Override
     public void onLogin() {
         Log.d(TAG, Constants.LOGIN_SUCCESS);
         Utils.setLoggedinStatus(true);
+        Pref.newInstance(getContext()).setBoolean(Constants.LOG_IN, true);
         if (listener != null) listener.onLogin(true);
     }
 
     @Override
     public void onLogout() {
         Log.d(TAG, Constants.LOGOUT_SUCCESS);
+        Pref.newInstance(getContext()).clear();
         if (listener != null) listener.onLogout();
     }
 
@@ -149,20 +165,25 @@ public class PlivoBackEnd implements EventListener {
     }
 
     @Override
-    public void mediaMetrics(HashMap messageTemplate){
+    public void mediaMetrics(HashMap messageTemplate) {
         Log.d(TAG, Constants.MEDIAMETRICS);
         Log.i(TAG, messageTemplate.toString());
-        if (listener != null ) listener.mediaMetrics(messageTemplate);
+        if (listener != null) listener.mediaMetrics(messageTemplate);
     }
 
 
     // Your own custom listener
     public interface BackendListener {
         void onLogin(boolean success);
+
         void onLogout();
+
         void onIncomingCall(Incoming data, STATE callState);
+
         void onOutgoingCall(Outgoing data, STATE callState);
+
         void onIncomingDigit(String digit);
+
         void mediaMetrics(HashMap messageTemplate);
     }
 }
