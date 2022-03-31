@@ -41,6 +41,7 @@ public class Pref {
 
 
     public void clear() {
+        setBoolean(Constants.LOG_IN,false);
         sharedPref.edit().clear().apply();
     }
 }

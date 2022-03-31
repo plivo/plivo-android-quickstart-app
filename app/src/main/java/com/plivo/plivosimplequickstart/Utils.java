@@ -95,6 +95,7 @@ public class Utils {
     }
 
     static void stopVibrating() {
-        vibrator.cancel();
+        if (vibrator != null)
+            vibrator.cancel();
     }
 }
