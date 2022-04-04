@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public static boolean isInstantiated = false;
     private BroadcastReceiver callIncomingReceiver;
+    ConstraintLayout constraintLayout;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +91,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
         password = Pref.newInstance(MainActivity.this).getString(Constants.PASSWORD);
 
+        constraintLayout = (ConstraintLayout) findViewById(R.id.cl_main);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                 init();
@@ -278,6 +283,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             case ANSWERED:
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
                 String phoneNum = phoneNumberText.getText().toString();
+                progressBar.setVisibility(View.GONE);
                 setContentView(R.layout.call);
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
                 callerName.setText(callerId);
@@ -292,6 +298,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 cancelTimer();
                 removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
+                progressBar.setVisibility(View.GONE);
+                constraintLayout.setVisibility(View.VISIBLE);
                 updateUI(STATE.IDLE, null);
                 Utils.setIncoming(null);
                 break;
@@ -429,8 +437,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
         if (Utils.getIncoming() != null) {
             Log.d("@@Incoming", "answerCall");
+            constraintLayout.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
             Utils.getIncoming().answer();
-            updateUI(STATE.ANSWERED, Utils.getIncoming());
+//            updateUI(STATE.ANSWERED, Utils.getIncoming());
         } else {
             Log.d("TAG", "answerCall: inside answer, call data is null");
         }

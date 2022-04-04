@@ -17,6 +17,7 @@ public class Constants {
     public static final String LOGOUT_SUCCESS = "onLogout success";
     public static final String LOGIN_FAILED = "onLoginFailed";
     public static final String INCOMING_CALL_RINGING = "onIncomingCall Ringing";
+    public static final String INCOMING_CALL_ANSWERED = "onIncomingCall Answered";
     public static final String INCOMING_CALL_HANGUP = "onIncomingCallHangup";
     public static final String INCOMING_CALL_REJECTED = "onIncomingCallRejected";
     public static final String OUTGOING_CALL = "onOutgoingCall";
