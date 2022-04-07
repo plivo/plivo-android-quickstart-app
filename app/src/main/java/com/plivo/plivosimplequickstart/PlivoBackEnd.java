@@ -24,14 +24,9 @@ public class PlivoBackEnd implements EventListener {
     }
 
     public void init(boolean log) {
-        Log.d("@@Incoming", "PlivoBackend | Init");
-        HashMap options = new HashMap<>();
-        options.put("enableTracking", true);
-        options.put("context", Utils.options.get("context"));
+        endpoint = Endpoint.newInstance((Context) Utils.options.get("context"),log, this);
 
-        endpoint = Endpoint.newInstance(log, options, this);
-
-        //Iniatiate SDK with Options, "enableTracking" and "context"(To get network related information)
+        //Initiate SDK with Options, "enableTracking" (To get network related information)
 
 //        endpoint = Endpoint.newInstance(log, this,Utils.options);
     }
