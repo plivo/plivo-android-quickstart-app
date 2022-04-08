@@ -24,11 +24,13 @@ public class PlivoBackEnd implements EventListener {
     }
 
     public void init(boolean log) {
-        endpoint = Endpoint.newInstance((Context) Utils.options.get("context"),log, this);
+//        endpoint = Endpoint.newInstance(context,log, this);
 
         //Initiate SDK with Options, "enableTracking" (To get network related information)
 
-//        endpoint = Endpoint.newInstance(log, this,Utils.options);
+        HashMap options = new HashMap();
+        options.put("maxAverageBitrate", 48000);
+        endpoint = Endpoint.newInstance(context, log, this, options);
     }
 
     public void setListener(BackendListener listener) {
