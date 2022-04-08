@@ -49,6 +49,9 @@ public class PlivoBackEnd implements EventListener {
     public void registerListener(Context context) {
         endpoint.registerNetworkChangeReceiver(context);
     }
+    public void unregisterListener(Context context) {
+        endpoint.unregisterNetworkChangeReceiver(context);
+    }
 
     public boolean loginForIncoming(String newToken, String username, String password) {
         Log.d("@@Incoming","loginForIncoming");
