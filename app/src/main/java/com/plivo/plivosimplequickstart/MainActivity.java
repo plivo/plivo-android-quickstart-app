@@ -281,8 +281,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
         switch (state) {
             case ANSWERED:
-                EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
-                String phoneNum = phoneNumberText.getText().toString();
                 progressBar.setVisibility(View.GONE);
                 setContentView(R.layout.call);
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
@@ -437,6 +435,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
         if (Utils.getIncoming() != null) {
             Log.d("@@Incoming", "answerCall");
+            constraintLayout = (ConstraintLayout) findViewById(R.id.cl_main);
+            progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+
             constraintLayout.setVisibility(View.GONE);
             progressBar.setVisibility(View.VISIBLE);
             Utils.getIncoming().answer();
