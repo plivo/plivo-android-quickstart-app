@@ -153,7 +153,7 @@ public class PlivoBackEnd implements EventListener {
 
 
     public void onIncomingCallConnected(Incoming incoming) {
-        Log.d(TAG, Constants.INCOMING_CALL_ANSWERED);
+        Log.d(TAG, Constants.INCOMING_CALL_CONNECTED);
         if (listener != null) listener.onIncomingCall(incoming, STATE.ANSWERED);
     }
 
