@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         super.onCreate(savedInstanceState);
         isInstantiated = true;
         setContentView(R.layout.activity_main);
-        Log.d("@@Incoming", "onCretae");
+        ((App) getApplication()).backend().registerListener(this);
         actionBar = getSupportActionBar();
 //        actionBar.setDisplayHomeAsUpEnabled(true);
 
@@ -169,9 +169,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         return super.dispatchTouchEvent(ev);
     }
 
+
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onDestroy() {
+        ((App) getApplication()).backend().unregisterListener(this);
+        super.onDestroy();
+
     }
 
     @Override
