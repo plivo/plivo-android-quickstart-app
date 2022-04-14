@@ -10,29 +10,37 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Vibrator;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.plivo.endpoint.Incoming;
+
 import java.util.HashMap;
 
 public class PlivoFCMService extends FirebaseMessagingService {
-    private Vibrator vibrator;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         if (remoteMessage.getData() != null) {
             String deviceToken = Utils.getDeviceToken();
-            if (((App) getApplication()).backend().loginForIncoming(deviceToken)) {
-                ((App) getApplication()).backend().relayIncomingPushData(new HashMap<>(remoteMessage.getData()));
+            HashMap<String, String> pushMap = new HashMap<>(remoteMessage.getData());
+
+            if (((App) getApplication()).backend().loginForIncoming(deviceToken, Utils.USERNAME, Utils.PASSWORD)) {
+                Log.d("@@Incoming", "onMessageReceived | relayIncomingPushData");
+                ((App) getApplication()).backend().relayIncomingPushData(pushMap);
             }
+
+            Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | start MainActivity");
             startActivity(new Intent(this, MainActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             );
 
             if (Utils.getBackendListener() == null) {
+                Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | getBackendListener null");
                 notificationDialog();
             }
         }
@@ -48,7 +56,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
             notificationChannel.setDescription(Constants.NOTIFICATION_DESCRIPTION);
             notificationChannel.enableLights(true);
             notificationChannel.setLightColor(Color.RED);
-            notificationChannel.setVibrationPattern(new long[] { 0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500});
+            notificationChannel.setVibrationPattern(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500});
             notificationChannel.enableVibration(true);
             notificationManager.createNotificationChannel(notificationChannel);
         }
@@ -67,11 +75,10 @@ public class PlivoFCMService extends FirebaseMessagingService {
                 .setContentTitle(Constants.NOTIFICATION_DESCRIPTION)
                 .addAction(android.R.drawable.ic_menu_call, getString(R.string.launch), LaunchIntent)
                 .setOngoing(true)
-                .setVibrate(new long[] { 0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
+                .setVibrate(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
                 .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
         notificationManager.notify(0, notificationBuilder.build());
 
-        vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(new long[] { 1000, 1000, 1000, 1000, 1000},3);
+        Utils.startVibrating(this);
     }
 }

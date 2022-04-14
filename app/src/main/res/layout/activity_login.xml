@@ -4,46 +4,62 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".loginActivity">
+    tools:context=".LoginActivity">
+
+    <ImageView
+        android:id="@+id/appicon"
+        android:layout_width="200dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="92dp"
+        android:background="@drawable/image_rounded"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.445"
+        app:srcCompat="@drawable/plivo_icon" />
+
+    <EditText
+        android:id="@+id/etUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="username"
+        android:inputType="textPersonName"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.522"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.416" />
 
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:autofillHints=""
         android:ems="10"
-        android:hint="Password"
-        android:inputType="numberPassword"
+        android:hint="password"
+        android:inputType="textPassword"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.522"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etName"
-        app:layout_constraintVertical_bias="0.064" />
+        app:layout_constraintTop_toBottomOf="@+id/etUsername"
+        app:layout_constraintVertical_bias="0.096" />
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="login"
+        android:background="@drawable/rounded_button"
+        android:text="Login"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etPassword"
-        app:layout_constraintVertical_bias="0.098" />
-
-    <EditText
-        android:id="@+id/etName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:autofillHints=""
-        android:ems="10"
-        android:hint="Username"
-        android:inputType="textPersonName"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.326" />
-
+        app:layout_constraintVertical_bias="0.094" />
 </androidx.constraintlayout.widget.ConstraintLayout>
