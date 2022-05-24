@@ -37,6 +37,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
 
+import com.auth0.android.jwt.JWT;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: ");
         isInstantiated = true;
         setContentView(R.layout.activity_main);
         ((App) getApplication()).backend().registerListener(this);
@@ -102,7 +104,21 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         } else {
             init();
         }
+        Toast.makeText(MainActivity.this,"Helloo",Toast.LENGTH_LONG).show();
 
+
+//        try {
+//            JWTUtils.decoded("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTI3NzI4NDEsImlzcyI6Ik1BRENIQU5EUkVTSDAyVEFOSzA2IiwibmJmIjoxNjUyNjg2NDQxLCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOnRydWUsIm91dGdvaW5nX2FsbG93Ijp0cnVlfX0sInN1YiI6ImdhdXJhdjIzNzA3MjE3NDQ1MzY0ODU0In0.Khva18W2KvExqFxISgFFtQ9xv-mezOuPAKUDUQ5J5zw");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        Log.d(TAG, "onCreate: jwtParse"+("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTI3NzI4NDEsImlzcyI6Ik1BRENIQU5EUkVTSDAyVEFOSzA2IiwibmJmIjoxNjUyNjg2NDQxLCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOnRydWUsIm91dGdvaW5nX2FsbG93Ijp0cnVlfX0sInN1YiI6ImdhdXJhdjIzNzA3MjE3NDQ1MzY0ODU0In0.Khva18W2KvExqFxISgFFtQ9xv-mezOuPAKUDUQ5J5zw"));
+//        Log.d(TAG, "onCreate: "+getDecodedJwt("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTI3NzI4NDEsImlzcyI6Ik1BRENIQU5EUkVTSDAyVEFOSzA2IiwibmJmIjoxNjUyNjg2NDQxLCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOnRydWUsIm91dGdvaW5nX2FsbG93Ijp0cnVlfX0sInN1YiI6ImdhdXJhdjIzNzA3MjE3NDQ1MzY0ODU0In0.Khva18W2KvExqFxISgFFtQ9xv-mezOuPAKUDUQ5J5zw").getExpiresAt());
+    }
+
+    public JWT getDecodedJwt(String jwt) {
+        return new JWT(jwt);
     }
 
     @Override
@@ -233,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
         String title = state.name();
         TextView callerState;
+        Log.d(TAG, "showOutCallUI: "+ state);
         switch (state) {
             case IDLE:
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
@@ -603,6 +620,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
                 ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 ((Button) findViewById(R.id.btlogout)).setText(Constants.LOG_OUT);
+                findViewById(R.id.btlogout).setOnClickListener(view -> {
+                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                    startActivity(intent);
+                    logout();
+                });
                 findViewById(R.id.call_btn).setEnabled(true);
 
                 if (data != null) {

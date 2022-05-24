@@ -42,6 +42,12 @@ public class PlivoBackEnd implements EventListener {
         Utils.setDeviceToken(newToken);
     }
 
+    public void loginWithJwtToken(String token, String JWTToken) {
+        Log.d("@@Incoming", "Endpoint login");
+        endpoint.loginWithJwtToken(JWTToken,token);
+        Utils.setDeviceToken(token);
+    }
+
     public void registerListener(Context context) {
         endpoint.registerNetworkChangeReceiver(context);
     }
@@ -96,6 +102,11 @@ public class PlivoBackEnd implements EventListener {
     public void onLoginFailed() {
         Log.e(TAG, Constants.LOGIN_FAILED);
         if (listener != null) listener.onLogin(false);
+    }
+
+    @Override
+    public void onLoginFailed(String message) {
+
     }
 
     @Override

@@ -3,15 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/rounded_border"
-    tools:context=".LoginActivity">
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/appicon"
-        android:layout_marginHorizontal="64dp"
         android:layout_width="200dp"
         android:layout_height="150dp"
+        android:layout_marginHorizontal="64dp"
         android:layout_marginTop="32dp"
         android:background="@drawable/image_rounded"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,36 +21,19 @@
         app:srcCompat="@drawable/plivo_icon" />
 
     <EditText
-        android:id="@+id/etUsername"
+        android:id="@+id/etTokenUserName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:textIsSelectable="true"
         android:ems="10"
-        android:hint="username"
-        android:inputType="textPersonName"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:hint="username/token"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.522"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appicon"
-        app:layout_constraintVertical_bias="0.18" />
-
-    <EditText
-        android:id="@+id/etPassword"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="password"
-        android:inputType="textPassword"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.522"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etUsername"
-        app:layout_constraintVertical_bias="0.096" />
+        app:layout_constraintTop_toBottomOf="@+id/appicon" />
 
     <Button
-        android:id="@+id/btLogin"
+        android:id="@+id/loginWithJWT"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -62,7 +43,9 @@
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.433"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etPassword"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/etTokenUserName" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -30,4 +30,5 @@ public class Constants {
     public static final String MAP = "hashmap";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
+    public static final String JWT_ACCESS_TOKEN = "JWT Access Token";
 }
