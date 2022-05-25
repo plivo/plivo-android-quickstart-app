@@ -51,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.plivo.plivosimplequickstart.Utils.HH_MM_SS;
 import static com.plivo.plivosimplequickstart.Utils.MM_SS;
+import static com.plivo.plivosimplequickstart.Utils.USERNAME;
 import static com.plivo.plivosimplequickstart.Utils.startVibrating;
 import static com.plivo.plivosimplequickstart.Utils.stopVibrating;
 
@@ -88,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         setContentView(R.layout.activity_main);
         ((App) getApplication()).backend().registerListener(this);
         actionBar = getSupportActionBar();
-//        actionBar.setDisplayHomeAsUpEnabled(true);
 
         username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
         password = Pref.newInstance(MainActivity.this).getString(Constants.PASSWORD);
@@ -104,18 +104,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         } else {
             init();
         }
-        Toast.makeText(MainActivity.this,"Helloo",Toast.LENGTH_LONG).show();
-
-
-//        try {
-//            JWTUtils.decoded("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTI3NzI4NDEsImlzcyI6Ik1BRENIQU5EUkVTSDAyVEFOSzA2IiwibmJmIjoxNjUyNjg2NDQxLCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOnRydWUsIm91dGdvaW5nX2FsbG93Ijp0cnVlfX0sInN1YiI6ImdhdXJhdjIzNzA3MjE3NDQ1MzY0ODU0In0.Khva18W2KvExqFxISgFFtQ9xv-mezOuPAKUDUQ5J5zw");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        Log.d(TAG, "onCreate: jwtParse"+("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTI3NzI4NDEsImlzcyI6Ik1BRENIQU5EUkVTSDAyVEFOSzA2IiwibmJmIjoxNjUyNjg2NDQxLCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOnRydWUsIm91dGdvaW5nX2FsbG93Ijp0cnVlfX0sInN1YiI6ImdhdXJhdjIzNzA3MjE3NDQ1MzY0ODU0In0.Khva18W2KvExqFxISgFFtQ9xv-mezOuPAKUDUQ5J5zw"));
-//        Log.d(TAG, "onCreate: "+getDecodedJwt("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTI3NzI4NDEsImlzcyI6Ik1BRENIQU5EUkVTSDAyVEFOSzA2IiwibmJmIjoxNjUyNjg2NDQxLCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOnRydWUsIm91dGdvaW5nX2FsbG93Ijp0cnVlfX0sInN1YiI6ImdhdXJhdjIzNzA3MjE3NDQ1MzY0ODU0In0.Khva18W2KvExqFxISgFFtQ9xv-mezOuPAKUDUQ5J5zw").getExpiresAt());
-    }
+   }
 
     public JWT getDecodedJwt(String jwt) {
         return new JWT(jwt);
@@ -216,19 +205,28 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void loginWithToken() {
-        Log.d("@@Incoming", "loginWithToken");
-        if (Utils.getLoggedinStatus()) {
-            updateUI(STATE.IDLE, null);
-            callData = Utils.getIncoming();
-            if (callData != null) {
-                Log.d("@@Incoming", "loginWithToken | callData not null");
-                showInCallUI(STATE.RINGING, Utils.getIncoming());
-            }
-        } else {
-            Log.d("@@Incoming", "loginWithToken | is not logged in");
+        if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)){
+            Log.d(TAG, "loginWithToken: 1");
+            String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().login(instanceIdResult.getToken(),username , password));
+                    ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
+        }else {
+            Log.d(TAG, "loginWithToken: 2");
+            Log.d("@@Incoming", "loginWithToken");
+            if (Utils.getLoggedinStatus()) {
+                updateUI(STATE.IDLE, null);
+                callData = Utils.getIncoming();
+                if (callData != null) {
+                    Log.d("@@Incoming", "loginWithToken | callData not null");
+                    showInCallUI(STATE.RINGING, Utils.getIncoming());
+                }
+            } else {
+                Log.d("@@Incoming", "loginWithToken | is not logged in");
+                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                        ((App) getApplication()).backend().login(instanceIdResult.getToken(), username, password));
+            }
         }
+
     }
 
     public void onClickLogout(View view) {
@@ -593,6 +591,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void updateUI(PlivoBackEnd.STATE state, Object data) {
+        Log.d(TAG, "updateUI: "+state);
         callData = data;
         if (state.equals(STATE.REJECTED) || state.equals(STATE.HANGUP) || state.equals(STATE.INVALID)) {
             if (data != null) {
@@ -617,6 +616,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     }
                 }
             } else {
+                Log.d(TAG, "updateUI: 11");
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
                 ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 ((Button) findViewById(R.id.btlogout)).setText(Constants.LOG_OUT);
@@ -642,13 +642,25 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogin(boolean success) {
+
+        Log.d(TAG, "onLogin: "+success);
         runOnUiThread(() -> {
             if (success) {
+                if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
+                    Pref.newInstance(MainActivity.this).setString(USERNAME, ((App) getApplication()).backend().getJWTUserName());
+                    username = ((App) getApplication()).backend().getJWTUserName();
+                }
                 updateUI(STATE.IDLE, null);
             } else {
-                Toast.makeText(this, R.string.login_failed, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, R.string.login_failed, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onLoginFailed(String message) {
+        Log.d(TAG, "onLoginFailed: ");
+        Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
     }
 
     @Override

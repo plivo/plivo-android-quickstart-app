@@ -15,9 +15,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 public class LogInWithPasswordDialog extends DialogFragment {
-    EditText eusername;
-    EditText epassword;
-    Button eLogin;
+    EditText eUsername;
+    EditText ePassword;
+    Button bLogin;
 
 
     @Nullable
@@ -26,43 +26,32 @@ public class LogInWithPasswordDialog extends DialogFragment {
         return inflater.inflate(R.layout.activity_login, container, false);
     }
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return super.onCreateDialog(savedInstanceState);
-    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        eusername = view.findViewById(R.id.etUsername);
-        epassword = view.findViewById(R.id.etPassword);
-        System.out.println(eusername);
-        eLogin = (Button) view.findViewById(R.id.btLogin);
-        System.out.println(eLogin);
-        String username = Utils.USERNAME;
-        String password = Utils.PASSWORD;
-        eusername.setText(username);
-        epassword.setText(password);
+        eUsername = view.findViewById(R.id.etUsername);
+        ePassword = view.findViewById(R.id.etPassword);
+        bLogin = view.findViewById(R.id.btLogin);
+        eUsername.setText(Utils.USERNAME);
+        ePassword.setText(Utils.PASSWORD);
 
-        eLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String username1 = eusername.getText().toString();
-                String password2 = epassword.getText().toString();
+        bLogin.setOnClickListener(view1 -> login());
+    }
 
-                if (username1.isEmpty() || password2.isEmpty()) {
-                    Toast.makeText(view.getContext(), "Please enter the username or password", Toast.LENGTH_LONG).show();
-                } else {
-                    Pref.newInstance(view.getContext()).setString(Constants.USERNAME, username1);
-                    Pref.newInstance(view.getContext()).setString(Constants.PASSWORD, password2);
+    private void login() {
+        String username1 = eUsername.getText().toString();
+        String password2 = ePassword.getText().toString();
+
+        if (username1.isEmpty() || password2.isEmpty()) {
+            Toast.makeText(getContext(), "Please enter the username or password", Toast.LENGTH_LONG).show();
+        } else {
+            Pref.newInstance(getContext()).setString(Constants.USERNAME, username1);
+            Pref.newInstance(getContext()).setString(Constants.PASSWORD, password2);
 //                    login(username, password);
-                    dismiss();
-                    Intent intent = new Intent(view.getContext(), MainActivity.class);
-                    startActivity(intent);
-                }
-            }
-        });
-        
+            dismiss();
+            Intent intent = new Intent(getContext(), MainActivity.class);
+            startActivity(intent);
+        }
     }
 }

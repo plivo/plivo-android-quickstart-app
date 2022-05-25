@@ -31,4 +31,5 @@ public class Constants {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String JWT_ACCESS_TOKEN = "JWT Access Token";
+    public static final String IS_LOGIN_WITH_TOKEN = "isLoginWithToken";
 }

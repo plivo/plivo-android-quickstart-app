@@ -1,15 +1,10 @@
 package com.plivo.plivosimplequickstart;
 
+import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -24,7 +19,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginWithTokenOrUserName() {
-        LoginWithTokenOrUsername dialogFragment = new LoginWithTokenOrUsername();
+        LoginWithTokenOrUsernameDialog dialogFragment = new LoginWithTokenOrUsernameDialog();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog2");
         if (prev != null) {
@@ -36,9 +31,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loginWithUserNamePassword() {
         LogInWithPasswordDialog dialogFragment = new LogInWithPasswordDialog();
-        Bundle bundle = new Bundle();
-        bundle.putBoolean("UserNamePassword", true);
-        dialogFragment.setArguments(bundle);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog");
         if (prev != null) {
