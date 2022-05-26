@@ -13,6 +13,7 @@ import java.util.HashMap;
 public class PlivoBackEnd implements EventListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
+
     enum STATE {IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID;}
 
     private Endpoint endpoint;
@@ -43,9 +44,14 @@ public class PlivoBackEnd implements EventListener {
     }
 
     public void loginWithJwtToken(String token, String JWTToken) {
-        Log.d("@@Incoming", "Endpoint login");
+        Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         endpoint.loginWithJwtToken(JWTToken,token);
         Utils.setDeviceToken(token);
+    }
+
+
+    public String getJWTUserName() {
+        return endpoint.sub_auth_ID;
     }
 
     public void registerListener(Context context) {
@@ -55,9 +61,9 @@ public class PlivoBackEnd implements EventListener {
         endpoint.unregisterNetworkChangeReceiver(context);
     }
 
-    public boolean loginForIncoming(String newToken, String username, String password) {
+    public boolean loginForIncoming(String newToken) {
         Log.d("@@Incoming","loginForIncoming");
-        return endpoint.login(username, password, newToken);
+        return endpoint.loginForIncoming(newToken);
     }
 
     public void logout() {
@@ -81,6 +87,11 @@ public class PlivoBackEnd implements EventListener {
     public void setContext(Context context) {
         this.context = context;
     }
+
+    public boolean getRegistered() {
+        return endpoint.getRegistered();
+    }
+
 
     // Plivo SDK callbacks
     @Override
@@ -106,7 +117,8 @@ public class PlivoBackEnd implements EventListener {
 
     @Override
     public void onLoginFailed(String message) {
-
+        Log.e(TAG, Constants.LOGIN_FAILED + message);
+        if (listener != null) listener.onLoginFailed(message);
     }
 
     @Override
@@ -191,6 +203,8 @@ public class PlivoBackEnd implements EventListener {
     // Your own custom listener
     public interface BackendListener {
         void onLogin(boolean success);
+
+        void onLoginFailed(String message);
 
         void onLogout();
 
