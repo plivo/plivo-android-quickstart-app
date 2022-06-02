@@ -38,6 +38,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
 
 import com.auth0.android.jwt.JWT;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
@@ -80,6 +81,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private BroadcastReceiver callIncomingReceiver;
     ConstraintLayout constraintLayout;
     ProgressBar progressBar;
+    ConstraintLayout parentPanel;
+    boolean isMainPage = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d(TAG, "onCreate: ");
         isInstantiated = true;
         setContentView(R.layout.activity_main);
+        isMainPage = true;
         ((App) getApplication()).backend().registerListener(this);
         actionBar = getSupportActionBar();
 
@@ -184,12 +188,19 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     protected void onResume() {
+//        ((App) getApplication()).backend().register();
         super.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+//        ((App) getApplication()).backend().resetStack();
     }
 
     private void init() {
@@ -253,6 +264,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
                 String phoneNum = phoneNumberText.getText().toString();
                 setContentView(R.layout.call);
+                isMainPage = false;
                 ((ImageButton) findViewById(R.id.speaker)).setVisibility(View.GONE);
                 ((ImageButton) findViewById(R.id.mute)).setVisibility(View.GONE);
                 ((ImageButton) findViewById(R.id.hold)).setVisibility(View.GONE);
@@ -280,6 +292,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 cancelTimer();
                 this.outgoing = null;
                 setContentView(R.layout.activity_main);
+                isMainPage = true;
                 updateUI(STATE.IDLE, null);
                 break;
         }
@@ -301,6 +314,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             case ANSWERED:
                 progressBar.setVisibility(View.GONE);
                 setContentView(R.layout.call);
+                isMainPage = false;
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
                 callerName.setText(callerId);
                 ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.GONE);
@@ -314,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 cancelTimer();
                 removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
+                isMainPage = true;
                 progressBar.setVisibility(View.GONE);
                 constraintLayout.setVisibility(View.VISIBLE);
                 updateUI(STATE.IDLE, null);
@@ -660,7 +675,14 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onLoginFailed(String message) {
         Log.d(TAG, "onLoginFailed: ");
-        Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
+
+        if(isMainPage) {
+            parentPanel = findViewById(R.id.parentPanel);
+            Snackbar snackbar = Snackbar.make(parentPanel, message, Snackbar.LENGTH_LONG);
+            snackbar.show();
+        } else {
+            Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
