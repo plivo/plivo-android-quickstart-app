@@ -94,16 +94,6 @@ public class PlivoBackEnd implements EventListener {
         return endpoint.getRegistered();
     }
 
-    public void resetStack() {
-        Log.d(TAG, "resetStack: ");
-        endpoint.resetStack();
-    }
-
-    public void register() {
-        endpoint.registerAfterResetingStack();
-    }
-
-
     // Plivo SDK callbacks
     @Override
     public void onLogin() {
@@ -210,10 +200,10 @@ public class PlivoBackEnd implements EventListener {
         if (listener != null) listener.mediaMetrics(messageTemplate);
     }
 
-    @Override
-    public String onTokenExpired() {
-        return listener.onTokenExpired();
-    }
+//    @Override
+//    public String onTokenExpired() {
+//        return listener.onTokenExpired();
+//    }
 
 
     // Your own custom listener

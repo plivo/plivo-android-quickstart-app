@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
         password = Pref.newInstance(MainActivity.this).getString(Constants.PASSWORD);
 
-        constraintLayout = (ConstraintLayout) findViewById(R.id.cl_main);
-        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        constraintLayout = findViewById(R.id.cl_main);
+        progressBar = findViewById(R.id.progress_bar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                 init();
@@ -200,27 +200,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     @Override
-    protected void onResume() {
-        if(isStackReset) {
-            ((App) getApplication()).backend().register();
-            isStackReset = false;
-        }
-        super.onResume();
-    }
-
-    @Override
     protected void onPause() {
         progressDialog.dismiss();
         super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if(Utils.getLoggedinStatus()) {
-            ((App) getApplication()).backend().resetStack();
-            isStackReset = true;
-        }
     }
 
     private void init() {
