@@ -6,16 +6,16 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -43,6 +44,12 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
+import com.plivo.plivosimplequickstart.network.APIInterface;
+import com.plivo.plivosimplequickstart.network.BodyInput;
+import com.plivo.plivosimplequickstart.network.Per;
+import com.plivo.plivosimplequickstart.network.TokenResponse;
+import com.plivo.plivosimplequickstart.network.RetroClient;
+import com.plivo.plivosimplequickstart.network.Voice;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +62,9 @@ import static com.plivo.plivosimplequickstart.Utils.MM_SS;
 import static com.plivo.plivosimplequickstart.Utils.USERNAME;
 import static com.plivo.plivosimplequickstart.Utils.startVibrating;
 import static com.plivo.plivosimplequickstart.Utils.stopVibrating;
+
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
     private static final int PERMISSIONS_REQUEST_CODE = 21;
@@ -76,12 +86,14 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     boolean isKeyboardOpen = false;
     String keypadData = "";
     boolean isBackPressed = false;
+    boolean isStackReset = false;
 
     public static boolean isInstantiated = false;
     private BroadcastReceiver callIncomingReceiver;
     ConstraintLayout constraintLayout;
     ProgressBar progressBar;
     ConstraintLayout parentPanel;
+    private ProgressDialog progressDialog;
     boolean isMainPage = false;
 
     @Override
@@ -91,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isInstantiated = true;
         setContentView(R.layout.activity_main);
         isMainPage = true;
+        progressDialog = new ProgressDialog(this);
         ((App) getApplication()).backend().registerListener(this);
         actionBar = getSupportActionBar();
 
@@ -188,19 +201,26 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     protected void onResume() {
-//        ((App) getApplication()).backend().register();
+        if(isStackReset) {
+            ((App) getApplication()).backend().register();
+            isStackReset = false;
+        }
         super.onResume();
     }
 
     @Override
     protected void onPause() {
+        progressDialog.dismiss();
         super.onPause();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        ((App) getApplication()).backend().resetStack();
+        if(Utils.getLoggedinStatus()) {
+            ((App) getApplication()).backend().resetStack();
+            isStackReset = true;
+        }
     }
 
     private void init() {
@@ -687,9 +707,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogout() {
-        Utils.setLoggedinStatus(false);
-        startActivity(new Intent(this, LoginActivity.class));
-        finish();
+//        Utils.setLoggedinStatus(false);
+//        startActivity(new Intent(this, LoginActivity.class));
+//        finish();
     }
 
     @Override
@@ -723,6 +743,73 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void mediaMetrics(HashMap messageTemplate) {
 
+    }
+
+    @Override
+    public String onTokenExpired() {
+        Log.d(TAG, "onTokenExpired: ");
+//        createDialog();
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                createDialog();
+            }
+        });
+        //generate token
+        if(false){
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), ""));
+        }
+        return null;
+    }
+
+    private void createDialog() {
+        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                switch (which){
+                    case DialogInterface.BUTTON_POSITIVE:
+                        //Yes button clicked
+                        generateNewToken();
+                        break;
+
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        //No button clicked
+                        break;
+                }
+            }
+        };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to generate token?\n Your token expired").setPositiveButton("Yes", dialogClickListener)
+                .setNegativeButton("No", dialogClickListener).show();
+    }
+
+    private void  generateNewToken() {
+        Log.d(TAG, "generateNewToken: ");
+        progressDialog.setMessage("Generating token");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        APIInterface apiInterface = RetroClient.getRetroClient().create(APIInterface.class);
+        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),"pal3333","1654487593","1678498136");
+        Call<TokenResponse> call = apiInterface.getToken(bodyInput);
+
+        call.enqueue(new Callback<TokenResponse>() {
+            @Override
+            public void onResponse(Call<TokenResponse> call, retrofit2.Response<TokenResponse> response) {
+                Log.d(TAG, "onResponse: ");
+                progressDialog.dismiss();
+                Log.d(TAG, "onResponse: "+response.code());
+                if(response.body()!=null){
+                    Log.d(TAG, "onResponse: successful"+response.body().getToken());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TokenResponse> call, Throwable t) {
+                Log.d(TAG, "onFailure: ");
+                progressDialog.dismiss();
+            }
+        });
     }
 
 }

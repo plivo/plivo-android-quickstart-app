@@ -14,6 +14,8 @@ public class PlivoBackEnd implements EventListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
 
+
+
     enum STATE {IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID;}
 
     private Endpoint endpoint;
@@ -92,6 +94,15 @@ public class PlivoBackEnd implements EventListener {
         return endpoint.getRegistered();
     }
 
+    public void resetStack() {
+        Log.d(TAG, "resetStack: ");
+        endpoint.resetStack();
+    }
+
+    public void register() {
+        endpoint.registerAfterResetingStack();
+    }
+
 
     // Plivo SDK callbacks
     @Override
@@ -106,7 +117,7 @@ public class PlivoBackEnd implements EventListener {
     public void onLogout() {
         Log.d(TAG, Constants.LOGOUT_SUCCESS);
         Pref.newInstance(getContext()).clear();
-        if (listener != null) listener.onLogout();
+//        if (listener != null) listener. cf();
     }
 
     @Override
@@ -199,6 +210,11 @@ public class PlivoBackEnd implements EventListener {
         if (listener != null) listener.mediaMetrics(messageTemplate);
     }
 
+    @Override
+    public String onTokenExpired() {
+        return listener.onTokenExpired();
+    }
+
 
     // Your own custom listener
     public interface BackendListener {
@@ -215,5 +231,7 @@ public class PlivoBackEnd implements EventListener {
         void onIncomingDigit(String digit);
 
         void mediaMetrics(HashMap messageTemplate);
+
+        String onTokenExpired();
     }
 }
