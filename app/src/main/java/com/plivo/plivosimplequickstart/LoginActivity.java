@@ -28,9 +28,10 @@ public class LoginActivity extends AppCompatActivity {
         System.out.println(eusername);
         eLogin = (Button) findViewById(R.id.btLogin);
         System.out.println(eLogin);
-
-        eusername.setText(Utils.USERNAME);
-        epassword.setText(Utils.PASSWORD);
+        String username = Utils.USERNAME;
+        String password = Utils.PASSWORD;
+        eusername.setText(username);
+        epassword.setText(password);
 
         eLogin.setOnClickListener(new View.OnClickListener() {
             @Override

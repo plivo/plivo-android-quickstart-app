@@ -42,6 +42,10 @@ android {
             dimension "mode"
             buildConfigField 'String', 'SIP_DOMAIN', '"phone.plivo.com"'
         }
+        clientPhone {
+            dimension "mode"
+            buildConfigField 'String', 'SIP_DOMAIN', '"client-east-phone-qa.voice.plivodev.com"'
+        }
     }
 
     splits {
@@ -61,7 +65,8 @@ dependencies {
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.plivo.endpoint:endpoint:3.0.1-beta.2@aar'
+    implementation 'com.plivo.endpoint:endpoint:3.0.2-beta.0@aar'
+
     implementation 'org.webrtc:google-webrtc:1.0.32006'
     implementation 'com.google.firebase:firebase-core:16.0.5'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'

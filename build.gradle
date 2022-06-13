@@ -20,7 +20,7 @@ allprojects {
     repositories {
         maven {
             setAllowInsecureProtocol(true)
-            url "https://oss.sonatype.org/content/repositories/complivo-1140"
+            url "https://oss.sonatype.org/content/repositories/complivo-1144"
         }
         google()
         jcenter()

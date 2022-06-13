@@ -28,8 +28,7 @@ public class PlivoBackEnd implements EventListener {
 
         //Initiate SDK with Options, "enableTracking" (To get network related information)
         HashMap options = new HashMap();
-//        options.put("maxAverageBitrate", 48000);
-//        options.put("enableTracking", true);
+        options.put("maxAverageBitrate", 48000);
         endpoint = Endpoint.newInstance(context, log, this, options);
     }
 
@@ -41,6 +40,13 @@ public class PlivoBackEnd implements EventListener {
         Log.d("@@Incoming", "Endpoint login");
         endpoint.login(username, password, newToken);
         Utils.setDeviceToken(newToken);
+    }
+
+    public void registerListener(Context context) {
+        endpoint.registerNetworkChangeReceiver(context);
+    }
+    public void unregisterListener(Context context) {
+        endpoint.unregisterNetworkChangeReceiver(context);
     }
 
     public boolean loginForIncoming(String newToken, String username, String password) {
@@ -143,6 +149,12 @@ public class PlivoBackEnd implements EventListener {
     public void onOutgoingCallRejected(Outgoing outgoing) {
         Log.d(TAG, Constants.OUTGOING_CALL_REJECTED);
         if (listener != null) listener.onOutgoingCall(outgoing, STATE.REJECTED);
+    }
+
+
+    public void onIncomingCallConnected(Incoming incoming) {
+        Log.d(TAG, Constants.INCOMING_CALL_CONNECTED);
+        if (listener != null) listener.onIncomingCall(incoming, STATE.ANSWERED);
     }
 
     @Override
