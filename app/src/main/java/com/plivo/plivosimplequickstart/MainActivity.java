@@ -641,6 +641,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     Intent intent = new Intent(MainActivity.this,LoginActivity.class);
                     startActivity(intent);
                     logout();
+                    finish();
                 });
                 findViewById(R.id.call_btn).setEnabled(true);
 

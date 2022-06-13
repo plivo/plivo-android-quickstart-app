@@ -1,6 +1,7 @@
 package com.plivo.plivosimplequickstart;
 
 import android.app.Application;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -8,11 +9,13 @@ import java.io.File;
 import java.io.IOException;
 
 public class App extends Application {
+    private static final String TAG = "AppPlivo";
 
     private PlivoBackEnd backend;
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate: ");
         super.onCreate();
         Utils.options.put("context",getApplicationContext());
         Utils.options.put("sharedContext",getApplicationContext());
@@ -20,30 +23,27 @@ public class App extends Application {
         backend.setContext(this);
         backend.init(BuildConfig.DEBUG);
 
+        writeLogFile();
 
+    }
+
+    private void writeLogFile() {
         if ( isExternalStorageWritable() ) {
 
-            File appDirectory = new File( Environment.getExternalStorageDirectory() + "/MyPersonalAppFolder" );
+            File appDirectory = new File( getApplicationContext().getCacheDir() + "/MyPersonalAppFolder" );
             File logDirectory = new File( appDirectory + "/logs" );
             File logFile = new File( logDirectory, "logcat_" + System.currentTimeMillis() + ".txt" );
             boolean p = false;
             boolean x = false;
-            // create app folder
             if ( !appDirectory.exists() ) {
-
                 x = appDirectory.mkdir();
             }
 
-            // create log folder
             if ( !logDirectory.exists() ) {
-
                 p = logDirectory.mkdir();
             }
 
 
-            Log.d("TAG", "onCreate: "+x +""+p);
-
-            // clear the previous logcat and then write the new one to the file
             try {
                 Process process = Runtime.getRuntime().exec("logcat -c");
                 process = Runtime.getRuntime().exec("logcat -f " + logFile);
@@ -51,10 +51,6 @@ public class App extends Application {
                 e.printStackTrace();
             }
 
-        } else if ( isExternalStorageReadable() ) {
-            // only readable
-        } else {
-            // not accessible
         }
     }
 
@@ -70,12 +66,5 @@ public class App extends Application {
             return true;
         }
         return false;
-    }
-
-    /* Checks if external storage is available to at least read */
-    public boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
     }
 }

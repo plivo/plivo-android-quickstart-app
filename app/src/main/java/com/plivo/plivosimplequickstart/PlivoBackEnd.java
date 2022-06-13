@@ -53,7 +53,7 @@ public class PlivoBackEnd implements EventListener {
 
 
     public String getJWTUserName() {
-        return endpoint.sub_auth_ID;
+        return endpoint.getSub_auth_ID();
     }
 
     public void registerListener(Context context) {
@@ -63,9 +63,9 @@ public class PlivoBackEnd implements EventListener {
         endpoint.unregisterNetworkChangeReceiver(context);
     }
 
-    public boolean loginForIncoming(String newToken) {
+    public boolean loginForIncoming(String deviceToken, boolean isLogInWithJWT) {
         Log.d("@@Incoming","loginForIncoming");
-        return endpoint.loginForIncoming(newToken);
+        return endpoint.loginForIncoming(deviceToken,isLogInWithJWT);
     }
 
     public void logout() {
@@ -198,6 +198,11 @@ public class PlivoBackEnd implements EventListener {
         Log.d(TAG, Constants.MEDIAMETRICS);
         Log.i(TAG, messageTemplate.toString());
         if (listener != null) listener.mediaMetrics(messageTemplate);
+    }
+
+    @Override
+    public void onPermissionDenied() {
+        listener.onLoginFailed("PERMISSION DENIED");
     }
 
 //    @Override

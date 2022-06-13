@@ -50,6 +50,7 @@ public class LogInWithPasswordDialog extends DialogFragment {
             Pref.newInstance(getContext()).setString(Constants.PASSWORD, password2);
 //                    login(username, password);
             dismiss();
+            Pref.newInstance(getContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN, false);
             Intent intent = new Intent(getContext(), MainActivity.class);
             startActivity(intent);
         }
