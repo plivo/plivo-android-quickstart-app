@@ -640,6 +640,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 findViewById(R.id.btlogout).setOnClickListener(view -> {
                     Intent intent = new Intent(MainActivity.this,LoginActivity.class);
                     startActivity(intent);
+                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
                     logout();
                     finish();
                 });

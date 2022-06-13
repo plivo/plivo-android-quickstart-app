@@ -39,16 +39,16 @@ public class PlivoBackEnd implements EventListener {
         this.listener = listener;
     }
 
-    public void login(String newToken, String username, String password) {
+    public boolean login(String newToken, String username, String password) {
         Log.d("@@Incoming", "Endpoint login");
-        endpoint.login(username, password, newToken);
         Utils.setDeviceToken(newToken);
+        return endpoint.login(username, password, newToken);
     }
 
-    public void loginWithJwtToken(String token, String JWTToken) {
+    public boolean loginWithJwtToken(String token, String JWTToken) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
-        endpoint.loginWithJwtToken(JWTToken,token);
         Utils.setDeviceToken(token);
+        return endpoint.loginWithJwtToken(JWTToken,token);
     }
 
 
@@ -201,8 +201,8 @@ public class PlivoBackEnd implements EventListener {
     }
 
     @Override
-    public void onPermissionDenied() {
-        listener.onLoginFailed("PERMISSION DENIED");
+    public void onPermissionDenied(String message) {
+        listener.onLoginFailed(message);
     }
 
 //    @Override
