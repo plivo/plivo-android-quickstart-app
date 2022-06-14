@@ -201,10 +201,10 @@ public class PlivoBackEnd implements EventListener {
         listener.onPermissionDenied(message);
     }
 
-//    @Override
-//    public String onTokenExpired() {
-//        return listener.onTokenExpired();
-//    }
+    @Override
+    public void onTokenExpired() {
+         listener.onTokenExpired();
+    }
 
 
     // Your own custom listener
@@ -225,6 +225,6 @@ public class PlivoBackEnd implements EventListener {
 
         void onPermissionDenied(String message);
 
-        String onTokenExpired();
+        void onTokenExpired();
     }
 }

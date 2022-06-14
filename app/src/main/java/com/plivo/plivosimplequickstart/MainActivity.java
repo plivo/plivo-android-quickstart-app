@@ -739,20 +739,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 }
 
     @Override
-    public String onTokenExpired() {
+    public void onTokenExpired() {
         Log.d(TAG, "onTokenExpired: ");
-//        createDialog();
         this.runOnUiThread(new Runnable() {
             public void run() {
                 createDialog();
             }
         });
-        //generate token
-        if(false){
-            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), ""));
-        }
-        return null;
     }
 
     private void createDialog() {
@@ -761,12 +754,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             public void onClick(DialogInterface dialog, int which) {
                 switch (which){
                     case DialogInterface.BUTTON_POSITIVE:
-                        //Yes button clicked
                         generateNewToken();
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
-                        //No button clicked
                         break;
                 }
             }
