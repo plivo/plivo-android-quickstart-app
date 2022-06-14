@@ -63,10 +63,6 @@ public class PlivoBackEnd implements EventListener {
         endpoint.unregisterNetworkChangeReceiver(context);
     }
 
-    public boolean loginForIncoming(String deviceToken, boolean isLogInWithJWT) {
-        Log.d("@@Incoming","loginForIncoming");
-        return endpoint.loginForIncoming(deviceToken,isLogInWithJWT);
-    }
 
     public void logout() {
         endpoint.logout();
@@ -202,7 +198,7 @@ public class PlivoBackEnd implements EventListener {
 
     @Override
     public void onPermissionDenied(String message) {
-        listener.onLoginFailed(message);
+        listener.onPermissionDenied(message);
     }
 
 //    @Override
@@ -226,6 +222,8 @@ public class PlivoBackEnd implements EventListener {
         void onIncomingDigit(String digit);
 
         void mediaMetrics(HashMap messageTemplate);
+
+        void onPermissionDenied(String message);
 
         String onTokenExpired();
     }

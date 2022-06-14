@@ -730,6 +730,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     @Override
+    public void onPermissionDenied(String message) {
+        setContentView(R.layout.activity_main);
+        isMainPage = true;
+        parentPanel = findViewById(R.id.parentPanel);
+        Snackbar snackbar = Snackbar.make(parentPanel, message, Snackbar.LENGTH_LONG);
+        snackbar.show();
+}
+
+    @Override
     public String onTokenExpired() {
         Log.d(TAG, "onTokenExpired: ");
 //        createDialog();
