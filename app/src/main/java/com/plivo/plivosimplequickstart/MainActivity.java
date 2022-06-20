@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     boolean isKeyboardOpen = false;
     String keypadData = "";
     boolean isBackPressed = false;
+    boolean isLoginFirstTime = false;
 
     public static boolean isInstantiated = false;
     private BroadcastReceiver callIncomingReceiver;
@@ -220,7 +221,14 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
-        }else {
+        }if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
+            Log.d(TAG, "loginWithToken: 1");
+            String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().loginWithAccessTokenGenerator(instanceIdResult.getToken(), token));
+        }
+
+        else {
             Log.d(TAG, "loginWithToken: 2");
             Log.d("@@Incoming", "loginWithToken");
             if (Utils.getLoggedinStatus()) {
@@ -658,8 +666,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d(TAG, "onLogin: "+success);
         runOnUiThread(() -> {
             if (success) {
-                if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
+                if(isLoginFirstTime) isLoginFirstTime = true;
+                if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
                     username = ((App) getApplication()).backend().getJWTUserName();
+                    Log.d(TAG, "onLogin:abhishek  "+username);
                     Pref.newInstance(MainActivity.this).setString(USERNAME, username);
                     ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 }
@@ -731,16 +741,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 }
 
     @Override
-    public void onTokenExpired() {
-        Log.d(TAG, "onTokenExpired: ");
-        this.runOnUiThread(new Runnable() {
-            public void run() {
-                setContentView(R.layout.activity_main);
-                parentPanel = findViewById(R.id.parentPanel);
-                Snackbar snackbar = Snackbar.make(parentPanel, "ACCESS_TOKEN_EXPIRED", Snackbar.LENGTH_LONG);
-                snackbar.show();
-                createDialog();
-            }
+    public void getAccessToken() {
+        Log.d(TAG, "getAccessToken: ");
+        this.runOnUiThread(() -> {
+            setContentView(R.layout.activity_main);
+            if(isLoginFirstTime) createDialog();
+            else generateNewToken();
         });
     }
 
@@ -770,7 +776,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         progressDialog.show();
 
         APIInterface apiInterface = RetroClient.getRetroClient().create(APIInterface.class);
-        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),"pal3333","1655714044","1655742844");
+        String sub = "plivoKing";
+        if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+            sub = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
+        }
+        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),sub,"1655714044","1655742844");
         Call<TokenResponse> call = apiInterface.getToken(bodyInput);
 
         call.enqueue(new Callback<TokenResponse>() {
@@ -781,7 +791,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 Log.d(TAG, "onResponse: "+response.code());
                 if(response.body()!=null){
                     Log.d(TAG, "onResponse: successful"+response.body().getToken());
-                    ((App) getApplication()).backend().loginWithJwtToken(response.body().getToken());
+                    ((App) getApplication()).backend().loginWithAccessTokenGenerator(response.body().getToken());
                 }
             }
 

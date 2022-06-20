@@ -7,11 +7,11 @@ import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
-import com.plivo.endpoint.slf4j.AccessTokenListener;
+import com.plivo.endpoint.AccessTokenListener;
 
 import java.util.HashMap;
 
-public class PlivoBackEnd implements EventListener , AccessTokenListener {
+public class PlivoBackEnd implements EventListener ,AccessTokenListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
 
@@ -49,13 +49,13 @@ public class PlivoBackEnd implements EventListener , AccessTokenListener {
     public boolean loginWithJwtToken(String token, String JWTToken) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         Utils.setDeviceToken(token);
-        return endpoint.loginWithAccessTokenGenerator(JWTToken,token,this);
+        return endpoint.loginWithJwtToken(JWTToken,token);
     }
 
 
-    public boolean loginWithJwtToken(String JWTToken) {
+    public void loginWithJwtToken(String JWTToken) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
-        return endpoint.loginWithAccessTokenGenerator(JWTToken,this);
+        endpoint.loginWithJwtToken(JWTToken);
     }
 
 
@@ -68,6 +68,16 @@ public class PlivoBackEnd implements EventListener , AccessTokenListener {
     }
     public void unregisterListener(Context context) {
         endpoint.unregisterNetworkChangeReceiver(context);
+    }
+
+    public void loginWithAccessTokenGenerator(String token, String jwtAccessToken) {
+        Log.d(TAG, "loginWithAccessTokenGenerator: ");
+        endpoint.loginWithAccessTokenGenerator(jwtAccessToken,token,this);
+    }
+
+    public void loginWithAccessTokenGenerator(String jwtAccessToken) {
+        Log.d(TAG, "loginWithAccessTokenGenerator: ");
+        endpoint.loginWithAccessTokenGenerator(jwtAccessToken,this);
     }
 
 
@@ -210,10 +220,11 @@ public class PlivoBackEnd implements EventListener , AccessTokenListener {
     }
 
     @Override
-    public void onTokenExpired() {
+    public void getAccessToken() {
         Log.d(TAG, "onTokenExpired: ");
-         listener.onTokenExpired();
+        listener.getAccessToken();
     }
+
 
 
     // Your own custom listener
@@ -234,6 +245,6 @@ public class PlivoBackEnd implements EventListener , AccessTokenListener {
 
         void onPermissionDenied(String message);
 
-        void onTokenExpired();
+        void getAccessToken();
     }
 }
