@@ -86,7 +86,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     boolean isKeyboardOpen = false;
     String keypadData = "";
     boolean isBackPressed = false;
-    boolean isStackReset = false;
 
     public static boolean isInstantiated = false;
     private BroadcastReceiver callIncomingReceiver;
@@ -94,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     ProgressBar progressBar;
     ConstraintLayout parentPanel;
     private ProgressDialog progressDialog;
-    boolean isMainPage = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d(TAG, "onCreate: ");
         isInstantiated = true;
         setContentView(R.layout.activity_main);
-        isMainPage = true;
         progressDialog = new ProgressDialog(this);
         ((App) getApplication()).backend().registerListener(this);
         actionBar = getSupportActionBar();
@@ -266,7 +263,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
                 String phoneNum = phoneNumberText.getText().toString();
                 setContentView(R.layout.call);
-                isMainPage = false;
                 ((ImageButton) findViewById(R.id.speaker)).setVisibility(View.GONE);
                 ((ImageButton) findViewById(R.id.mute)).setVisibility(View.GONE);
                 ((ImageButton) findViewById(R.id.hold)).setVisibility(View.GONE);
@@ -294,7 +290,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 cancelTimer();
                 this.outgoing = null;
                 setContentView(R.layout.activity_main);
-                isMainPage = true;
                 updateUI(STATE.IDLE, null);
                 break;
         }
@@ -316,7 +311,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             case ANSWERED:
                 progressBar.setVisibility(View.GONE);
                 setContentView(R.layout.call);
-                isMainPage = false;
                 TextView callerName = (TextView) findViewById(R.id.caller_name);
                 callerName.setText(callerId);
                 ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.GONE);
@@ -330,7 +324,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 cancelTimer();
                 removeNotification(Constants.NOTIFICATION_ID);
                 setContentView(R.layout.activity_main);
-                isMainPage = true;
                 progressBar.setVisibility(View.GONE);
                 constraintLayout.setVisibility(View.VISIBLE);
                 updateUI(STATE.IDLE, null);
@@ -666,8 +659,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         runOnUiThread(() -> {
             if (success) {
                 if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
-                    Pref.newInstance(MainActivity.this).setString(USERNAME, ((App) getApplication()).backend().getJWTUserName());
                     username = ((App) getApplication()).backend().getJWTUserName();
+                    Pref.newInstance(MainActivity.this).setString(USERNAME, username);
+                    ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 }
                 updateUI(STATE.IDLE, null);
             } else {
@@ -679,14 +673,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onLoginFailed(String message) {
         Log.d(TAG, "onLoginFailed: ");
-
-        if(isMainPage) {
+        runOnUiThread(() -> {
+            setContentView(R.layout.activity_main);
             parentPanel = findViewById(R.id.parentPanel);
             Snackbar snackbar = Snackbar.make(parentPanel, message, Snackbar.LENGTH_LONG);
             snackbar.show();
-        } else {
-            Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
-        }
+        });
+
     }
 
     @Override
@@ -732,7 +725,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onPermissionDenied(String message) {
         setContentView(R.layout.activity_main);
-        isMainPage = true;
         parentPanel = findViewById(R.id.parentPanel);
         Snackbar snackbar = Snackbar.make(parentPanel, message, Snackbar.LENGTH_LONG);
         snackbar.show();
@@ -743,6 +735,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d(TAG, "onTokenExpired: ");
         this.runOnUiThread(new Runnable() {
             public void run() {
+                setContentView(R.layout.activity_main);
+                parentPanel = findViewById(R.id.parentPanel);
+                Snackbar snackbar = Snackbar.make(parentPanel, "ACCESS_TOKEN_EXPIRED", Snackbar.LENGTH_LONG);
+                snackbar.show();
                 createDialog();
             }
         });
@@ -774,7 +770,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         progressDialog.show();
 
         APIInterface apiInterface = RetroClient.getRetroClient().create(APIInterface.class);
-        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),"pal3333","1654487593","1678498136");
+        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),"pal3333","1655714044","1655742844");
         Call<TokenResponse> call = apiInterface.getToken(bodyInput);
 
         call.enqueue(new Callback<TokenResponse>() {
@@ -785,6 +781,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 Log.d(TAG, "onResponse: "+response.code());
                 if(response.body()!=null){
                     Log.d(TAG, "onResponse: successful"+response.body().getToken());
+                    ((App) getApplication()).backend().loginWithJwtToken(response.body().getToken());
                 }
             }
 

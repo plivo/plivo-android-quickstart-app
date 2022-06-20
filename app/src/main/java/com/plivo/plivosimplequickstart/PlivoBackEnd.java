@@ -7,10 +7,11 @@ import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
+import com.plivo.endpoint.slf4j.AccessTokenListener;
 
 import java.util.HashMap;
 
-public class PlivoBackEnd implements EventListener {
+public class PlivoBackEnd implements EventListener , AccessTokenListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
 
@@ -48,7 +49,13 @@ public class PlivoBackEnd implements EventListener {
     public boolean loginWithJwtToken(String token, String JWTToken) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         Utils.setDeviceToken(token);
-        return endpoint.loginWithJwtToken(JWTToken,token);
+        return endpoint.loginWithAccessTokenGenerator(JWTToken,token,this);
+    }
+
+
+    public boolean loginWithJwtToken(String JWTToken) {
+        Log.d("@@Incoming", "Endpoint loginWithJwtToken");
+        return endpoint.loginWithAccessTokenGenerator(JWTToken,this);
     }
 
 
@@ -196,6 +203,7 @@ public class PlivoBackEnd implements EventListener {
         if (listener != null) listener.mediaMetrics(messageTemplate);
     }
 
+
     @Override
     public void onPermissionDenied(String message) {
         listener.onPermissionDenied(message);
@@ -203,6 +211,7 @@ public class PlivoBackEnd implements EventListener {
 
     @Override
     public void onTokenExpired() {
+        Log.d(TAG, "onTokenExpired: ");
          listener.onTokenExpired();
     }
 
