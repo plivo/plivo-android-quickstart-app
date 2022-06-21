@@ -70,16 +70,10 @@ public class PlivoBackEnd implements EventListener ,AccessTokenListener {
         endpoint.unregisterNetworkChangeReceiver(context);
     }
 
-    public void loginWithAccessTokenGenerator(String token, String jwtAccessToken) {
+    public void loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
-        endpoint.loginWithAccessTokenGenerator(jwtAccessToken,token,this);
+        endpoint.loginWithAccessTokenGenerator(this);
     }
-
-    public void loginWithAccessTokenGenerator(String jwtAccessToken) {
-        Log.d(TAG, "loginWithAccessTokenGenerator: ");
-        endpoint.loginWithAccessTokenGenerator(jwtAccessToken,this);
-    }
-
 
     public void logout() {
         endpoint.logout();

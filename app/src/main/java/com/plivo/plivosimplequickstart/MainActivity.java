@@ -223,9 +223,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
         }if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
             Log.d(TAG, "loginWithToken: 1");
-            String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
-            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().loginWithAccessTokenGenerator(instanceIdResult.getToken(), token));
+            String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
+            ((App) getApplication()).backend().loginWithAccessTokenGenerator() ;
         }
 
         else {
@@ -780,7 +779,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
             sub = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
         }
-        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),sub,"1655714044","1655742844");
+        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),sub,"1655789744","1655789984");
         Call<TokenResponse> call = apiInterface.getToken(bodyInput);
 
         call.enqueue(new Callback<TokenResponse>() {
@@ -789,18 +788,19 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 Log.d(TAG, "onResponse: ");
                 progressDialog.dismiss();
                 Log.d(TAG, "onResponse: "+response.code());
-                if(response.body()!=null){
+                if(response.code() == 200 && response.body()!=null){
                     Log.d(TAG, "onResponse: successful"+response.body().getToken());
-                    ((App) getApplication()).backend().loginWithAccessTokenGenerator(response.body().getToken());
+                    ((App) getApplication()).backend().loginWithJwtToken(response.body().getToken());
+                }else{
+                    Toast.makeText(MainActivity.this,response.message(),Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<TokenResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure: ");
+                Log.d(TAG, "onFailure: "+t.toString());
                 progressDialog.dismiss();
             }
         });
     }
-
 }
