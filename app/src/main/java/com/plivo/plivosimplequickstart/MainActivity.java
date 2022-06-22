@@ -51,6 +51,7 @@ import com.plivo.plivosimplequickstart.network.TokenResponse;
 import com.plivo.plivosimplequickstart.network.RetroClient;
 import com.plivo.plivosimplequickstart.network.Voice;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -779,7 +780,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
             sub = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
         }
-        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),sub,"1655789744","1655789984");
+        long nbfTime = System.currentTimeMillis() /1000  -20;
+        long expTime = System.currentTimeMillis() /1000  +200;
+
+        final BodyInput bodyInput = new BodyInput("MADCHANDRESH02TANK06",new Per(new Voice(true,true)),sub,String.valueOf(nbfTime),String.valueOf(expTime));
         Call<TokenResponse> call = apiInterface.getToken(bodyInput);
 
         call.enqueue(new Callback<TokenResponse>() {

@@ -30,7 +30,7 @@ public class LoginWithTokenOrUsernameDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         TextView t = view.findViewById(R.id.etTokenUserName);
-        t.setText("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTU4NzU1MjYsImlzcyI6Ik1BRENIQU5EUkVTSDAyVEFOSzA2IiwibmJmIjoxNjU1Nzg5MTI2LCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOnRydWUsIm91dGdvaW5nX2FsbG93Ijp0cnVlfX0sInN1YiI6ImFiaGkxMTMzMyJ9.PkdnFLYj2BvlHDE-Q3E_LPgyC1Bz7yNScCAiGRhsYY4");
+        t.setText("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTU5NjMxOTYsImlzcyI6Ik1BWTJSSk5aS1pOSk1XT1RHNE5UIiwibmJmIjoxNjU1ODc2Nzk2LCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOmZhbHNlLCJvdXRnb2luZ19hbGxvdyI6dHJ1ZX19LCJzdWIiOiJlbml5YXZhbjEifQ.VqwxwsdZ2sEiVgkAUWijW4TMLMfIvnWA0TOiJV8hOHM");
         view.findViewById(R.id.loginWithJWT).setOnClickListener(view1 -> loginWithJWTtoken(t.getText().toString()));
     }
 

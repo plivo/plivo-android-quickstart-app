@@ -7,11 +7,10 @@ import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
-import com.plivo.endpoint.AccessTokenListener;
 
 import java.util.HashMap;
 
-public class PlivoBackEnd implements EventListener ,AccessTokenListener {
+public class PlivoBackEnd implements EventListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
 
@@ -70,9 +69,10 @@ public class PlivoBackEnd implements EventListener ,AccessTokenListener {
         endpoint.unregisterNetworkChangeReceiver(context);
     }
 
-    public void loginWithAccessTokenGenerator() {
+    public boolean loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
-        endpoint.loginWithAccessTokenGenerator(this);
+        return false;
+//        return  endpoint.loginWithAccessTokenGenerator(this);
     }
 
     public void logout() {
@@ -213,11 +213,11 @@ public class PlivoBackEnd implements EventListener ,AccessTokenListener {
         listener.onPermissionDenied(message);
     }
 
-    @Override
-    public void getAccessToken() {
-        Log.d(TAG, "onTokenExpired: ");
-        listener.getAccessToken();
-    }
+//    @Override
+//    public void getAccessToken() {
+//        Log.d(TAG, "onTokenExpired: ");
+//        listener.getAccessToken();
+//    }
 
 
 
