@@ -5,15 +5,36 @@ import android.util.Log;
 
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
+import com.plivo.endpoint.FeedbackCallback;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class PlivoBackEnd implements EventListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
+    public void submitFeedback(float rating) {
+        endpoint.submitCallQualityFeedback(endpoint.getLastCallUUID(), (int) rating, new ArrayList<>(
+                Arrays.asList("Best Quality")), "", false, new FeedbackCallback() {
+            @Override
+            public void onFailure(int statusCode) {
+                Log.d("@@Feedback", "onFailure: ");
+            }
 
+            @Override
+            public void onSuccess(String response) {
+                Log.d("@@Feedback", "onSuccess: ");
+            }
+
+            @Override
+            public void onValidationFail(String message) {
+                Log.d("@@Feedback", "onValidationFail: ");
+            }
+        });
+    }
 
 
     enum STATE {IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID;}

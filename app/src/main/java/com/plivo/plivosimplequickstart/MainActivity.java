@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     ProgressBar progressBar;
     ConstraintLayout parentPanel;
     private ProgressDialog progressDialog;
+    boolean activeCall = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -291,6 +292,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 startTimer();
                 ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.VISIBLE);
                 ((TextView) findViewById(R.id.dial_numbers)).setText("");
+                activeCall = true;
                 break;
             case HANGUP:
             case REJECTED:
@@ -666,7 +668,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d(TAG, "onLogin: "+success);
         runOnUiThread(() -> {
             if (success) {
-                if(isLoginFirstTime) isLoginFirstTime = true;
+                if(!isLoginFirstTime) isLoginFirstTime = true;
                 if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
                     username = ((App) getApplication()).backend().getJWTUserName();
                     Log.d(TAG, "onLogin:abhishek  "+username);
@@ -815,26 +817,28 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
 
 
-    public void showRateDialog()
-    {
-        final AlertDialog.Builder popDialog = new AlertDialog.Builder(this);
-        final RatingBar rating = new RatingBar(this);
-        rating.setNumStars(5);
+    public void showRateDialog() {
+        if(activeCall) {
+            final AlertDialog.Builder popDialog = new AlertDialog.Builder(this);
+            final RatingBar rating = new RatingBar(this);
+            rating.setNumStars(5);
 
-        popDialog.setIcon(android.R.drawable.btn_star_big_on);
-        popDialog.setTitle("Add Rating: ");
-        popDialog.setView(rating);
+            popDialog.setIcon(android.R.drawable.btn_star_big_on);
+            popDialog.setTitle("Add Rating: ");
+            popDialog.setView(rating);
 
-        popDialog.setPositiveButton(android.R.string.ok,
-                (dialog, which) -> {
-                    dialog.dismiss();
-                })
+            popDialog.setPositiveButton(android.R.string.ok,
+                    (dialog, which) -> {
+                        ((App) getApplication()).backend().submitFeedback(rating.getRating());
+                        dialog.dismiss();
+                    })
 
-                .setNegativeButton("Cancel",
-                        (dialog, id) -> dialog.cancel());
+                    .setNegativeButton("Cancel",
+                            (dialog, id) -> dialog.cancel());
 
-        popDialog.create();
-        popDialog.show();
+            popDialog.create();
+            popDialog.show();
+        }
 
     }
 
