@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,7 +52,6 @@ import com.plivo.plivosimplequickstart.network.TokenResponse;
 import com.plivo.plivosimplequickstart.network.RetroClient;
 import com.plivo.plivosimplequickstart.network.Voice;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -709,6 +709,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             if (outgoing != null) {
                 outgoing = null;
             }
+            if (callState == STATE.HANGUP) {
+                showRateDialog();
+            }
             updateUI(callState, data);
         });
     }
@@ -716,8 +719,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onOutgoingCall(Outgoing data, PlivoBackEnd.STATE callState) {
         runOnUiThread(() -> {
-            if (callState == STATE.HANGUP)
+            if (callState == STATE.HANGUP) {
                 endCallRituals();
+                showRateDialog();
+            }
             updateUI(callState, data);
         });
     }
@@ -802,9 +807,36 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
             @Override
             public void onFailure(Call<TokenResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure: "+t.toString());
+                Log.d(TAG, "onFailure: "+ t);
                 progressDialog.dismiss();
             }
         });
     }
+
+
+
+    public void showRateDialog()
+    {
+        final AlertDialog.Builder popDialog = new AlertDialog.Builder(this);
+        final RatingBar rating = new RatingBar(this);
+        rating.setNumStars(5);
+
+        popDialog.setIcon(android.R.drawable.btn_star_big_on);
+        popDialog.setTitle("Add Rating: ");
+        popDialog.setView(rating);
+
+        popDialog.setPositiveButton(android.R.string.ok,
+                (dialog, which) -> {
+                    dialog.dismiss();
+                })
+
+                .setNegativeButton("Cancel",
+                        (dialog, id) -> dialog.cancel());
+
+        popDialog.create();
+        popDialog.show();
+
+    }
+
+
 }
