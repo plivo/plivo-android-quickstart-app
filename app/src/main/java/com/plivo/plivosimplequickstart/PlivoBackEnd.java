@@ -18,7 +18,7 @@ public class PlivoBackEnd implements EventListener {
 
     public void submitFeedback(float rating) {
         endpoint.submitCallQualityFeedback(endpoint.getLastCallUUID(), (int) rating, new ArrayList<>(
-                Arrays.asList("Best Quality")), "", false, new FeedbackCallback() {
+                Arrays.asList("audio_lag")), "", false, new FeedbackCallback() {
             @Override
             public void onFailure(int statusCode) {
                 Log.d("@@Feedback", "onFailure: ");
