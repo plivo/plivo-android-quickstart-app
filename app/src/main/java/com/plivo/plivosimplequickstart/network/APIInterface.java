@@ -9,9 +9,9 @@ public interface APIInterface {
 
     @Headers({
             "Content-Type: application/json",
-            "Authorization: Basic TUFEQ0hBTkRSRVNIMDJUQU5LMDY6T1Rsak5tVm1PR1ZrTkdaaE5qSmxPV0l5TVdNMFpESTBaalF3WkRkaw==",
+            "Authorization: Basic TUFZMlJKTlpLWk5KTVdPVEc0TlQ6WWpJM1pXVmpPV0poTW1Kak5USXhNakJtTkdJeVlUUmtZVGd3TUdSaA==",
     })
-    @POST("v1/Account/MADCHANDRESH02TANK06/JWT/Token")
+    @POST("v1/Account/MAY2RJNZKZNJMWOTG4NT/JWT/Token")
     Call<TokenResponse> getToken(@Body BodyInput bodyInput);
 
 }

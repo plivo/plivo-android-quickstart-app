@@ -93,8 +93,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
 
     public boolean loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
-        return false;
-//        return  endpoint.loginWithAccessTokenGenerator(this);
+        return  endpoint.loginWithAccessTokenGenerator(this);
     }
 
     public void logout() {

@@ -11,7 +11,7 @@ public class RetroClient {
 
 
 
-    private static final String BASE_URL = "https://api-qa.voice.plivodev.com/";
+    private static final String BASE_URL = "https://api.plivo.com/";
 
     public static Retrofit getRetroClient() {
 
