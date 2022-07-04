@@ -3,6 +3,7 @@ package com.plivo.plivosimplequickstart;
 import android.content.Context;
 import android.util.Log;
 
+import com.plivo.endpoint.AccessTokenListener;
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.FeedbackCallback;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class PlivoBackEnd implements EventListener {
+public class PlivoBackEnd implements EventListener, AccessTokenListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
     public void submitFeedback(float rating) {
@@ -234,12 +235,11 @@ public class PlivoBackEnd implements EventListener {
         listener.onPermissionDenied(message);
     }
 
-//    @Override
-//    public void getAccessToken() {
-//        Log.d(TAG, "onTokenExpired: ");
-//        listener.getAccessToken();
-//    }
-
+    @Override
+    public void getAccessToken() {
+        Log.d(TAG, "onTokenExpired: ");
+        listener.getAccessToken();
+    }
 
 
     // Your own custom listener
