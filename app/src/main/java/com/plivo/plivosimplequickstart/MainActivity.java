@@ -1,5 +1,11 @@
 package com.plivo.plivosimplequickstart;
 
+import static com.plivo.plivosimplequickstart.Utils.HH_MM_SS;
+import static com.plivo.plivosimplequickstart.Utils.MM_SS;
+import static com.plivo.plivosimplequickstart.Utils.USERNAME;
+import static com.plivo.plivosimplequickstart.Utils.startVibrating;
+import static com.plivo.plivosimplequickstart.Utils.stopVibrating;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -45,12 +51,8 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
-import com.plivo.plivosimplequickstart.network.APIInterface;
-import com.plivo.plivosimplequickstart.network.BodyInput;
-import com.plivo.plivosimplequickstart.network.Per;
-import com.plivo.plivosimplequickstart.network.TokenResponse;
-import com.plivo.plivosimplequickstart.network.RetroClient;
-import com.plivo.plivosimplequickstart.network.Voice;
+
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,14 +60,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import static com.plivo.plivosimplequickstart.Utils.HH_MM_SS;
-import static com.plivo.plivosimplequickstart.Utils.MM_SS;
-import static com.plivo.plivosimplequickstart.Utils.USERNAME;
-import static com.plivo.plivosimplequickstart.Utils.startVibrating;
-import static com.plivo.plivosimplequickstart.Utils.stopVibrating;
-
-import retrofit2.Call;
-import retrofit2.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
     private static final int PERMISSIONS_REQUEST_CODE = 21;
@@ -753,7 +752,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         this.runOnUiThread(() -> {
             setContentView(R.layout.activity_main);
             if(isLoginFirstTime) createDialog();
-            else generateNewToken();
+            else generateToken();
         });
     }
 
@@ -763,7 +762,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             public void onClick(DialogInterface dialog, int which) {
                 switch (which){
                     case DialogInterface.BUTTON_POSITIVE:
-                        generateNewToken();
+                            generateToken();
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
@@ -776,41 +775,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 .setNegativeButton("No", dialogClickListener).show();
     }
 
-    private void  generateNewToken() {
-        Log.d(TAG, "generateNewToken: ");
-        progressDialog.setMessage("Generating token");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
 
-        APIInterface apiInterface = RetroClient.getRetroClient().create(APIInterface.class);
-        String sub = "plivoKing";
-        if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
-            sub = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
-        }
-        final BodyInput bodyInput = new BodyInput("MAY2RJNZKZNJMWOTG4NT",new Per(new Voice(true,true)),sub,"1656922125","1656946125");
-        Call<TokenResponse> call = apiInterface.getToken(bodyInput);
-
-        call.enqueue(new Callback<TokenResponse>() {
-            @Override
-            public void onResponse(Call<TokenResponse> call, retrofit2.Response<TokenResponse> response) {
-                Log.d(TAG, "onResponse: ");
-                progressDialog.dismiss();
-                Log.d(TAG, "onResponse: "+response.code());
-                if(response.code() == 200 && response.body()!=null){
-                    Log.d(TAG, "onResponse: successful"+response.body().getToken());
-                    ((App) getApplication()).backend().loginWithJwtToken(response.body().getToken());
-                }else{
-                    Toast.makeText(MainActivity.this,response.message(),Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<TokenResponse> call, Throwable t) {
-                Log.d(TAG, "onFailure: "+ t);
-                progressDialog.dismiss();
-            }
-        });
-    }
 
 
 
@@ -838,6 +803,44 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
 
     }
+    public void generateToken(){
+        new Thread(() -> {
+            String sub = "plivoKing";
+            if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+                sub = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
+            }
+            long nbf = System.currentTimeMillis() / 1000 + 3736;
+            long exp = nbf+240;
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            MediaType mediaType = MediaType.parse("application/json");
+            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \""+sub+"\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": false,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": "+ exp +"\n}\n");        Request request = new Request.Builder()
+                    .url("https://api.plivo.com/v1/Account/MAY2RJNZKZNJMWOTG4NT/JWT/Token")
+                    .method("POST", body)
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Basic TUFZMlJKTlpLWk5KTVdPVEc0TlQ6WWpJM1pXVmpPV0poTW1Kak5USXhNakJtTkdJeVlUUmtZVGd3TUdSaA==")
+                    .build();
+            try {
+                Response response = client.newCall(request).execute();
+                Log.d(TAG, "generateToken: response"+response);
+                String responseData = response.body().string();
+                Log.d(TAG, "run: generateToken "+responseData);
 
+
+                if(response.code() == 200){
+                    JSONObject jsonResponse = new JSONObject(responseData);
+                    String token = jsonResponse.getString("token");
+                    Log.d(TAG, "run: generateToken "+ token);
+                    runOnUiThread(() -> ((App) getApplication()).backend().loginWithJwtToken(token));
+                }else{
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this,response.message(),Toast.LENGTH_LONG).show());
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "run: generateToken "+e.toString());
+                e.printStackTrace();
+            }
+        }).start();
+
+    }
 
 }
