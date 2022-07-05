@@ -134,7 +134,10 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
     @Override
     public void onLogout() {
         Log.d(TAG, Constants.LOGOUT_SUCCESS);
-        Pref.newInstance(getContext()).clear();
+        Pref.newInstance(context.getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN, false);
+        Pref.newInstance(context.getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, false);
+        Pref.newInstance(context.getApplicationContext()).setBoolean(Constants.LOG_IN, false);
+        Utils.setLoggedinStatus(false);
 //        if (listener != null) listener. cf();
     }
 

@@ -222,14 +222,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
-        }if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
-            Log.d(TAG, "loginWithToken: 1");
+        }
+        if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
+            Log.d(TAG, "loginWithToken: 2");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
             ((App) getApplication()).backend().loginWithAccessTokenGenerator() ;
         }
 
         else {
-            Log.d(TAG, "loginWithToken: 2");
+            Log.d(TAG, "loginWithToken: 3");
             Log.d("@@Incoming", "loginWithToken");
             if (Utils.getLoggedinStatus()) {
                 updateUI(STATE.IDLE, null);
@@ -643,6 +644,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     Intent intent = new Intent(MainActivity.this,LoginActivity.class);
                     startActivity(intent);
                     Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
+                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME,false);
                     logout();
                     finish();
                 });
@@ -695,6 +697,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogout() {
+        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN, false);
+        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, false);
+
 //        Utils.setLoggedinStatus(false);
 //        startActivity(new Intent(this, LoginActivity.class));
 //        finish();
@@ -804,17 +809,20 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     }
     public void generateToken(){
+        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, true);
         new Thread(() -> {
-            String sub = "plivoKing";
-            if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
-                sub = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
-            }
-            long nbf = System.currentTimeMillis() / 1000 + 3736;
+            String sub;
+            sub = Pref.newInstance(getApplicationContext()).getString(Constants.LOGIN_USERNAME);
+            if(sub.isEmpty()) sub = "plivoUser";
+            long nbf = System.currentTimeMillis() / 1000;
             long exp = nbf+240;
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             MediaType mediaType = MediaType.parse("application/json");
-            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \""+sub+"\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": "+ exp +"\n}\n");        Request request = new Request.Builder()
+            Log.d(TAG, "generateToken: sub: "+ sub);
+            Log.d(TAG, "generateToken: nbf: "+ nbf);
+            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \""+sub+"\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": "+ exp +"\n}\n");
+            Request request = new Request.Builder()
                     .url("https://api.plivo.com/v1/Account/MAY2RJNZKZNJMWOTG4NT/JWT/Token")
                     .method("POST", body)
                     .addHeader("Content-Type", "application/json")
@@ -826,14 +834,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 String responseData = response.body().string();
                 Log.d(TAG, "run: generateToken "+responseData);
 
-
                 if(response.code() == 200){
                     JSONObject jsonResponse = new JSONObject(responseData);
                     String token = jsonResponse.getString("token");
-                    Log.d(TAG, "run: generateToken "+ token);
+                    Log.d(TAG, "run: generateToken jwtToken"+ token);
+                    Pref.newInstance(getApplicationContext()).setString(Constants.JWT_ACCESS_TOKEN, token);
                     runOnUiThread(() -> {
                         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
-                            Pref.newInstance(MainActivity.this).setString(Constants.JWT_ACCESS_TOKEN, token);
                             Log.d(TAG, "generateToken: device-token"+instanceIdResult.getToken());
                             ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
                         });

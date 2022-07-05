@@ -13,8 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.firebase.iid.FirebaseInstanceId;
-
 public class LoginWithTokenOrUsernameDialog extends DialogFragment {
     private static final String TAG = "LoginWithTokenDialog";
 
