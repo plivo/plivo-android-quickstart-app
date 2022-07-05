@@ -814,7 +814,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             MediaType mediaType = MediaType.parse("application/json");
-            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \""+sub+"\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": false,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": "+ exp +"\n}\n");        Request request = new Request.Builder()
+            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \""+sub+"\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": "+ exp +"\n}\n");        Request request = new Request.Builder()
                     .url("https://api.plivo.com/v1/Account/MAY2RJNZKZNJMWOTG4NT/JWT/Token")
                     .method("POST", body)
                     .addHeader("Content-Type", "application/json")
@@ -831,7 +831,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     JSONObject jsonResponse = new JSONObject(responseData);
                     String token = jsonResponse.getString("token");
                     Log.d(TAG, "run: generateToken "+ token);
-                    runOnUiThread(() -> ((App) getApplication()).backend().loginWithJwtToken(token));
+                    runOnUiThread(() -> {
+                        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
+                            Log.d(TAG, "generateToken: device-token"+instanceIdResult.getToken());
+                            ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
+                        });
+                    });
                 }else{
                     runOnUiThread(() -> Toast.makeText(MainActivity.this,response.message(),Toast.LENGTH_LONG).show());
                 }
