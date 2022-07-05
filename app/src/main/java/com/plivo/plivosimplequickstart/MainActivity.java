@@ -833,6 +833,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     Log.d(TAG, "run: generateToken "+ token);
                     runOnUiThread(() -> {
                         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
+                            Pref.newInstance(MainActivity.this).setString(Constants.JWT_ACCESS_TOKEN, token);
                             Log.d(TAG, "generateToken: device-token"+instanceIdResult.getToken());
                             ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
                         });

@@ -9,14 +9,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.Vibrator;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.plivo.endpoint.Incoming;
 
 import java.util.HashMap;
 
@@ -36,7 +34,14 @@ public class PlivoFCMService extends FirebaseMessagingService {
                     Log.d("@@Incoming", "onMessageReceived | relayIncomingPushData");
                     ((App) getApplication()).backend().relayIncomingPushData(pushMap);
                 }
-            } else if(((App) getApplication()).backend().login(deviceToken,username,password)){
+            }if(Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
+                if (((App) getApplication()).backend().loginWithJwtToken(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN))) {
+                    Log.d("@@Incoming", "onMessageReceived | relayIncomingPushData");
+                    ((App) getApplication()).backend().relayIncomingPushData(pushMap);
+                }
+            }
+
+            else if(((App) getApplication()).backend().login(deviceToken,username,password)){
                 Log.d("@@Incoming", "onMessageReceived | relayIncomingPushData");
                 ((App) getApplication()).backend().relayIncomingPushData(pushMap);
             }
