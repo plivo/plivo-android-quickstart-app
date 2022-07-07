@@ -771,6 +771,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
+                        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
+                        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME,false);
                         break;
                 }
             }
@@ -849,7 +854,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     runOnUiThread(() -> Toast.makeText(MainActivity.this,response.message(),Toast.LENGTH_LONG).show());
                 }
             } catch (Exception e) {
-                Log.d(TAG, "run: generateToken "+e.toString());
+                Log.d(TAG, "run: generateToken "+ e);
                 e.printStackTrace();
             }
         }).start();
