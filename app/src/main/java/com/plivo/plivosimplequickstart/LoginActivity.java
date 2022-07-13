@@ -1,5 +1,6 @@
 package com.plivo.plivosimplequickstart;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,6 +17,11 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.signin);
         findViewById(R.id.loginWithUsername).setOnClickListener(view -> loginWithUserNamePassword());
         findViewById(R.id.loginwithTokenUsername).setOnClickListener(view -> loginWithTokenOrUserName());
+
+        if(Pref.newInstance(LoginActivity.this).getBoolean(Constants.LOG_IN)){
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
     }
 
     private void loginWithTokenOrUserName() {

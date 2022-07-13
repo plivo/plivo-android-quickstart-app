@@ -217,32 +217,34 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void loginWithToken() {
-        if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)){
-            Log.d(TAG, "loginWithToken: 1");
-            String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
-            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
-        }
-        if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
-            Log.d(TAG, "loginWithToken: 2");
-            String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
-            ((App) getApplication()).backend().loginWithAccessTokenGenerator() ;
-        }
-
-        else {
-            Log.d(TAG, "loginWithToken: 3");
-            Log.d("@@Incoming", "loginWithToken");
-            if (Utils.getLoggedinStatus()) {
-                updateUI(STATE.IDLE, null);
-                callData = Utils.getIncoming();
-                if (callData != null) {
-                    Log.d("@@Incoming", "loginWithToken | callData not null");
-                    showInCallUI(STATE.RINGING, Utils.getIncoming());
-                }
-            } else {
-                Log.d("@@Incoming", "loginWithToken | is not logged in");
+        Log.d(TAG, "loginWithToken: isLoggedIn "+Pref.newInstance(MainActivity.this).getBoolean(Constants.LOG_IN));
+        if(!Pref.newInstance(MainActivity.this).getBoolean(Constants.LOG_IN)) {
+            if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
+                Log.d(TAG, "loginWithToken: 1");
+                String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
                 FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                        ((App) getApplication()).backend().login(instanceIdResult.getToken(), username, password));
+                        ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
+            }
+            if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+                Log.d(TAG, "loginWithToken: 2");
+                String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
+                ((App) getApplication()).backend().loginWithAccessTokenGenerator();
+            }
+            else {
+                Log.d(TAG, "loginWithToken: 3");
+                Log.d("@@Incoming", "loginWithToken");
+                if (Utils.getLoggedinStatus()) {
+                    updateUI(STATE.IDLE, null);
+                    callData = Utils.getIncoming();
+                    if (callData != null) {
+                        Log.d("@@Incoming", "loginWithToken | callData not null");
+                        showInCallUI(STATE.RINGING, Utils.getIncoming());
+                    }
+                } else {
+                    Log.d("@@Incoming", "loginWithToken | is not logged in");
+                    FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                            ((App) getApplication()).backend().login(instanceIdResult.getToken(), username, password));
+                }
             }
         }
 
@@ -762,22 +764,21 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void createDialog() {
-        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                            generateToken();
-                        break;
+        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
+            switch (which){
+                case DialogInterface.BUTTON_POSITIVE:
+                        dialog.cancel();
+                        generateToken();
+                    break;
 
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                        startActivity(intent);
-                        finish();
-                        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
-                        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME,false);
-                        break;
-                }
+                case DialogInterface.BUTTON_NEGATIVE:
+                    dialog.cancel();
+                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
+                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME,false);
+                    break;
             }
         };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -834,8 +835,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     .addHeader("Authorization", "Basic TUFZMlJKTlpLWk5KTVdPVEc0TlQ6WWpJM1pXVmpPV0poTW1Kak5USXhNakJtTkdJeVlUUmtZVGd3TUdSaA==")
                     .build();
             try {
+                runOnUiThread(() -> {
+                            progressDialog.setMessage("generating..");
+                            progressDialog.show();
+                        });
                 Response response = client.newCall(request).execute();
-                Log.d(TAG, "generateToken: response"+response);
+                progressDialog.dismiss();
                 String responseData = response.body().string();
                 Log.d(TAG, "run: generateToken "+responseData);
 
@@ -849,9 +854,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                             Log.d(TAG, "generateToken: device-token"+instanceIdResult.getToken());
                             ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
                         });
+                        progressDialog.dismiss();
                     });
                 }else{
                     runOnUiThread(() -> Toast.makeText(MainActivity.this,response.message(),Toast.LENGTH_LONG).show());
+                    progressDialog.dismiss();
                 }
             } catch (Exception e) {
                 Log.d(TAG, "run: generateToken "+ e);
