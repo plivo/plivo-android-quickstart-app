@@ -217,36 +217,34 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void loginWithToken() {
-        Log.d(TAG, "loginWithToken: isLoggedIn "+Pref.newInstance(MainActivity.this).getBoolean(Constants.LOG_IN));
-        if(!Pref.newInstance(MainActivity.this).getBoolean(Constants.LOG_IN)) {
-            if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
-                Log.d(TAG, "loginWithToken: 1");
-                String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
-                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                        ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
+        Log.d("@@Incoming", "loginWithToken "+Utils.getLoggedinStatus());
+        if (Utils.getLoggedinStatus()) {
+            Log.d(TAG, "loginWithToken: 21345678");
+            updateUI(STATE.IDLE, null);
+            callData = Utils.getIncoming();
+            Log.d(TAG, "loginWithToken: abhi "+(callData != null));
+            if (callData != null) {
+                Log.d(TAG, "loginWithToken: abhishek ");
+                Log.d("@@Incoming", "loginWithToken | callData not null");
+                showInCallUI(STATE.RINGING, Utils.getIncoming());
             }
-            if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
-                Log.d(TAG, "loginWithToken: 2");
-                String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
-                ((App) getApplication()).backend().loginWithAccessTokenGenerator();
-            }
-            else {
-                Log.d(TAG, "loginWithToken: 3");
-                Log.d("@@Incoming", "loginWithToken");
-                if (Utils.getLoggedinStatus()) {
-                    updateUI(STATE.IDLE, null);
-                    callData = Utils.getIncoming();
-                    if (callData != null) {
-                        Log.d("@@Incoming", "loginWithToken | callData not null");
-                        showInCallUI(STATE.RINGING, Utils.getIncoming());
-                    }
-                } else {
-                    Log.d("@@Incoming", "loginWithToken | is not logged in");
-                    FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                            ((App) getApplication()).backend().login(instanceIdResult.getToken(), username, password));
-                }
-            }
+        }else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
+            Log.d(TAG, "loginWithToken: 1");
+            String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
+        }else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+            Log.d(TAG, "loginWithToken: 2");
+            String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
+            ((App) getApplication()).backend().loginWithAccessTokenGenerator();
         }
+        else {
+            Log.d("@@Incoming", "loginWithToken | is not logged in");
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().login(instanceIdResult.getToken(), username, password));
+        }
+
+        Log.d(TAG, "loginWithToken: 3232");
 
     }
 
@@ -314,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
      * @param incoming
      */
     private void showInCallUI(STATE state, Incoming incoming) {
+        Log.d(TAG, "showInCallUI: "+state);
 
         String title = (incoming != null ? Utils.from(incoming.getFromContact(), incoming.getFromSip()) : "");
 
@@ -330,6 +329,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
 
             case RINGING:
+                Log.d(TAG, "showInCallUI: ringingF");
                 notificationDialog(title, incoming);
                 break;
             case HANGUP:

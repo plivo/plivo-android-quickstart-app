@@ -19,6 +19,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import java.util.HashMap;
 
 public class PlivoFCMService extends FirebaseMessagingService {
+    private static final String TAG = "PlivoFCMService";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -31,28 +32,28 @@ public class PlivoFCMService extends FirebaseMessagingService {
             String password = Utils.PASSWORD;
             if(Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)){
                 if (((App) getApplication()).backend().loginWithJwtToken(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN))) {
-                    Log.d("@@Incoming", "onMessageReceived | relayIncomingPushData");
+                    Log.d(TAG, "onMessageReceived | relayIncomingPushData1 ");
                     ((App) getApplication()).backend().relayIncomingPushData(pushMap);
                 }
             }if(Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
                 if (((App) getApplication()).backend().loginWithJwtToken(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN))) {
-                    Log.d("@@Incoming", "onMessageReceived | relayIncomingPushData");
+                    Log.d(TAG, "onMessageReceived | relayIncomingPushData 3");
                     ((App) getApplication()).backend().relayIncomingPushData(pushMap);
                 }
             }
 
             else if(((App) getApplication()).backend().login(deviceToken,username,password)){
-                Log.d("@@Incoming", "onMessageReceived | relayIncomingPushData");
+                Log.d(TAG, "onMessageReceived | relayIncomingPushData 2");
                 ((App) getApplication()).backend().relayIncomingPushData(pushMap);
             }
 
-            Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | start MainActivity");
+            Log.d(TAG, "PlivoFCMService | onMessageReceived | start MainActivity");
             startActivity(new Intent(this, MainActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             );
 
             if (Utils.getBackendListener() == null) {
-                Log.d("@@Incoming", "PlivoFCMService | onMessageReceived | getBackendListener null");
+                Log.d(TAG, "PlivoFCMService | onMessageReceived | getBackendListener null");
                 notificationDialog();
             }
         }
