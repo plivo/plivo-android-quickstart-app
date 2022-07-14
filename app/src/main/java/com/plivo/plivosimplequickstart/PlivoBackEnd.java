@@ -234,6 +234,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
 
     @Override
     public void onPermissionDenied(String message) {
+        Log.d(TAG, "onPermissionDenied: "+message);
         listener.onPermissionDenied(message);
     }
 
