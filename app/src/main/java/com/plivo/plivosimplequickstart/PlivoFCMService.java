@@ -30,20 +30,14 @@ public class PlivoFCMService extends FirebaseMessagingService {
 
             String username = Utils.USERNAME;
             String password = Utils.PASSWORD;
-            if(Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)){
+            if(Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
                 if (((App) getApplication()).backend().loginWithJwtToken(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN))) {
-                    Log.d(TAG, "onMessageReceived | relayIncomingPushData1 ");
-                    ((App) getApplication()).backend().relayIncomingPushData(pushMap);
-                }
-            }if(Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)){
-                if (((App) getApplication()).backend().loginWithJwtToken(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN))) {
-                    Log.d(TAG, "onMessageReceived | relayIncomingPushData 3");
+                    Log.d(TAG, "onMessageReceived | relayIncomingPushData login with token ");
                     ((App) getApplication()).backend().relayIncomingPushData(pushMap);
                 }
             }
-
             else if(((App) getApplication()).backend().login(deviceToken,username,password)){
-                Log.d(TAG, "onMessageReceived | relayIncomingPushData 2");
+                Log.d(TAG, "onMessageReceived | relayIncomingPushData login with username pass");
                 ((App) getApplication()).backend().relayIncomingPushData(pushMap);
             }
 
