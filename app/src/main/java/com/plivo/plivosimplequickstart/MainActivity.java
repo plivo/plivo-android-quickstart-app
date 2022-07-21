@@ -639,11 +639,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 ((Button) findViewById(R.id.btlogout)).setText(Constants.LOG_OUT);
                 findViewById(R.id.btlogout).setOnClickListener(view -> {
-                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                    startActivity(intent);
                     logout();
-                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
-                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME,false);
                 });
                 findViewById(R.id.call_btn).setEnabled(true);
 
@@ -694,9 +690,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogout() {
-        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN, false);
-        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, false);
-
+        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+        startActivity(intent);
 //        Utils.setLoggedinStatus(false);
 //        startActivity(new Intent(this, LoginActivity.class));
 //        finish();
