@@ -193,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
         ((App) getApplication()).backend().unregisterListener(this);
         super.onDestroy();
 
@@ -219,22 +220,19 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     private void loginWithToken() {
         Log.d("@@Incoming", "loginWithToken "+Utils.getLoggedinStatus());
         if (Utils.getLoggedinStatus()) {
-            Log.d(TAG, "loginWithToken: 21345678");
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
-            Log.d(TAG, "loginWithToken: abhi "+(callData != null));
             if (callData != null) {
-                Log.d(TAG, "loginWithToken: abhishek ");
                 Log.d("@@Incoming", "loginWithToken | callData not null");
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
             }
         }else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
-            Log.d(TAG, "loginWithToken: 1");
+            Log.d(TAG, "loginWithToken: login with token");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
         }else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
-            Log.d(TAG, "loginWithToken: 2");
+            Log.d(TAG, "loginWithToken: login with accessToken generator");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
             ((App) getApplication()).backend().loginWithAccessTokenGenerator();
         }
@@ -243,9 +241,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().login(instanceIdResult.getToken(), username, password));
         }
-
-        Log.d(TAG, "loginWithToken: 3232");
-
     }
 
     public void onClickLogout(View view) {
@@ -253,6 +248,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void logout() {
+        Log.d(TAG, "logout: ");
         ((App) getApplication()).backend().logout();
     }
 
@@ -638,17 +634,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     }
                 }
             } else {
-                Log.d(TAG, "updateUI: 11");
+                Log.d(TAG, "updateUI: ");
                 ((AppCompatTextView) findViewById(R.id.logging_in_label)).setText(Constants.LOGGED_IN_LABEL);
                 ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 ((Button) findViewById(R.id.btlogout)).setText(Constants.LOG_OUT);
                 findViewById(R.id.btlogout).setOnClickListener(view -> {
-                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                    startActivity(intent);
-                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
-                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME,false);
                     logout();
-                    finish();
                 });
                 findViewById(R.id.call_btn).setEnabled(true);
 
@@ -699,9 +690,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogout() {
-        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN, false);
-        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, false);
-
+        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+        startActivity(intent);
 //        Utils.setLoggedinStatus(false);
 //        startActivity(new Intent(this, LoginActivity.class));
 //        finish();
