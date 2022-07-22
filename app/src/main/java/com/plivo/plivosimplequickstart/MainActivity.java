@@ -692,6 +692,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void onLogout() {
         Intent intent = new Intent(MainActivity.this,LoginActivity.class);
         startActivity(intent);
+        finish();
 //        Utils.setLoggedinStatus(false);
 //        startActivity(new Intent(this, LoginActivity.class));
 //        finish();

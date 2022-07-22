@@ -46,10 +46,10 @@ public class PlivoFCMService extends FirebaseMessagingService {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             );
 
-            if (Utils.getBackendListener() == null) {
+            /*if (Utils.getBackendListener() == null) {
                 Log.d(TAG, "PlivoFCMService | onMessageReceived | getBackendListener null");
                 notificationDialog();
-            }
+            }*/
         }
     }
 
