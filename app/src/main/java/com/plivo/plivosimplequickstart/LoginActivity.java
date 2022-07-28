@@ -21,6 +21,7 @@ public class LoginActivity extends AppCompatActivity {
         if(Pref.newInstance(LoginActivity.this).getBoolean(Constants.LOG_IN)){
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+            finish();
         }
     }
 

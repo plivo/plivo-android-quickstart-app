@@ -218,26 +218,29 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void loginWithToken() {
-        Log.d("@@Incoming", "loginWithToken "+Utils.getLoggedinStatus());
-        if (Utils.getLoggedinStatus()) {
+        boolean isLoginForIncoming = getIntent().getBooleanExtra(Constants.LAUNCH_ACTION,false);
+        Log.d("****@@Incoming", "isLoginForIncoming "+isLoginForIncoming);
+        Log.d("****@@Incoming", "loginWithToken "+Utils.getLoggedinStatus());
+
+        if (Utils.getLoggedinStatus() || isLoginForIncoming) {
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
             if (callData != null) {
-                Log.d("@@Incoming", "loginWithToken | callData not null");
+                Log.d("****@@Incoming", "loginWithToken | callData not null");
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
             }
         }else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
-            Log.d(TAG, "loginWithToken: login with token");
+            Log.d(TAG, "****loginWithToken: login with token");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
         }else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
-            Log.d(TAG, "loginWithToken: login with accessToken generator");
+            Log.d(TAG, "****loginWithToken: login with accessToken generator");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
             ((App) getApplication()).backend().loginWithAccessTokenGenerator();
         }
         else {
-            Log.d("@@Incoming", "loginWithToken | is not logged in");
+            Log.d("****@@Incoming", "loginWithToken | is not logged in");
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().login(instanceIdResult.getToken(), username, password));
         }
@@ -308,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
      * @param incoming
      */
     private void showInCallUI(STATE state, Incoming incoming) {
-        Log.d(TAG, "showInCallUI: "+state);
+        Log.d(TAG, "****showInCallUI: "+state);
 
         String title = (incoming != null ? Utils.from(incoming.getFromContact(), incoming.getFromSip()) : "");
 
@@ -325,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
 
             case RINGING:
-                Log.d(TAG, "showInCallUI: ringingF");
+                Log.d(TAG, "****showInCallUI: ringingF");
                 notificationDialog(title, incoming);
                 break;
             case HANGUP:
@@ -609,9 +612,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void updateUI(PlivoBackEnd.STATE state, Object data) {
-        Log.d(TAG, "updateUI: "+state);
+        Log.d(TAG, "****updateUI: "+state);
         callData = data;
         if (state.equals(STATE.REJECTED) || state.equals(STATE.HANGUP) || state.equals(STATE.INVALID)) {
+            Log.d(TAG, "****updateUI: REJECTED,HANGUP,INVALID");
             if (data != null) {
                 if (data instanceof Outgoing) {
                     // handle outgoing
@@ -659,7 +663,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onLogin(boolean success) {
 
-        Log.d(TAG, "onLogin: "+success);
+        Log.d(TAG, "****onLogin: "+success);
         runOnUiThread(() -> {
             if (success) {
                 if(!isLoginFirstTime) isLoginFirstTime = true;
@@ -678,7 +682,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLoginFailed(String message) {
-        Log.d(TAG, "onLoginFailed: ");
+        Log.d(TAG, "****onLoginFailed: ");
         runOnUiThread(() -> {
             setContentView(R.layout.activity_main);
             parentPanel = findViewById(R.id.parentPanel);
@@ -700,10 +704,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onIncomingCall(Incoming data, PlivoBackEnd.STATE callState) {
-
+        Log.d("****Incoming", "onIncomingCall");
         runOnUiThread(() -> {
             if (data != null) {
-                Log.d("TAG", "incoming data is not null");
+                Log.d("****TAG", "incoming data is not null");
             }
             if (outgoing != null) {
                 outgoing = null;

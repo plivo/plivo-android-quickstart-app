@@ -50,7 +50,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
 
     public void init(boolean log) {
 //        endpoint = Endpoint.newInstance(context,log, this);
-
+        Log.d("****PlivoBackEnd", "Init");
         //Initiate SDK with Options, "enableTracking" (To get network related information)
         HashMap options = new HashMap();
         options.put("maxAverageBitrate", 48000);
@@ -100,9 +100,9 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         endpoint.logout();
     }
 
-    public void relayIncomingPushData(HashMap<String, String> incomingData) {
+    public void loginForIncomingWithUsername(String username, String password, String deviceToken, String certificateId,int regTimeOut, HashMap<String, String> incomingData) {
         if (incomingData != null && !incomingData.isEmpty()) {
-            endpoint.relayVoipPushNotification(incomingData);
+            endpoint.loginForIncomingWithUsername(username,password,deviceToken,certificateId,regTimeOut,incomingData);
         }
     }
 
@@ -162,6 +162,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
     @Override
     public void onIncomingCall(Incoming incoming) {
         Log.d(TAG, Constants.INCOMING_CALL_RINGING);
+        Log.d(TAG, "****onIncomingCall");
         Utils.setIncoming(incoming);
         if (listener != null) listener.onIncomingCall(incoming, STATE.RINGING);
     }
