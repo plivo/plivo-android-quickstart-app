@@ -33,18 +33,16 @@ public class PlivoFCMService extends FirebaseMessagingService {
             String password = Utils.PASSWORD;
 
             if (Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
-                if (((App) getApplication()).backend().loginWithJwtToken(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN))) {
-                    Log.d(TAG, "onMessageReceived | relayIncomingPushData login with token ");
-//                    ((App) getApplication()).backend().relayIncomingPushData(pushMap);
-                }
-            } else  {
+                ((App) getApplication()).backend().loginForIncomingWithJwt(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN), pushMap);
+                Log.d(TAG, "onMessageReceived | loginForIncomingWithJwt ");
+            } else {
                 ((App) getApplication()).backend().loginForIncomingWithUsername(username, password, deviceToken, "", 0, pushMap);
-                Log.d(TAG, "****onMessageReceived | loginForIncomingWithUsername");
+                Log.d(TAG, "onMessageReceived | loginForIncomingWithUsername");
             }
 
-            Log.d(TAG, "****PlivoFCMService | onMessageReceived | start MainActivity");
+            Log.d(TAG, "PlivoFCMService | onMessageReceived | start MainActivity");
             startActivity(new Intent(this, MainActivity.class)
-                    .putExtra(Constants.LAUNCH_ACTION,true)
+                    .putExtra(Constants.LAUNCH_ACTION, true)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             );
 
