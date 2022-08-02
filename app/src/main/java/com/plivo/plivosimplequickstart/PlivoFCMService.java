@@ -35,7 +35,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
             boolean isLoginWithTokenGenerator = Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME);
 
             if (Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
-                ((App) getApplication()).backend().loginForIncomingWithJwt(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN), pushMap);
+                ((App) getApplication()).backend().loginForIncomingWithJwt(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN),"", pushMap);
                 Log.d(TAG, "onMessageReceived | loginForIncomingWithJwt ");
             } else if (isLoginWithTokenGenerator){
                 //Do nothing just go to MainActivity & handle things there

@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
             HashMap<String, String> finalPayload = payload;
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token, finalPayload));
+                    ((App) getApplication()).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token,"", finalPayload));
         } else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
             Log.d(TAG, "****loginWithToken: login with accessToken generator");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
@@ -850,7 +850,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
                             Log.d(TAG, "generateToken: device-token" + instanceIdResult.getToken());
                             if (isLoginForIncomingWithTokenGenerator && payload != null) {
-                                ((App) getApplication()).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token, payload);
+                                ((App) getApplication()).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token,"", payload);
                             } else {
                                 ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
                             }
