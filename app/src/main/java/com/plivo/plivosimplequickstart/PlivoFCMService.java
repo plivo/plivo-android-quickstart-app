@@ -38,7 +38,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
                 ((App) getApplication()).backend().loginForIncomingWithJwt(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN), pushMap);
                 Log.d(TAG, "onMessageReceived | loginForIncomingWithJwt ");
             } else if (isLoginWithTokenGenerator){
-//                ((App) getApplication()).backend().loginWithAccessTokenGenerator();
+                //Do nothing just go to MainActivity & handle things there
             }else {
                 ((App) getApplication()).backend().loginForIncomingWithUsername(username, password, deviceToken, "", 0, pushMap);
                 Log.d(TAG, "onMessageReceived | loginForIncomingWithUsername");
@@ -52,47 +52,8 @@ public class PlivoFCMService extends FirebaseMessagingService {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             );
 
-            /*if (Utils.getBackendListener() == null) {
-                Log.d(TAG, "****PlivoFCMService | onMessageReceived | getBackendListener null");
-                notificationDialog();
-            }*/
             super.onMessageReceived(remoteMessage);
         }
     }
 
-
-    public void notificationDialog() {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        String NOTIFICATION_CHANNEL_ID = Constants.NOTIFICATION_CHANNEL;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            @SuppressLint("WrongConstant") NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "My Notifications", NotificationManager.IMPORTANCE_MAX);
-            // Configure the notification channel.
-            notificationChannel.setDescription(Constants.NOTIFICATION_DESCRIPTION);
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
-            notificationChannel.setVibrationPattern(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500});
-            notificationChannel.enableVibration(true);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-
-        Intent launchIntent = new Intent(this, MainActivity.class);
-        launchIntent.setAction(Constants.LAUNCH_ACTION);
-        PendingIntent LaunchIntent = PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
-
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
-        notificationBuilder.setAutoCancel(true)
-                .setCategory(Notification.CATEGORY_CALL)
-                .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setTicker(Constants.NOTIFICATION_CHANNEL)
-                .setPriority(Notification.PRIORITY_MAX)
-                .setContentTitle(Constants.NOTIFICATION_DESCRIPTION)
-                .addAction(android.R.drawable.ic_menu_call, getString(R.string.launch), LaunchIntent)
-                .setOngoing(true)
-                .setVibrate(new long[]{0, 100, 500, 100, 500, 100, 500, 100, 500, 100, 500})
-                .setContentInfo(Constants.NOTIFICATION_DESCRIPTION);
-        notificationManager.notify(0, notificationBuilder.build());
-
-        Utils.startVibrating(this);
-    }
 }
