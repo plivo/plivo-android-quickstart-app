@@ -73,10 +73,10 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         return endpoint.loginWithJwtToken(JWTToken, token);
     }
 
-    public boolean loginForIncomingWithJwt(String token, String JWTToken,HashMap<String, String> incomingData) {
+    public boolean loginForIncomingWithJwt(String token, String JWTToken, HashMap<String, String> incomingData) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         Utils.setDeviceToken(token);
-        return endpoint.loginForIncomingWithJwt(JWTToken,token,incomingData);
+        return endpoint.loginForIncomingWithJwt(JWTToken, token, incomingData);
     }
 
     public void loginWithJwtToken(String JWTToken) {
@@ -249,7 +249,8 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
     @Override
     public void getAccessToken() {
         Log.d(TAG, "onTokenExpired: ");
-        listener.getAccessToken();
+        if (listener != null)
+            listener.getAccessToken();
     }
 
 

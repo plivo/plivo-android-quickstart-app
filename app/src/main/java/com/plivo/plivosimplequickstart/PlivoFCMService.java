@@ -23,7 +23,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        super.onMessageReceived(remoteMessage);
+
         Log.d(TAG, "****onMessageReceived");
         if (remoteMessage.getData() != null) {
             String deviceToken = Utils.getDeviceToken();
@@ -32,10 +32,14 @@ public class PlivoFCMService extends FirebaseMessagingService {
             String username = Utils.USERNAME;
             String password = Utils.PASSWORD;
 
-            if (Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+            boolean isLoginWithTokenGenerator = Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME);
+
+            if (Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
                 ((App) getApplication()).backend().loginForIncomingWithJwt(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN), pushMap);
                 Log.d(TAG, "onMessageReceived | loginForIncomingWithJwt ");
-            } else {
+            } else if (isLoginWithTokenGenerator){
+//                ((App) getApplication()).backend().loginWithAccessTokenGenerator();
+            }else {
                 ((App) getApplication()).backend().loginForIncomingWithUsername(username, password, deviceToken, "", 0, pushMap);
                 Log.d(TAG, "onMessageReceived | loginForIncomingWithUsername");
             }
@@ -43,6 +47,8 @@ public class PlivoFCMService extends FirebaseMessagingService {
             Log.d(TAG, "PlivoFCMService | onMessageReceived | start MainActivity");
             startActivity(new Intent(this, MainActivity.class)
                     .putExtra(Constants.LAUNCH_ACTION, true)
+                    .putExtra(Constants.JWT_ACCESS_TOKEN_GENERATOR, isLoginWithTokenGenerator)
+                    .putExtra(Constants.PAYLOAD,pushMap)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             );
 
@@ -50,6 +56,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
                 Log.d(TAG, "****PlivoFCMService | onMessageReceived | getBackendListener null");
                 notificationDialog();
             }*/
+            super.onMessageReceived(remoteMessage);
         }
     }
 
