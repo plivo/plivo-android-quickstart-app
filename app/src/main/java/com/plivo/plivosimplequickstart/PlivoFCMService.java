@@ -11,20 +11,23 @@ import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.plivo.endpoint.Endpoint;
 
 import java.util.HashMap;
 
 public class PlivoFCMService extends FirebaseMessagingService {
     private static final String TAG = "PlivoFCMService";
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        Log.d(TAG, "****onMessageReceived");
+        Log.d(TAG, "****onMessageReceived" + remoteMessage);
         if (remoteMessage.getData() != null) {
             String deviceToken = Utils.getDeviceToken();
             HashMap<String, String> pushMap = new HashMap<>(remoteMessage.getData());
@@ -32,7 +35,10 @@ public class PlivoFCMService extends FirebaseMessagingService {
             String username = Utils.USERNAME;
             String password = Utils.PASSWORD;
 
-            boolean isLoginWithTokenGenerator = Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME);
+            Endpoint endpoint = Endpoint.newInstance(this,true,null);
+            endpoint.showCallScreen("PlivocallId");
+
+            /*boolean isLoginWithTokenGenerator = Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_USERNAME);
 
             if (Pref.newInstance(getApplicationContext()).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
                 ((App) getApplication()).backend().loginForIncomingWithJwt(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN), pushMap);
@@ -50,7 +56,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
                     .putExtra(Constants.JWT_ACCESS_TOKEN_GENERATOR, isLoginWithTokenGenerator)
                     .putExtra(Constants.PAYLOAD,pushMap)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            );
+            );*/
 
             super.onMessageReceived(remoteMessage);
         }

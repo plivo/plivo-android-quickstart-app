@@ -1,6 +1,7 @@
 package com.plivo.plivosimplequickstart;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import com.plivo.endpoint.AccessTokenListener;
@@ -55,6 +56,12 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         HashMap options = new HashMap();
         options.put("maxAverageBitrate", 48000);
         endpoint = Endpoint.newInstance(context, log, this, options);
+    }
+
+    public void showPhoneAccount(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            endpoint.registerConnectionService();
+        }
     }
 
     public void setListener(BackendListener listener) {

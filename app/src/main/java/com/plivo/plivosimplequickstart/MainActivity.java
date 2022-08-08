@@ -42,7 +42,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.PermissionChecker;
 
 import com.auth0.android.jwt.JWT;
@@ -70,6 +72,7 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
     private static final int PERMISSIONS_REQUEST_CODE = 21;
     private static final String TAG = MainActivity.class.getName();
+    private static final int CALL_PERMISSION_REQUEST = 34;
 
     private Timer callTimer;
 
@@ -115,14 +118,25 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         constraintLayout = findViewById(R.id.cl_main);
         progressBar = findViewById(R.id.progress_bar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED && hasCallPermission()) {
                 init();
             } else {
-                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_CODE);
+                requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO,Manifest.permission.MANAGE_OWN_CALLS, Manifest.permission.CALL_PHONE}, PERMISSIONS_REQUEST_CODE);
             }
         } else {
             init();
         }
+    }
+
+    boolean hasCallPermission(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_OWN_CALLS)
+                == PackageManager.PERMISSION_GRANTED)
+        {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE)
+                    == PackageManager.PERMISSION_GRANTED)
+                return true;
+        }
+        return false;
     }
 
     public JWT getDecodedJwt(String jwt) {
@@ -215,6 +229,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d("@@Incoming", "init");
         registerBackendListener();
         loginWithToken();
+        ((App) getApplication()).backend().showPhoneAccount();
     }
 
     private void registerBackendListener() {
