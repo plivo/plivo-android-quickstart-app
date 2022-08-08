@@ -54,7 +54,11 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         //Initiate SDK with Options, "enableTracking" (To get network related information)
         HashMap options = new HashMap();
         options.put("maxAverageBitrate", 48000);
-        endpoint = Endpoint.newInstance(context, log, this, options);
+        endpoint = Endpoint.newInstance(context)
+                .setDebug(true)
+                .setEventListener(this)
+                .setPendingIntentActivity(MainActivity.class);
+
     }
 
     public void setListener(BackendListener listener) {
@@ -251,6 +255,16 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         Log.d(TAG, "onTokenExpired: ");
         if (listener != null)
             listener.getAccessToken();
+    }
+
+    public String getJwtAccessToken(){
+        return endpoint.getJwtAccessToken();
+    }
+    public boolean isLoginWithToken(){
+        return endpoint.isLoginWithToken();
+    }
+    public boolean isLoginWithTokenGenerator(){
+        return endpoint.isLoginWithTokenGenerator();
     }
 
 

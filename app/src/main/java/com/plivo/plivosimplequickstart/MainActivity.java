@@ -48,6 +48,7 @@ import androidx.core.content.PermissionChecker;
 import com.auth0.android.jwt.JWT;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.plivo.endpoint.Global;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
@@ -224,14 +225,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void loginWithToken() {
-        boolean isLoginForIncoming = getIntent().getBooleanExtra(Constants.LAUNCH_ACTION, false);
-        boolean tokenGenerator = getIntent().getBooleanExtra(Constants.JWT_ACCESS_TOKEN_GENERATOR, false);
-        payload = (HashMap<String, String>) getIntent().getSerializableExtra(Constants.PAYLOAD);
+        boolean isLoginForIncoming = getIntent().getBooleanExtra(Global.IS_LOGIN_FOR_INCOMING, false);
+        isLoginForIncomingWithTokenGenerator = getIntent().getBooleanExtra(Global.JWT_ACCESS_TOKEN_GENERATOR, false);
+        payload = (HashMap<String, String>) getIntent().getSerializableExtra(Global.PAYLOAD);
         Log.d("****@@Incoming", "isLoginForIncoming " + isLoginForIncoming);
         Log.d("****@@Incoming", "loginWithToken " + Utils.getLoggedinStatus());
 
-        isLoginForIncomingWithTokenGenerator = tokenGenerator;
-        if ((Utils.getLoggedinStatus() || isLoginForIncoming) && !tokenGenerator) {
+        if ((Utils.getLoggedinStatus() || isLoginForIncoming) && !isLoginForIncomingWithTokenGenerator) {
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
             if (callData != null) {
@@ -245,7 +245,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
         } else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
             Log.d(TAG, "****loginWithToken: login with accessToken generator");
-            String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
             ((App) getApplication()).backend().loginWithAccessTokenGenerator();
         } else {
             Log.d("****@@Incoming", "loginWithToken | is not logged in");
@@ -255,10 +254,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     public void loginWithToken(Intent intent) {
-        boolean isLoginForIncoming = intent.getBooleanExtra(Constants.LAUNCH_ACTION, false);
-        boolean tokenGenerator = intent.getBooleanExtra(Constants.JWT_ACCESS_TOKEN_GENERATOR, false);
-        payload = (HashMap<String, String>) intent.getSerializableExtra(Constants.PAYLOAD);
-//        Log.d("****@@Incoming", "isLoginForIncoming " + isLoginForIncoming);
+        boolean tokenGenerator = intent.getBooleanExtra(Global.JWT_ACCESS_TOKEN_GENERATOR, false);
+        payload = (HashMap<String, String>) intent.getSerializableExtra(Global.PAYLOAD);
         Log.d("****@@Incoming", "loginWithToken " + Utils.getLoggedinStatus());
 
         isLoginForIncomingWithTokenGenerator = tokenGenerator;
@@ -849,6 +846,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     public void generateToken() {
         Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, true);
+
         new Thread(() -> {
             String sub;
             sub = Pref.newInstance(getApplicationContext()).getString(Constants.LOGIN_USERNAME);
@@ -881,7 +879,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     JSONObject jsonResponse = new JSONObject(responseData);
                     String token = jsonResponse.getString("token");
                     Log.d(TAG, "run: generateToken jwtToken" + token);
-                    Pref.newInstance(getApplicationContext()).setString(Constants.JWT_ACCESS_TOKEN, token);
+
+//                    Pref.newInstance(getApplicationContext()).setString(Constants.JWT_ACCESS_TOKEN, token);
                     runOnUiThread(() -> {
                         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
                             Log.d(TAG, "generateToken: device-token" + instanceIdResult.getToken());
