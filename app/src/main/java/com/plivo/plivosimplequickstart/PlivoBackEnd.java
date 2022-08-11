@@ -1,5 +1,6 @@
 package com.plivo.plivosimplequickstart;
 
+import android.content.Context;
 import android.util.Log;
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
@@ -22,8 +23,8 @@ public class PlivoBackEnd implements EventListener {
         return new PlivoBackEnd();
     }
 
-    public void init(boolean log) {
-        endpoint = Endpoint.newInstance(log, this);
+    public void init(boolean log, Context applicationContext) {
+        endpoint = Endpoint.newInstance(applicationContext,log, this);
 
         //Iniatiate SDK with Options, "enableTracking" and "context"(To get network related information)
 
@@ -87,6 +88,11 @@ public class PlivoBackEnd implements EventListener {
         Log.d(TAG, Constants.INCOMING_CALL_RINGING);
         Utils.setIncoming(incoming);
         if (listener != null) listener.onIncomingCall(incoming, STATE.RINGING);
+    }
+
+    @Override
+    public void onIncomingCallConnected(Incoming incoming) {
+
     }
 
     @Override
