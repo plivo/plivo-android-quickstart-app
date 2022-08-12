@@ -44,6 +44,8 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.PermissionChecker;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.auth0.android.jwt.JWT;
 import com.google.android.material.snackbar.Snackbar;
@@ -136,6 +138,17 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             super.onBackPressed();
         }
 
+    }
+
+    private void showFeedbackDialog(){
+        SubmitFeedbackDialog dialogFragment = new SubmitFeedbackDialog();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog2");
+        if (prev != null) {
+            ft.remove(prev);
+        }
+        ft.addToBackStack(null);
+        dialogFragment.show(ft, "feedback");
     }
 
     @Override
@@ -665,7 +678,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 if(!isLoginFirstTime) isLoginFirstTime = true;
                 if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
                     username = ((App) getApplication()).backend().getJWTUserName();
-                    Log.d(TAG, "onLogin:abhishek  "+username);
+                    Log.d(TAG, "onLogin:   "+username);
                     Pref.newInstance(MainActivity.this).setString(USERNAME, username);
                     ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 }
@@ -709,7 +722,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 outgoing = null;
             }
             if (callState == STATE.HANGUP) {
-                showRateDialog();
+                showFeedbackDialog();
             }
             updateUI(callState, data);
         });
@@ -720,7 +733,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         runOnUiThread(() -> {
             if (callState == STATE.HANGUP) {
                 endCallRituals();
-                showRateDialog();
+                showFeedbackDialog();
             }
             updateUI(callState, data);
         });
@@ -781,30 +794,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
 
 
-    public void showRateDialog() {
-        if(activeCall) {
-            final AlertDialog.Builder popDialog = new AlertDialog.Builder(this);
-            final RatingBar rating = new RatingBar(this);
-            rating.setNumStars(5);
-
-            popDialog.setIcon(android.R.drawable.btn_star_big_on);
-            popDialog.setTitle("Add Rating: ");
-            popDialog.setView(rating);
-
-            popDialog.setPositiveButton(android.R.string.ok,
-                    (dialog, which) -> {
-                        ((App) getApplication()).backend().submitFeedback(rating.getRating());
-                        dialog.dismiss();
-                    })
-
-                    .setNegativeButton("Cancel",
-                            (dialog, id) -> dialog.cancel());
-
-            popDialog.create();
-            popDialog.show();
-        }
-
-    }
     public void generateToken(){
         Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, true);
         new Thread(() -> {
