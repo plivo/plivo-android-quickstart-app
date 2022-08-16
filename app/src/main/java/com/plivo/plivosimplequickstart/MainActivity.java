@@ -8,6 +8,7 @@ import static com.plivo.plivosimplequickstart.Utils.stopVibrating;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -22,6 +23,7 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -36,6 +38,8 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -54,7 +58,6 @@ import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
 
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -112,6 +115,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
         password = Pref.newInstance(MainActivity.this).getString(Constants.PASSWORD);
 
+        checkPermission();
+
         constraintLayout = findViewById(R.id.cl_main);
         progressBar = findViewById(R.id.progress_bar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -124,6 +129,28 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             init();
         }
     }
+
+
+    public void checkPermission() {
+        Log.d(TAG, "checkPermission: ");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                Intent myIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                someActivityResultLauncher.launch(myIntent);
+            }
+        }
+    }
+
+
+    ActivityResultLauncher<Intent> someActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+
+                }
+            });
+
+
 
     public JWT getDecodedJwt(String jwt) {
         return new JWT(jwt);
