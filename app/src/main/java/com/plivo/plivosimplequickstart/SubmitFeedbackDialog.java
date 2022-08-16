@@ -2,6 +2,7 @@ package com.plivo.plivosimplequickstart;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RatingBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,11 +25,15 @@ import java.util.Map;
 
 public class SubmitFeedbackDialog extends DialogFragment {
 
+    private static final String TAG = "SubmitFeedbackDialog";
+
     RatingBar callRatingView;
     EditText commentTextView;
     CheckBox sendLogsBox;
     Button submitFeedbackButton;
     Button skipFeedbackButton;
+    ListView listView;
+    TextView commentTextViewHead;
 
 
     public static Map<String, String> DEFAULT_COMMENTS = new HashMap<String, String>() {{
@@ -43,6 +49,8 @@ public class SubmitFeedbackDialog extends DialogFragment {
         put("OTHERS", "others");
         put("ROBOTIC AUDIO", "robotic_audio");
     }};
+
+
 
     ArrayList<String> selectedIssueList = new ArrayList<>();
 
@@ -63,12 +71,13 @@ public class SubmitFeedbackDialog extends DialogFragment {
         sendLogsBox = view.findViewById(R.id.sendlogs_toggle);
         submitFeedbackButton = view.findViewById(R.id.submit_feedback_bt);
         skipFeedbackButton = view.findViewById(R.id.skip_feedback_bt);
+        listView = (ListView) view.findViewById(R.id.issue_list);
+        commentTextViewHead = view.findViewById(R.id.comment_text_view);
 
         List<String> issueNameList = new ArrayList<String>(DEFAULT_COMMENTS.keySet());
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getContext(), R.layout.issue_item, issueNameList);
 
-        ListView listView = (ListView) view.findViewById(R.id.issue_list);
+
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((arg0, arg1, position, id) -> {
 
@@ -83,12 +92,39 @@ public class SubmitFeedbackDialog extends DialogFragment {
 
 
         submitFeedbackButton.setOnClickListener(v -> {
+            if(callRatingView.getRating() == 5.0) resetValues();
             ((App) v.getContext().getApplicationContext()).backend().submitFeedback(callRatingView.getRating(),selectedIssueList,commentTextView.getText().toString(),sendLogsBox.isChecked());
             dismiss();
         });
 
         skipFeedbackButton.setOnClickListener(v->dismiss());
 
+
+
+        callRatingView.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
+            Log.d(TAG, "onRatingChanged: "+rating);
+            if(rating==5) {
+                commentTextView.setVisibility(View.GONE);
+                sendLogsBox.setVisibility(View.GONE);
+                commentTextView.setVisibility(View.GONE);
+                listView.setVisibility(View.GONE);
+                commentTextViewHead.setVisibility(View.GONE);
+            }else{
+                commentTextView.setVisibility(View.VISIBLE);
+                sendLogsBox.setVisibility(View.VISIBLE);
+                commentTextView.setVisibility(View.VISIBLE);
+                listView.setVisibility(View.VISIBLE);
+                commentTextViewHead.setVisibility(View.VISIBLE);
+            }
+        });
+
+
+    }
+
+    private void resetValues() {
+        selectedIssueList.clear();
+        commentTextView.setText("");
+        sendLogsBox.setChecked(false);
     }
 
 

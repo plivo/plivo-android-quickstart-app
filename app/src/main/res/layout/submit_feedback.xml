@@ -34,13 +34,14 @@
         app:layout_constraintTop_toBottomOf="@+id/head" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/comment_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:text="Comment"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,13 +54,15 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
+        android:maxLength="279"
         android:ems="10"
         android:gravity="start|top"
         android:inputType="textMultiLine"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/comment_text_view" />
 
     <CheckBox
         android:id="@+id/sendlogs_toggle"
@@ -69,6 +72,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
         android:text="send logs"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,39 +84,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.808"
         app:layout_constraintStart_toEndOf="@+id/sendlogs_toggle"
         app:layout_constraintTop_toBottomOf="@+id/sendlogs_toggle" />
 
-    <TextView
-        android:id="@+id/selected_issue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:text=""
-        android:visibility="gone"
-        android:textColor="@color/colorAccent"
-        app:layout_constraintBottom_toTopOf="@+id/issue_list"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/sendlogs_toggle"
-        app:layout_constraintTop_toBottomOf="@+id/comment_text" />
-
-    <TextView
-        android:id="@+id/issue_chosen_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:saveEnabled="true"
-        android:visibility="gone"
-        android:text="Issue chosen: "
-        app:layout_constraintBottom_toTopOf="@+id/issue_list"
-        app:layout_constraintEnd_toStartOf="@+id/selected_issue"
-        app:layout_constraintHorizontal_bias="0.9"
-        app:layout_constraintStart_toEndOf="@+id/sendlogs_toggle"
-        app:layout_constraintTop_toBottomOf="@+id/comment_text" />
 
     <Button
         android:id="@+id/submit_feedback_bt"
