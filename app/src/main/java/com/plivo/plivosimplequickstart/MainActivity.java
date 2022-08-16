@@ -146,7 +146,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK) {
-
+                    Log.d(TAG, ":ACTION_MANAGE_OVERLAY_PERMISSION granted ");
+                }else{
+                    Log.d(TAG, "ACTION_MANAGE_OVERLAY_PERMISSION: denied ");
                 }
             });
 
