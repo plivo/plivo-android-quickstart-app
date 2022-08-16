@@ -54,6 +54,7 @@ import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -95,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     ConstraintLayout parentPanel;
     private ProgressDialog progressDialog;
     boolean activeCall = false;
+    private boolean isLoginForIncomingWithTokenGenerator = false;
+    private HashMap<String, String> payload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         } else {
             init();
         }
-   }
+    }
 
     public JWT getDecodedJwt(String jwt) {
         return new JWT(jwt);
@@ -141,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        Log.d("MainActivity", "onNewIntent");
         String action = intent.getAction();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (Constants.ANSWER_ACTION.equals(action)) {
@@ -152,6 +156,9 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             rejectCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
             Utils.stopVibrating();
+        }else{
+            Log.d("MainActivity", "onNewIntent | loginWithToken");
+            loginWithToken(intent);
         }
     }
 
@@ -190,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         return super.dispatchTouchEvent(ev);
     }
 
-
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: ");
@@ -218,28 +224,66 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void loginWithToken() {
-        Log.d("@@Incoming", "loginWithToken "+Utils.getLoggedinStatus());
-        if (Utils.getLoggedinStatus()) {
+        boolean isLoginForIncoming = getIntent().getBooleanExtra(Constants.LAUNCH_ACTION, false);
+        boolean tokenGenerator = getIntent().getBooleanExtra(Constants.JWT_ACCESS_TOKEN_GENERATOR, false);
+        payload = (HashMap<String, String>) getIntent().getSerializableExtra(Constants.PAYLOAD);
+        Log.d("****@@Incoming", "isLoginForIncoming " + isLoginForIncoming);
+        Log.d("****@@Incoming", "loginWithToken " + Utils.getLoggedinStatus());
+
+        isLoginForIncomingWithTokenGenerator = tokenGenerator;
+        if ((Utils.getLoggedinStatus() || isLoginForIncoming) && !tokenGenerator) {
             updateUI(STATE.IDLE, null);
             callData = Utils.getIncoming();
             if (callData != null) {
-                Log.d("@@Incoming", "loginWithToken | callData not null");
+                Log.d("****@@Incoming", "loginWithToken | callData not null");
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
             }
-        }else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
-            Log.d(TAG, "loginWithToken: login with token");
+        } else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
+            Log.d(TAG, "****loginWithToken: login with token");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token));
-        }else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
-            Log.d(TAG, "loginWithToken: login with accessToken generator");
+        } else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+            Log.d(TAG, "****loginWithToken: login with accessToken generator");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
             ((App) getApplication()).backend().loginWithAccessTokenGenerator();
-        }
-        else {
-            Log.d("@@Incoming", "loginWithToken | is not logged in");
+        } else {
+            Log.d("****@@Incoming", "loginWithToken | is not logged in");
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
                     ((App) getApplication()).backend().login(instanceIdResult.getToken(), username, password));
+        }
+    }
+
+    public void loginWithToken(Intent intent) {
+        boolean isLoginForIncoming = intent.getBooleanExtra(Constants.LAUNCH_ACTION, false);
+        boolean tokenGenerator = intent.getBooleanExtra(Constants.JWT_ACCESS_TOKEN_GENERATOR, false);
+        payload = (HashMap<String, String>) intent.getSerializableExtra(Constants.PAYLOAD);
+//        Log.d("****@@Incoming", "isLoginForIncoming " + isLoginForIncoming);
+        Log.d("****@@Incoming", "loginWithToken " + Utils.getLoggedinStatus());
+
+        isLoginForIncomingWithTokenGenerator = tokenGenerator;
+        if ((Utils.getLoggedinStatus()) && !tokenGenerator) {
+            updateUI(STATE.IDLE, null);
+            callData = Utils.getIncoming();
+            if (callData != null) {
+                Log.d("****@@Incoming", "loginWithToken | callData not null");
+                showInCallUI(STATE.RINGING, Utils.getIncoming());
+            }
+        } else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
+            Log.d(TAG, "****loginWithToken: login with token");
+            String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
+            HashMap<String, String> finalPayload = payload;
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token, finalPayload));
+        } else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+            Log.d(TAG, "****loginWithToken: login with accessToken generator");
+            String token = Pref.newInstance(MainActivity.this).getString(Constants.LOGIN_USERNAME);
+            ((App) getApplication()).backend().loginWithAccessTokenGenerator();
+        } else {
+            Log.d("****@@Incoming", "loginWithToken | is not logged in");
+            HashMap<String, String> finalPayload1 = payload;
+            FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
+                    ((App) getApplication()).backend().loginForIncomingWithUsername(username, password,instanceIdResult.getToken(),"",0, finalPayload1));
         }
     }
 
@@ -262,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
         String title = state.name();
         TextView callerState;
-        Log.d(TAG, "showOutCallUI: "+ state);
+        Log.d(TAG, "showOutCallUI: " + state);
         switch (state) {
             case IDLE:
                 EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
@@ -308,7 +352,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
      * @param incoming
      */
     private void showInCallUI(STATE state, Incoming incoming) {
-        Log.d(TAG, "showInCallUI: "+state);
+        Log.d(TAG, "****showInCallUI: " + state);
 
         String title = (incoming != null ? Utils.from(incoming.getFromContact(), incoming.getFromSip()) : "");
 
@@ -325,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 break;
 
             case RINGING:
-                Log.d(TAG, "showInCallUI: ringingF");
+                Log.d(TAG, "****showInCallUI: ringingF");
                 notificationDialog(title, incoming);
                 break;
             case HANGUP:
@@ -609,9 +653,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void updateUI(PlivoBackEnd.STATE state, Object data) {
-        Log.d(TAG, "updateUI: "+state);
+        Log.d(TAG, "****updateUI: " + state);
         callData = data;
         if (state.equals(STATE.REJECTED) || state.equals(STATE.HANGUP) || state.equals(STATE.INVALID)) {
+            Log.d(TAG, "****updateUI: REJECTED,HANGUP,INVALID");
             if (data != null) {
                 if (data instanceof Outgoing) {
                     // handle outgoing
@@ -659,13 +704,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onLogin(boolean success) {
 
-        Log.d(TAG, "onLogin: "+success);
+        Log.d(TAG, "****onLogin: " + success);
         runOnUiThread(() -> {
             if (success) {
-                if(!isLoginFirstTime) isLoginFirstTime = true;
-                if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+                if (!isLoginFirstTime) isLoginFirstTime = true;
+                if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
                     username = ((App) getApplication()).backend().getJWTUserName();
-                    Log.d(TAG, "onLogin:abhishek  "+username);
+                    Log.d(TAG, "onLogin:abhishek  " + username);
                     Pref.newInstance(MainActivity.this).setString(USERNAME, username);
                     ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 }
@@ -678,7 +723,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLoginFailed(String message) {
-        Log.d(TAG, "onLoginFailed: ");
+        Log.d(TAG, "****onLoginFailed: ");
         runOnUiThread(() -> {
             setContentView(R.layout.activity_main);
             parentPanel = findViewById(R.id.parentPanel);
@@ -690,7 +735,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogout() {
-        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
 //        Utils.setLoggedinStatus(false);
@@ -700,10 +745,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onIncomingCall(Incoming data, PlivoBackEnd.STATE callState) {
-
+        Log.d("****Incoming", "onIncomingCall");
         runOnUiThread(() -> {
             if (data != null) {
-                Log.d("TAG", "incoming data is not null");
+                Log.d("****TAG", "incoming data is not null");
             }
             if (outgoing != null) {
                 outgoing = null;
@@ -742,33 +787,32 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         parentPanel = findViewById(R.id.parentPanel);
         Snackbar snackbar = Snackbar.make(parentPanel, message, Snackbar.LENGTH_LONG);
         snackbar.show();
-}
+    }
 
     @Override
     public void getAccessToken() {
         Log.d(TAG, "getAccessToken: ");
         this.runOnUiThread(() -> {
             setContentView(R.layout.activity_main);
-            if(isLoginFirstTime) createDialog();
-            else generateToken();
+            generateToken();
         });
     }
 
     private void createDialog() {
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
-            switch (which){
+            switch (which) {
                 case DialogInterface.BUTTON_POSITIVE:
-                        dialog.cancel();
-                        generateToken();
+                    dialog.cancel();
+                    generateToken();
                     break;
 
                 case DialogInterface.BUTTON_NEGATIVE:
                     dialog.cancel();
-                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(intent);
                     finish();
-                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
-                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME,false);
+                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN, false);
+                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, false);
                     break;
             }
         };
@@ -778,11 +822,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
 
-
-
-
     public void showRateDialog() {
-        if(activeCall) {
+        if (activeCall) {
             final AlertDialog.Builder popDialog = new AlertDialog.Builder(this);
             final RatingBar rating = new RatingBar(this);
             rating.setNumStars(5);
@@ -792,10 +833,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             popDialog.setView(rating);
 
             popDialog.setPositiveButton(android.R.string.ok,
-                    (dialog, which) -> {
-                        ((App) getApplication()).backend().submitFeedback(rating.getRating());
-                        dialog.dismiss();
-                    })
+                            (dialog, which) -> {
+                                ((App) getApplication()).backend().submitFeedback(rating.getRating());
+                                dialog.dismiss();
+                            })
 
                     .setNegativeButton("Cancel",
                             (dialog, id) -> dialog.cancel());
@@ -805,20 +846,21 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
 
     }
-    public void generateToken(){
+
+    public void generateToken() {
         Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, true);
         new Thread(() -> {
             String sub;
             sub = Pref.newInstance(getApplicationContext()).getString(Constants.LOGIN_USERNAME);
-            if(sub.isEmpty()) sub = "plivoUser";
+            if (sub.isEmpty()) sub = "plivoUser";
             long nbf = System.currentTimeMillis() / 1000;
-            long exp = nbf+240;
+            long exp = nbf + 240;
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             MediaType mediaType = MediaType.parse("application/json");
-            Log.d(TAG, "generateToken: sub: "+ sub);
-            Log.d(TAG, "generateToken: nbf: "+ nbf);
-            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \""+sub+"\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": "+ exp +"\n}\n");
+            Log.d(TAG, "generateToken: sub: " + sub);
+            Log.d(TAG, "generateToken: nbf: " + nbf);
+            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \"" + sub + "\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": " + exp + "\n}\n");
             Request request = new Request.Builder()
                     .url("https://api.plivo.com/v1/Account/MAY2RJNZKZNJMWOTG4NT/JWT/Token")
                     .method("POST", body)
@@ -827,32 +869,36 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     .build();
             try {
                 runOnUiThread(() -> {
-                            progressDialog.setMessage("generating..");
-                            progressDialog.show();
-                        });
+                    progressDialog.setMessage("generating..");
+                    progressDialog.show();
+                });
                 Response response = client.newCall(request).execute();
                 progressDialog.dismiss();
                 String responseData = response.body().string();
-                Log.d(TAG, "run: generateToken "+responseData);
+                Log.d(TAG, "run: generateToken " + responseData);
 
-                if(response.code() == 200){
+                if (response.code() == 200) {
                     JSONObject jsonResponse = new JSONObject(responseData);
                     String token = jsonResponse.getString("token");
-                    Log.d(TAG, "run: generateToken jwtToken"+ token);
+                    Log.d(TAG, "run: generateToken jwtToken" + token);
                     Pref.newInstance(getApplicationContext()).setString(Constants.JWT_ACCESS_TOKEN, token);
                     runOnUiThread(() -> {
                         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
-                            Log.d(TAG, "generateToken: device-token"+instanceIdResult.getToken());
-                            ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
+                            Log.d(TAG, "generateToken: device-token" + instanceIdResult.getToken());
+                            if (isLoginForIncomingWithTokenGenerator && payload != null) {
+                                ((App) getApplication()).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token, payload);
+                            } else {
+                                ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
+                            }
                         });
                         progressDialog.dismiss();
                     });
-                }else{
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this,response.message(),Toast.LENGTH_LONG).show());
+                } else {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, response.message(), Toast.LENGTH_LONG).show());
                     progressDialog.dismiss();
                 }
             } catch (Exception e) {
-                Log.d(TAG, "run: generateToken "+ e);
+                Log.d(TAG, "run: generateToken " + e);
                 e.printStackTrace();
             }
         }).start();

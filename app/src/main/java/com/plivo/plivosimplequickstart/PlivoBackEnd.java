@@ -50,7 +50,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
 
     public void init(boolean log) {
 //        endpoint = Endpoint.newInstance(context,log, this);
-
+        Log.d("****PlivoBackEnd", "Init");
         //Initiate SDK with Options, "enableTracking" (To get network related information)
         HashMap options = new HashMap();
         options.put("maxAverageBitrate", 48000);
@@ -70,9 +70,14 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
     public boolean loginWithJwtToken(String token, String JWTToken) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         Utils.setDeviceToken(token);
-        return endpoint.loginWithJwtToken(JWTToken,token);
+        return endpoint.loginWithJwtToken(JWTToken, token);
     }
 
+    public boolean loginForIncomingWithJwt(String token, String JWTToken, HashMap<String, String> incomingData) {
+        Log.d("@@Incoming", "Endpoint loginWithJwtToken");
+        Utils.setDeviceToken(token);
+        return endpoint.loginForIncomingWithJwt(JWTToken, token, incomingData);
+    }
 
     public void loginWithJwtToken(String JWTToken) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
@@ -87,22 +92,23 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
     public void registerListener(Context context) {
         endpoint.registerNetworkChangeReceiver(context);
     }
+
     public void unregisterListener(Context context) {
         endpoint.unregisterNetworkChangeReceiver(context);
     }
 
     public boolean loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
-        return  endpoint.loginWithAccessTokenGenerator(this);
+        return endpoint.loginWithAccessTokenGenerator(this);
     }
 
     public void logout() {
         endpoint.logout();
     }
 
-    public void relayIncomingPushData(HashMap<String, String> incomingData) {
+    public void loginForIncomingWithUsername(String username, String password, String deviceToken, String certificateId, int regTimeOut, HashMap<String, String> incomingData) {
         if (incomingData != null && !incomingData.isEmpty()) {
-            endpoint.relayVoipPushNotification(incomingData);
+            endpoint.loginForIncomingWithUsername(username, password, deviceToken, certificateId, regTimeOut, incomingData);
         }
     }
 
@@ -162,6 +168,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
     @Override
     public void onIncomingCall(Incoming incoming) {
         Log.d(TAG, Constants.INCOMING_CALL_RINGING);
+        Log.d(TAG, "****onIncomingCall");
         Utils.setIncoming(incoming);
         if (listener != null) listener.onIncomingCall(incoming, STATE.RINGING);
     }
@@ -235,14 +242,15 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
 
     @Override
     public void onPermissionDenied(String message) {
-        Log.d(TAG, "onPermissionDenied: "+message);
+        Log.d(TAG, "onPermissionDenied: " + message);
         listener.onPermissionDenied(message);
     }
 
     @Override
     public void getAccessToken() {
         Log.d(TAG, "onTokenExpired: ");
-        listener.getAccessToken();
+        if (listener != null)
+            listener.getAccessToken();
     }
 
 
