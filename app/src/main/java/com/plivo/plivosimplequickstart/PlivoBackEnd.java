@@ -42,13 +42,6 @@ public class PlivoBackEnd implements EventListener {
         Utils.setDeviceToken(newToken);
     }
 
-    public void registerListener(Context context) {
-        endpoint.registerNetworkChangeReceiver(context);
-    }
-    public void unregisterListener(Context context) {
-        endpoint.unregisterNetworkChangeReceiver(context);
-    }
-
     public boolean loginForIncoming(String newToken, String username, String password) {
         Log.d("@@Incoming","loginForIncoming");
         return endpoint.login(username, password, newToken);
