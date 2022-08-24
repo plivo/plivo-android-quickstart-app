@@ -9,6 +9,7 @@ import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.FeedbackCallback;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
+import com.plivo.endpoint.slf4j.helpers.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
 
     public void submitFeedback(float rating, ArrayList<String> issue,String comment, boolean sendLogs) {
-        endpoint.submitCallQualityFeedback(endpoint.getLastCallUUID(), (int) rating, issue, comment, sendLogs, new FeedbackCallback() {
+        endpoint.submitCallQualityFeedback((int) rating, issue, comment, sendLogs, new FeedbackCallback() {
             @Override
             public void onFailure(int statusCode) {
                 Log.d("@@Feedback", "onFailure: ");
@@ -50,7 +51,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
 //        endpoint = Endpoint.newInstance(context,log, this);
 
         //Initiate SDK with Options, "enableTracking" (To get network related information)
-        HashMap options = new HashMap();
+        HashMap options = Utils.options;
         options.put("maxAverageBitrate", 48000);
         endpoint = Endpoint.newInstance(context, log, this, options);
     }

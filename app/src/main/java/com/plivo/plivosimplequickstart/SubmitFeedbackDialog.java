@@ -37,17 +37,17 @@ public class SubmitFeedbackDialog extends DialogFragment {
 
 
     public static Map<String, String> DEFAULT_COMMENTS = new HashMap<String, String>() {{
-        put("AUDIO LAG", "audio_lag");
-        put("BROKEN AUDIO", "broken_audio");
-        put("CALL DROPPED", "call_dropped");
-        put("CALLERID ISSUES", "callerid_issue");
-        put("DIGITS NOT CAPTURED", "digits_not_captured");
+        put("AUDIO_LAG", "audio_lag");
+        put("BROKEN_AUDIO", "broken_audio");
+        put("CALL_DROPPED", "call_dropped");
+        put("CALLERID_ISSUES", "callerid_issue");
+        put("DIGITS_NOT_CAPTURED", "digits_not_captured");
         put("ECHO", "echo");
-        put("HIGH CONNECT_TIME", "high_connect_time");
-        put("LOW AUDIO LEVEL", "low_audio_level");
-        put("ONE WAY AUDIO", "one_way_audio");
+        put("HIGH_CONNECT_TIME", "high_connect_time");
+        put("LOW_AUDIO_LEVEL", "low_audio_level");
+        put("ONE_WAY_AUDIO", "one_way_audio");
         put("OTHERS", "others");
-        put("ROBOTIC AUDIO", "robotic_audio");
+        put("ROBOTIC_AUDIO", "robotic_audio");
     }};
 
 
@@ -75,14 +75,14 @@ public class SubmitFeedbackDialog extends DialogFragment {
         commentTextViewHead = view.findViewById(R.id.comment_text_view);
 
         List<String> issueNameList = new ArrayList<String>(DEFAULT_COMMENTS.keySet());
+        List<String> issueList = new ArrayList<String>(DEFAULT_COMMENTS.values());
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getContext(), R.layout.issue_item, issueNameList);
-
 
         listView.setAdapter(adapter);
         listView.setOnItemClickListener((arg0, arg1, position, id) -> {
 
             if(!selectedIssueList.contains(issueNameList.get(position))){
-                selectedIssueList.add(issueNameList.get(position));
+                selectedIssueList.add(issueList.get(position));
                 listView.getChildAt(position).setBackgroundColor(Color.RED);
             }else{
                 selectedIssueList.remove(issueNameList.get(position));
