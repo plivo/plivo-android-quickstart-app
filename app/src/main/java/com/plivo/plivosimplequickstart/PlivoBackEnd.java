@@ -9,6 +9,7 @@ import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.FeedbackCallback;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
+import com.plivo.endpoint.slf4j.helpers.Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +53,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
 //        endpoint = Endpoint.newInstance(context,log, this);
         Log.d("****PlivoBackEnd", "Init");
         //Initiate SDK with Options, "enableTracking" (To get network related information)
-        HashMap options = new HashMap();
+        HashMap options = Utils.options;
         options.put("maxAverageBitrate", 48000);
         endpoint = Endpoint.newInstance(context, log, this, options);
     }
