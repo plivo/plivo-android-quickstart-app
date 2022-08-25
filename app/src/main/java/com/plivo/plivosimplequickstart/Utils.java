@@ -5,8 +5,8 @@ import android.content.SharedPreferences;
 import android.os.Vibrator;
 import android.text.TextUtils;
 
+import com.plivo.endpoint.CallAndMediaMetrics;
 import com.plivo.endpoint.Incoming;
-import com.plivo.endpoint.Tracking;
 
 import java.util.HashMap;
 
@@ -35,7 +35,7 @@ public class Utils {
 
     public static HashMap<String, Object> options = new HashMap<String, Object>() {{
 //        put("enableTracking", Tracking.NONE);
-//        put("enableQualityTracking", Tracking.ALL);
+        put("enableQualityTracking", CallAndMediaMetrics.ALL);
     }};
 
     static String getDeviceToken() {
