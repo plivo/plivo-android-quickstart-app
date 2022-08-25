@@ -717,13 +717,13 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     public void onLogin(boolean success) {
 
-        Log.d(TAG, "onLogin: "+success);
+        Log.d(TAG, "****onLogin: " + success);
         runOnUiThread(() -> {
             if (success) {
-                if(!isLoginFirstTime) isLoginFirstTime = true;
-                if(Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
+                if (!isLoginFirstTime) isLoginFirstTime = true;
+                if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN) || Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_USERNAME)) {
                     username = ((App) getApplication()).backend().getJWTUserName();
-                    Log.d(TAG, "onLogin:   "+username);
+                    Log.d(TAG, "onLogin:  " + username);
                     Pref.newInstance(MainActivity.this).setString(USERNAME, username);
                     ((AppCompatTextView) findViewById(R.id.logged_in_as)).setText(username);
                 }
@@ -748,7 +748,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
     @Override
     public void onLogout() {
-        Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
 //        Utils.setLoggedinStatus(false);
@@ -811,71 +811,21 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         });
     }
 
-    private void createDialog() {
-        DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
-            switch (which){
-                case DialogInterface.BUTTON_POSITIVE:
-                        dialog.cancel();
-                        generateToken();
-                    break;
 
-                case DialogInterface.BUTTON_NEGATIVE:
-                    dialog.cancel();
-                    Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-                    startActivity(intent);
-                    finish();
-                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN,false);
-                    Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME,false);
-                    break;
-            }
-        };
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Do you want to generate token?\n Your token expired").setPositiveButton("Yes", dialogClickListener)
-                .setNegativeButton("No", dialogClickListener).show();
-    }
-
-
-
-
-
-    public void showRateDialog() {
-        if(activeCall) {
-            final AlertDialog.Builder popDialog = new AlertDialog.Builder(this);
-            final RatingBar rating = new RatingBar(this);
-            rating.setNumStars(5);
-
-            popDialog.setIcon(android.R.drawable.btn_star_big_on);
-            popDialog.setTitle("Add Rating: ");
-            popDialog.setView(rating);
-
-            popDialog.setPositiveButton(android.R.string.ok,
-                    (dialog, which) -> {
-                        ((App) getApplication()).backend().submitFeedback(rating.getRating());
-                        dialog.dismiss();
-                    })
-
-                    .setNegativeButton("Cancel",
-                            (dialog, id) -> dialog.cancel());
-
-            popDialog.create();
-            popDialog.show();
-        }
-
-    }
-    public void generateToken(){
+    public void generateToken() {
         Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, true);
         new Thread(() -> {
             String sub;
             sub = Pref.newInstance(getApplicationContext()).getString(Constants.LOGIN_USERNAME);
-            if(sub.isEmpty()) sub = "plivoUser";
+            if (sub.isEmpty()) sub = "plivoUser";
             long nbf = System.currentTimeMillis() / 1000;
-            long exp = nbf+240;
+            long exp = nbf + 240;
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .build();
             MediaType mediaType = MediaType.parse("application/json");
-            Log.d(TAG, "generateToken: sub: "+ sub);
-            Log.d(TAG, "generateToken: nbf: "+ nbf);
-            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \""+sub+"\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": "+ exp +"\n}\n");
+            Log.d(TAG, "generateToken: sub: " + sub);
+            Log.d(TAG, "generateToken: nbf: " + nbf);
+            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \"" + sub + "\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": " + exp + "\n}\n");
             Request request = new Request.Builder()
                     .url("https://api.plivo.com/v1/Account/MAY2RJNZKZNJMWOTG4NT/JWT/Token")
                     .method("POST", body)
@@ -884,32 +834,36 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                     .build();
             try {
                 runOnUiThread(() -> {
-                            progressDialog.setMessage("generating..");
-                            progressDialog.show();
-                        });
+                    progressDialog.setMessage("generating..");
+                    progressDialog.show();
+                });
                 Response response = client.newCall(request).execute();
                 progressDialog.dismiss();
                 String responseData = response.body().string();
-                Log.d(TAG, "run: generateToken "+responseData);
+                Log.d(TAG, "run: generateToken " + responseData);
 
-                if(response.code() == 200){
+                if (response.code() == 200) {
                     JSONObject jsonResponse = new JSONObject(responseData);
                     String token = jsonResponse.getString("token");
-                    Log.d(TAG, "run: generateToken jwtToken"+ token);
+                    Log.d(TAG, "run: generateToken jwtToken" + token);
                     Pref.newInstance(getApplicationContext()).setString(Constants.JWT_ACCESS_TOKEN, token);
                     runOnUiThread(() -> {
                         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
-                            Log.d(TAG, "generateToken: device-token"+instanceIdResult.getToken());
-                            ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
+                            Log.d(TAG, "generateToken: device-token" + instanceIdResult.getToken());
+                            if (isLoginForIncomingWithTokenGenerator && payload != null) {
+                                ((App) getApplication()).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token, payload);
+                            } else {
+                                ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
+                            }
                         });
                         progressDialog.dismiss();
                     });
-                }else{
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this,response.message(),Toast.LENGTH_LONG).show());
+                } else {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, response.message(), Toast.LENGTH_LONG).show());
                     progressDialog.dismiss();
                 }
             } catch (Exception e) {
-                Log.d(TAG, "run: generateToken "+ e);
+                Log.d(TAG, "run: generateToken " + e);
                 e.printStackTrace();
             }
         }).start();
