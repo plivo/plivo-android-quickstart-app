@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 Log.d("****@@Incoming", "loginWithToken | callData not null");
                 showInCallUI(STATE.RINGING, Utils.getIncoming());
             }
-77        } else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
+        } else if (Pref.newInstance(MainActivity.this).getBoolean(Constants.IS_LOGIN_WITH_TOKEN)) {
             Log.d(TAG, "****loginWithToken: login with token");
             String token = Pref.newInstance(MainActivity.this).getString(Constants.JWT_ACCESS_TOKEN);
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
