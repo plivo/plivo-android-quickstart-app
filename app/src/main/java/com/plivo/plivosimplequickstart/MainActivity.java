@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             Log.d("****@@Incoming", "loginWithToken | is not logged in");
             HashMap<String, String> finalPayload1 = payload;
             FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult ->
-                    ((App) getApplication()).backend().loginForIncomingWithUsername(username, password,instanceIdResult.getToken(),"",0, finalPayload1));
+                    ((App) getApplication()).backend().loginForIncomingWithUsername(username, password,instanceIdResult.getToken(),"", finalPayload1));
         }
     }
 

@@ -40,7 +40,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
             } else if (isLoginWithTokenGenerator){
                 //Do nothing just go to MainActivity & handle things there
             }else {
-                ((App) getApplication()).backend().loginForIncomingWithUsername(username, password, deviceToken, "", 0, pushMap);
+                ((App) getApplication()).backend().loginForIncomingWithUsername(username, password, deviceToken, "",  pushMap);
                 Log.d(TAG, "onMessageReceived | loginForIncomingWithUsername");
             }
 

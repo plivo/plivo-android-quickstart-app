@@ -105,9 +105,9 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         endpoint.logout();
     }
 
-    public void loginForIncomingWithUsername(String username, String password, String deviceToken, String certificateId, int regTimeOut, HashMap<String, String> incomingData) {
+    public void loginForIncomingWithUsername(String username, String password, String deviceToken, String certificateId, HashMap<String, String> incomingData) {
         if (incomingData != null && !incomingData.isEmpty()) {
-            endpoint.loginForIncomingWithUsername(username, password, deviceToken, certificateId, regTimeOut, incomingData);
+            endpoint.loginForIncomingWithUsername(username, password, deviceToken, certificateId, incomingData);
         }
     }
 
