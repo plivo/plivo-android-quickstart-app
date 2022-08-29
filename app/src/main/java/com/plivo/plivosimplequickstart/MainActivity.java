@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isInstantiated = true;
         setContentView(R.layout.activity_main);
         progressDialog = new ProgressDialog(this);
-        ((App) getApplication()).backend().registerListener(this);
         actionBar = getSupportActionBar();
 
         username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
@@ -208,14 +207,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
         }
         return super.dispatchTouchEvent(ev);
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
-        ((App) getApplication()).backend().unregisterListener(this);
-        super.onDestroy();
-
     }
 
     @Override

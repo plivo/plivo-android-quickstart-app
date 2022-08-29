@@ -88,14 +88,6 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         return endpoint.getSub_auth_ID();
     }
 
-    public void registerListener(Context context) {
-        endpoint.registerNetworkChangeReceiver(context);
-    }
-
-    public void unregisterListener(Context context) {
-        endpoint.unregisterNetworkChangeReceiver(context);
-    }
-
     public boolean loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
         return endpoint.loginWithAccessTokenGenerator(this);
