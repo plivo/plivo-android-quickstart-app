@@ -480,7 +480,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("X-PH-Header1", "Value1");
             headers.put("X-PH-Header2", "Value2");
-            if (!outgoing.call("zeeshan09679679868913864", headers)) {
+            if (!outgoing.call(phoneNum, headers)) {
                 updateUI(STATE.INVALID, outgoing);
             }
         }
