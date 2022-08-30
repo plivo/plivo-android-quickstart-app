@@ -65,12 +65,12 @@ dependencies {
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
     implementation 'com.google.android.material:material:1.0.0'
-    implementation 'com.plivo.endpoint:endpoint:3.0.2-beta.0@aar'
+//    implementation 'com.plivo.endpoint:endpoint:3.0.2-beta.0@aar'
 
     implementation 'org.webrtc:google-webrtc:1.0.32006'
     implementation 'com.google.firebase:firebase-core:16.0.5'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
-//    implementation project(path: ':PlivoEndpoint')
+    implementation project(path: ':PlivoEndpoint')
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
