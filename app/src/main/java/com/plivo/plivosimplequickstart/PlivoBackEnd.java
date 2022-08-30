@@ -3,15 +3,39 @@ package com.plivo.plivosimplequickstart;
 import android.content.Context;
 import android.util.Log;
 
+import com.plivo.endpoint.AccessTokenListener;
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
+import com.plivo.endpoint.FeedbackCallback;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
+import com.plivo.endpoint.slf4j.helpers.Util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PlivoBackEnd implements EventListener {
+public class PlivoBackEnd implements EventListener, AccessTokenListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
+
+    public void submitFeedback(float rating, ArrayList<String> issue,String comment, boolean sendLogs) {
+        endpoint.submitCallQualityFeedback((int) rating, issue, comment, sendLogs, new FeedbackCallback() {
+            @Override
+            public void onFailure(int statusCode) {
+                Log.d("@@Feedback", "onFailure: ");
+            }
+
+            @Override
+            public void onSuccess(String response) {
+                Log.d("@@Feedback", "onSuccess: ");
+            }
+
+            @Override
+            public void onValidationFail(String message) {
+                Log.d("@@Feedback", "onValidationFail: ");
+            }
+        });
+    }
+
 
     enum STATE {IDLE, PROGRESS, RINGING, ANSWERED, HANGUP, REJECTED, INVALID;}
 
@@ -25,35 +49,59 @@ public class PlivoBackEnd implements EventListener {
 
     public void init(boolean log) {
 //        endpoint = Endpoint.newInstance(context,log, this);
-
+        Log.d("****PlivoBackEnd", "Init");
         //Initiate SDK with Options, "enableTracking" (To get network related information)
-        HashMap options = new HashMap();
+        HashMap options = Utils.options;
         options.put("maxAverageBitrate", 48000);
-        endpoint = Endpoint.newInstance(context, log, this, options);
+        endpoint = Endpoint.newInstance(context, log, this);
     }
 
     public void setListener(BackendListener listener) {
         this.listener = listener;
     }
 
-    public void login(String newToken, String username, String password) {
+    public boolean login(String newToken, String username, String password) {
         Log.d("@@Incoming", "Endpoint login");
-        endpoint.login(username, password, newToken);
         Utils.setDeviceToken(newToken);
-    }
-
-    public boolean loginForIncoming(String newToken, String username, String password) {
-        Log.d("@@Incoming","loginForIncoming");
         return endpoint.login(username, password, newToken);
     }
+
+    public boolean loginWithJwtToken(String token, String JWTToken) {
+        Log.d("@@Incoming", "Endpoint loginWithJwtToken");
+        Utils.setDeviceToken(token);
+        return endpoint.loginWithJwtToken(JWTToken, token);
+    }
+
+    public boolean loginForIncomingWithJwt(String token, String JWTToken, HashMap<String, String> incomingData) {
+        Log.d("@@Incoming", "Endpoint loginWithJwtToken");
+        Utils.setDeviceToken(token);
+        return endpoint.loginForIncomingWithJwt(JWTToken, token, incomingData);
+    }
+
+    public void loginWithJwtToken(String JWTToken) {
+        Log.d("@@Incoming", "Endpoint loginWithJwtToken");
+        endpoint.loginWithJwtToken(JWTToken);
+    }
+
+
+    public String getJWTUserName() {
+        return endpoint.getSub_auth_ID();
+    }
+
+
+    public boolean loginWithAccessTokenGenerator() {
+        Log.d(TAG, "loginWithAccessTokenGenerator: ");
+        return endpoint.loginWithAccessTokenGenerator(this);
+    }
+
 
     public void logout() {
         endpoint.logout();
     }
 
-    public void relayIncomingPushData(HashMap<String, String> incomingData) {
+    public void loginForIncomingWithUsername(String username, String password, String deviceToken, String certificateId, HashMap<String, String> incomingData) {
         if (incomingData != null && !incomingData.isEmpty()) {
-            endpoint.relayVoipPushNotification(incomingData);
+            endpoint.loginForIncomingWithUsername(username, password, deviceToken, certificateId, incomingData);
         }
     }
 
@@ -69,6 +117,10 @@ public class PlivoBackEnd implements EventListener {
         this.context = context;
     }
 
+    public boolean getRegistered() {
+        return endpoint.getRegistered();
+    }
+
     // Plivo SDK callbacks
     @Override
     public void onLogin() {
@@ -81,14 +133,24 @@ public class PlivoBackEnd implements EventListener {
     @Override
     public void onLogout() {
         Log.d(TAG, Constants.LOGOUT_SUCCESS);
-        Pref.newInstance(getContext()).clear();
-        if (listener != null) listener.onLogout();
+        Pref.newInstance(context.getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_TOKEN, false);
+        Pref.newInstance(context.getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, false);
+        Pref.newInstance(context.getApplicationContext()).setBoolean(Constants.LOG_IN, false);
+        Utils.setLoggedinStatus(false);
+        listener.onLogout();
+//        if (listener != null) listener. cf();
     }
 
     @Override
     public void onLoginFailed() {
         Log.e(TAG, Constants.LOGIN_FAILED);
         if (listener != null) listener.onLogin(false);
+    }
+
+    @Override
+    public void onLoginFailed(String message) {
+        Log.e(TAG, Constants.LOGIN_FAILED + message);
+        if (listener != null) listener.onLoginFailed(message);
     }
 
     @Override
@@ -99,6 +161,7 @@ public class PlivoBackEnd implements EventListener {
     @Override
     public void onIncomingCall(Incoming incoming) {
         Log.d(TAG, Constants.INCOMING_CALL_RINGING);
+        Log.d(TAG, "****onIncomingCall");
         Utils.setIncoming(incoming);
         if (listener != null) listener.onIncomingCall(incoming, STATE.RINGING);
     }
@@ -170,9 +233,25 @@ public class PlivoBackEnd implements EventListener {
     }
 
 
+    @Override
+    public void onPermissionDenied(String message) {
+        Log.d(TAG, "onPermissionDenied: " + message);
+        listener.onPermissionDenied(message);
+    }
+
+    @Override
+    public void getAccessToken() {
+        Log.d(TAG, "onTokenExpired: ");
+        if (listener != null)
+            listener.getAccessToken();
+    }
+
+
     // Your own custom listener
     public interface BackendListener {
         void onLogin(boolean success);
+
+        void onLoginFailed(String message);
 
         void onLogout();
 
@@ -183,5 +262,9 @@ public class PlivoBackEnd implements EventListener {
         void onIncomingDigit(String digit);
 
         void mediaMetrics(HashMap messageTemplate);
+
+        void onPermissionDenied(String message);
+
+        void getAccessToken();
     }
 }
