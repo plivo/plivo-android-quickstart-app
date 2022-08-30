@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isInstantiated = true;
         setContentView(R.layout.activity_main);
         progressDialog = new ProgressDialog(this);
-        ((App) getApplication()).backend().registerListener(this);
+
         actionBar = getSupportActionBar();
 
         username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
@@ -213,7 +213,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: ");
-        ((App) getApplication()).backend().unregisterListener(this);
         super.onDestroy();
 
     }
@@ -481,7 +480,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("X-PH-Header1", "Value1");
             headers.put("X-PH-Header2", "Value2");
-            if (!outgoing.call(phoneNum, headers)) {
+            if (!outgoing.call("zeeshan09679679868913864", headers)) {
                 updateUI(STATE.INVALID, outgoing);
             }
         }
@@ -490,10 +489,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     public void onClickBtnMakeCall(View view) {
         EditText phoneNumberText = (EditText) findViewById(R.id.call_text);
         String phoneNumber = phoneNumberText.getText().toString();
-        if (phoneNumber.matches("")) {
-            Toast.makeText(this, Constants.OUTGOING_CALL_DIAL_HINT, Toast.LENGTH_SHORT).show();
-            return;
-        }
+//        if (phoneNumber.matches("")) {
+//            Toast.makeText(this, Constants.OUTGOING_CALL_DIAL_HINT, Toast.LENGTH_SHORT).show();
+//            return;
+//        }
         showOutCallUI(STATE.IDLE, null);
     }
 

@@ -58,7 +58,6 @@ public class App extends Application {
         return backend;
     }
 
-
     /* Checks if external storage is available for read and write */
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
