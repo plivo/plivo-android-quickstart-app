@@ -53,7 +53,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         //Initiate SDK with Options, "enableTracking" (To get network related information)
         HashMap options = Utils.options;
         options.put("maxAverageBitrate", 48000);
-        endpoint = Endpoint.newInstance(context, log, this, options);
+        endpoint = Endpoint.newInstance(context, log, this);
     }
 
     public void setListener(BackendListener listener) {
@@ -88,18 +88,12 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         return endpoint.getSub_auth_ID();
     }
 
-    public void registerListener(Context context) {
-        endpoint.registerNetworkChangeReceiver(context);
-    }
-
-    public void unregisterListener(Context context) {
-        endpoint.unregisterNetworkChangeReceiver(context);
-    }
 
     public boolean loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
         return endpoint.loginWithAccessTokenGenerator(this);
     }
+
 
     public void logout() {
         endpoint.logout();

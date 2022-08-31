@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isInstantiated = true;
         setContentView(R.layout.activity_main);
         progressDialog = new ProgressDialog(this);
-        ((App) getApplication()).backend().registerListener(this);
+
         actionBar = getSupportActionBar();
 
         username = Pref.newInstance(MainActivity.this).getString(Constants.USERNAME);
@@ -213,7 +213,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: ");
-        ((App) getApplication()).backend().unregisterListener(this);
         super.onDestroy();
 
     }
@@ -751,9 +750,6 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
         finish();
-//        Utils.setLoggedinStatus(false);
-//        startActivity(new Intent(this, LoginActivity.class));
-//        finish();
     }
 
     @Override
