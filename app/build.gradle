@@ -42,10 +42,7 @@ android {
             dimension "mode"
             buildConfigField 'String', 'SIP_DOMAIN', '"phone.plivo.com"'
         }
-        clientPhone {
-            dimension "mode"
-            buildConfigField 'String', 'SIP_DOMAIN', '"client-east-phone-qa.voice.plivodev.com"'
-        }
+
     }
 
     splits {
