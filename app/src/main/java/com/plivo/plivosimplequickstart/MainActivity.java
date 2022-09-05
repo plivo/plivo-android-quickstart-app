@@ -166,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
             notificationManager.cancel(Constants.NOTIFICATION_ID);
             Utils.stopVibrating();
         } else if (Constants.REJECT_ACTION.equals(action)) {
+            Log.d("@@Incoming", "onNewIntent | REJECT_ACTION");
             rejectCall();
             notificationManager.cancel(Constants.NOTIFICATION_ID);
             Utils.stopVibrating();
@@ -382,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
 
             case RINGING:
                 Log.d(TAG, "****showInCallUI: ringingF");
-                notificationDialog(title, incoming);
+//                notificationDialog(title, incoming);
                 break;
             case HANGUP:
                 cancelTimer();
@@ -415,9 +416,11 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
 
         Intent answerIntent = new Intent(this, MainActivity.class);
+        answerIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         answerIntent.setAction(Constants.ANSWER_ACTION);
         PendingIntent AcceptIntent = PendingIntent.getActivity(this, 0, answerIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
         Intent rejectIntent = new Intent(this, MainActivity.class);
+        rejectIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         rejectIntent.setAction(Constants.REJECT_ACTION);
         PendingIntent RejectIntent = PendingIntent.getActivity(this, 0, rejectIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
 
@@ -803,67 +806,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         Log.d(TAG, "getAccessToken: ");
         this.runOnUiThread(() -> {
             setContentView(R.layout.activity_main);
-            generateToken();
+//            generateToken();
         });
     }
 
 
-    public void generateToken() {
-        Pref.newInstance(getApplicationContext()).setBoolean(Constants.IS_LOGIN_WITH_USERNAME, true);
-        new Thread(() -> {
-            String sub;
-            sub = Pref.newInstance(getApplicationContext()).getString(Constants.LOGIN_USERNAME);
-            if (sub.isEmpty()) sub = "plivoUser";
-            long nbf = System.currentTimeMillis() / 1000;
-            long exp = nbf + 240;
-            OkHttpClient client = new OkHttpClient().newBuilder()
-                    .build();
-            MediaType mediaType = MediaType.parse("application/json");
-            Log.d(TAG, "generateToken: sub: " + sub);
-            Log.d(TAG, "generateToken: nbf: " + nbf);
-            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \"" + sub + "\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": " + exp + "\n}\n");
-            Request request = new Request.Builder()
-                    .url("https://api.plivo.com/v1/Account/MAY2RJNZKZNJMWOTG4NT/JWT/Token")
-                    .method("POST", body)
-                    .addHeader("Content-Type", "application/json")
-                    .addHeader("Authorization", "Basic TUFZMlJKTlpLWk5KTVdPVEc0TlQ6WWpJM1pXVmpPV0poTW1Kak5USXhNakJtTkdJeVlUUmtZVGd3TUdSaA==")
-                    .build();
-            try {
-                runOnUiThread(() -> {
-                    progressDialog.setMessage("generating..");
-                    progressDialog.show();
-                });
-                Response response = client.newCall(request).execute();
-                progressDialog.dismiss();
-                String responseData = response.body().string();
-                Log.d(TAG, "run: generateToken " + responseData);
-
-                if (response.code() == 200) {
-                    JSONObject jsonResponse = new JSONObject(responseData);
-                    String token = jsonResponse.getString("token");
-                    Log.d(TAG, "run: generateToken jwtToken" + token);
-                    Pref.newInstance(getApplicationContext()).setString(Constants.JWT_ACCESS_TOKEN, token);
-                    runOnUiThread(() -> {
-                        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(this, instanceIdResult -> {
-                            Log.d(TAG, "generateToken: device-token" + instanceIdResult.getToken());
-                            if (isLoginForIncomingWithTokenGenerator && payload != null) {
-                                ((App) getApplication()).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token, payload);
-                            } else {
-                                ((App) getApplication()).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
-                            }
-                        });
-                        progressDialog.dismiss();
-                    });
-                } else {
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, response.message(), Toast.LENGTH_LONG).show());
-                    progressDialog.dismiss();
-                }
-            } catch (Exception e) {
-                Log.d(TAG, "run: generateToken " + e);
-                e.printStackTrace();
-            }
-        }).start();
-
-    }
 
 }
