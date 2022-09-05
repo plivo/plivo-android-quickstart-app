@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Vibrator;
 import android.text.TextUtils;
 
+import com.plivo.endpoint.CallAndMediaMetrics;
 import com.plivo.endpoint.Incoming;
 
 import java.util.HashMap;
@@ -33,7 +34,8 @@ public class Utils {
     private static Vibrator vibrator;
 
     public static HashMap<String, Object> options = new HashMap<String, Object>() {{
-        put("enableTracking", true);
+//        put("enableTracking", Tracking.NONE);
+        put("enableQualityTracking", CallAndMediaMetrics.ALL);
     }};
 
     static String getDeviceToken() {

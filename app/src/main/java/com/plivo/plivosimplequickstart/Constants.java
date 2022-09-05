@@ -30,4 +30,10 @@ public class Constants {
     public static final String MAP = "hashmap";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
+    public static final String JWT_ACCESS_TOKEN = "JWT Access Token";
+    public static final String JWT_ACCESS_TOKEN_GENERATOR = "jwt_access_token_generator";
+    public static final String PAYLOAD = "payload";
+    public static final String IS_LOGIN_WITH_TOKEN = "isLoginWithToken";
+    public static final String IS_LOGIN_WITH_USERNAME = "isLoginWithUsername";
+    public static final String LOGIN_USERNAME = "loginUsername";
 }
