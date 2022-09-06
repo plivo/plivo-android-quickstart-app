@@ -28,7 +28,6 @@ public class LoginWithTokenOrUsernameDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         TextView t = view.findViewById(R.id.etTokenUserName);
-        t.setText("eyJhbGciOiJIUzI1NiIsImN0eSI6InBsaXZvO3Y9MSIsInR5cCI6IkpXVCJ9.eyJhcHAiOiIiLCJleHAiOjE2NTc3MTQ4MTEsImlzcyI6Ik1BWTJSSk5aS1pOSk1XT1RHNE5UIiwibmJmIjoxNjU3NjI4NDExLCJwZXIiOnsidm9pY2UiOnsiaW5jb21pbmdfYWxsb3ciOmZhbHNlLCJvdXRnb2luZ19hbGxvdyI6ZmFsc2V9fSwic3ViIjoiIn0.qugtxEafjuU5grDM5Bs_YkAnCOHFmz1IT4jHodW2Kf4");
         view.findViewById(R.id.loginWithJWT).setOnClickListener(view1 -> loginWithJWTtoken(t.getText().toString()));
     }
 
