@@ -18,10 +18,6 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            setAllowInsecureProtocol(true)
-            url "https://oss.sonatype.org/content/repositories/complivo-1145"
-        }
         google()
         jcenter()
     }
