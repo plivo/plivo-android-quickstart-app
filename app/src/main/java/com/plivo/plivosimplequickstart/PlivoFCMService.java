@@ -42,9 +42,8 @@ public class PlivoFCMService extends FirebaseMessagingService {
                 ((App) getApplication()).backend().loginForIncomingWithJwt(deviceToken, Pref.newInstance(getApplicationContext()).getString(Constants.JWT_ACCESS_TOKEN),"", pushMap);
                 Log.d(TAG, "onMessageReceived | loginForIncomingWithJwt ");
             } else if (isLoginWithTokenGenerator) {
-//                Utils.setLoginWithTokenGenerator(true);
+                Log.d(TAG, "onMessageReceived | loginWithAccessTokenGenerator");
                 ((App) getApplication()).backend().loginWithAccessTokenGenerator(pushMap);
-                //Do nothing just go to MainActivity & handle things there
             } else {
                 ((App) getApplication()).backend().loginForIncomingWithUsername(username, password, deviceToken, "", pushMap);
                 Log.d(TAG, "onMessageReceived | loginForIncomingWithUsername");

@@ -81,7 +81,7 @@ public class PlivoBackEnd implements EventListener {
     public boolean loginWithJwtToken(String token, String JWTToken) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         Utils.setDeviceToken(token);
-        return endpoint.loginWithJwtToken(JWTToken, token,"");
+        return endpoint.loginWithJwtToken(JWTToken, token);
     }
 
     public boolean loginForIncomingWithJwt(String token, String JWTToken,String certificateId, HashMap<String, String> incomingData) {
@@ -103,12 +103,12 @@ public class PlivoBackEnd implements EventListener {
 
     public boolean loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
-        tokenGenerator.loginForIncoming(null);
+        tokenGenerator.loginForIncoming(null,"");
         return endpoint.loginWithAccessTokenGenerator(tokenGenerator.getListener());
     }
     public boolean loginWithAccessTokenGenerator(HashMap map) {
         Log.d(TAG, "loginWithAccessTokenGenerator with map ");
-        tokenGenerator.loginForIncoming(map);
+        tokenGenerator.loginForIncoming(map,"");
         return endpoint.loginWithAccessTokenGenerator(tokenGenerator.getListener());
     }
 

@@ -22,6 +22,7 @@ public class TokenGenerator implements AccessTokenListener {
     private PlivoBackEnd.BackendListener listener = null;
     private String TAG = TokenGenerator.class.getSimpleName();
     private HashMap payload;
+    private String certId = "";
 
     public TokenGenerator(Context context) {
         this.context = context;
@@ -31,8 +32,9 @@ public class TokenGenerator implements AccessTokenListener {
         this.listener = listener;
     }
 
-    public void loginForIncoming(HashMap map) {
+    public void loginForIncoming(HashMap map,String certificateId) {
         this.payload = map;
+        this.certId = certificateId;
     }
 
     public AccessTokenListener getListener() {
@@ -86,7 +88,7 @@ public class TokenGenerator implements AccessTokenListener {
                     FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(instanceIdResult -> {
                         Log.d(TAG, "generateToken: device-token" + instanceIdResult.getToken());
                         if ( payload != null) {
-                            ((App) context).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token, payload);
+                            ((App) context).backend().loginForIncomingWithJwt(instanceIdResult.getToken(), token, certId, payload);
                         } else {
                             ((App) context).backend().loginWithJwtToken(instanceIdResult.getToken(), token);
                         }
