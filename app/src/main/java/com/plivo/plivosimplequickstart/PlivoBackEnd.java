@@ -28,8 +28,8 @@ public class PlivoBackEnd implements EventListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
     private TokenGenerator tokenGenerator;
 
-    public void submitFeedback(float rating, ArrayList<String> issue,String comment, boolean sendLogs) {
-        endpoint.submitCallQualityFeedback((int) rating, issue, comment, sendLogs, new FeedbackCallback() {
+    public void submitFeedback(String callUUID, float rating, ArrayList<String> issue, String comment, boolean sendLogs) {
+        endpoint.submitCallQualityFeedback(callUUID, (int) rating, issue, comment, sendLogs, new FeedbackCallback() {
             @Override
             public void onFailure(int statusCode) {
                 Log.d("@@Feedback", "onFailure: ");
@@ -84,10 +84,10 @@ public class PlivoBackEnd implements EventListener {
         return endpoint.loginWithJwtToken(JWTToken, token);
     }
 
-    public boolean loginForIncomingWithJwt(String token, String JWTToken,String certificateId, HashMap<String, String> incomingData) {
+    public boolean loginForIncomingWithJwt(String token, String JWTToken, String certificateId, HashMap<String, String> incomingData) {
         Log.d("@@Incoming", "Endpoint loginForIncomingWithJwt");
         Utils.setDeviceToken(token);
-        return endpoint.loginForIncomingWithJwt(JWTToken, token, certificateId,incomingData);
+        return endpoint.loginForIncomingWithJwt(JWTToken, token, certificateId, incomingData);
     }
 
     public void loginWithJwtToken(String JWTToken) {
@@ -100,15 +100,19 @@ public class PlivoBackEnd implements EventListener {
         return endpoint.getSub_auth_ID();
     }
 
+    public String getCallUUID() {
+        return endpoint.getLastCallUUID();
+    }
 
     public boolean loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
-        tokenGenerator.loginForIncoming(null,"");
+        tokenGenerator.loginForIncoming(null, "");
         return endpoint.loginWithAccessTokenGenerator(tokenGenerator.getListener());
     }
+
     public boolean loginWithAccessTokenGenerator(HashMap map) {
         Log.d(TAG, "loginWithAccessTokenGenerator with map ");
-        tokenGenerator.loginForIncoming(map,"");
+        tokenGenerator.loginForIncoming(map, "");
         return endpoint.loginWithAccessTokenGenerator(tokenGenerator.getListener());
     }
 
@@ -255,9 +259,6 @@ public class PlivoBackEnd implements EventListener {
         Log.d(TAG, "onPermissionDenied: " + message);
         listener.onPermissionDenied(message);
     }
-
-
-
 
 
     // Your own custom listener
