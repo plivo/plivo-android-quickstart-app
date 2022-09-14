@@ -2,27 +2,15 @@ package com.plivo.plivosimplequickstart;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.plivo.endpoint.AccessTokenListener;
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
 import com.plivo.endpoint.FeedbackCallback;
 import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
-import com.plivo.endpoint.slf4j.helpers.Util;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class PlivoBackEnd implements EventListener {
     private static final String TAG = PlivoBackEnd.class.getSimpleName();
@@ -87,7 +75,7 @@ public class PlivoBackEnd implements EventListener {
     public boolean loginForIncomingWithJwt(String token, String JWTToken, HashMap<String, String> incomingData) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         Utils.setDeviceToken(token);
-        return endpoint.loginForIncomingWithJwt(JWTToken, token, incomingData);
+        return endpoint.loginForIncomingWithJwt(JWTToken, token,"", incomingData);
     }
 
     public void loginWithJwtToken(String JWTToken) {
