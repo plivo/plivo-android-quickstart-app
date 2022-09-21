@@ -91,7 +91,27 @@ public void logout() {
 }
 ```
 
-If the registration to an endpoint succeeds the following delegate gets called 
+#### With Access Tokens/ JWT
+You can register an endpoint using:
+
+- Access Token, device token, and certificate ID
+
+```public boolean loginWithJwtToken(String JWTToken, String deviceToken, String certificateId)```
+
+- Access Token, and device token
+
+```public boolean loginWithJwtToken(String JWTToken, String deviceToken)```
+
+- Access Token
+
+```public boolean loginWithJwtToken(String JWTToken)```
+- Access Token Generator
+
+```public boolean loginWithAccessTokenGenerator(AccessTokenListener accessTokenListener)```
+
+>Check out our [Github example](https://github.com/plivo/plivo-android-quickstart-app/tree/beta) for implementation.
+
+If the registration to an endpoint succeeds the following interface method gets called 
 ```
 @Override
 public void onLogin() {
@@ -99,7 +119,7 @@ public void onLogin() {
 }
 ```
 
-If the registration to an endpoint fails the following delegate gets called 
+If the registration to an endpoint fails the following interface method gets called 
 ```
 @Override
 public void onLoginFailed() {
@@ -107,6 +127,34 @@ public void onLoginFailed() {
 }
 ```
 
+If the registration to an endpoint fails with JWT the following interface method gets called
+```
+@Override
+public void onLoginFailed(String events) {
+   if (loginListener != null) loginListener.onLogin(false);
+}
+```
+
+Possible error events: 
+- INVALID_ACCESS_TOKEN
+- INVALID_ACCESS_TOKEN_HEADER
+- INVALID_ACCESS_TOKEN_ISSUER
+- INVALID_ACCESS_TOKEN_SUBJECT
+- ACCESS_TOKEN_NOT_VALID_YET
+- ACCESS_TOKEN_EXPIRED
+- INVALID_ACCESS_TOKEN_SIGNATURE
+- INVALID_ACCESS_TOKEN_GRANTS
+- EXPIRATION_EXCEEDS_MAX_ALLOWED_TIME
+- MAX_ALLOWED_LOGIN_REACHED
+
+
+When the user logs in with JWT and does not have the permission to make outgoing/receive incoming calls.
+```
+@Override
+public void onPermissionDenied(String message) {
+   Log.d(TAG,message); 
+}
+```
 
 ### <a name="bullet4"></a> Run the app
    - Clone the [repo](https://github.com/plivo/plivo-android-quickstart-app) and open plivo-android-quickstart-app.
