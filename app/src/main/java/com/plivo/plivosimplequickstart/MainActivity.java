@@ -15,7 +15,6 @@ import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -32,13 +31,11 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -54,20 +51,11 @@ import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 import com.plivo.plivosimplequickstart.PlivoBackEnd.STATE;
 
-import org.json.JSONObject;
-
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements PlivoBackEnd.BackendListener {
     private static final int PERMISSIONS_REQUEST_CODE = 21;
@@ -117,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         constraintLayout = findViewById(R.id.cl_main);
         progressBar = findViewById(R.id.progress_bar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PermissionChecker.PERMISSION_DENIED) {
                 init();
             } else {
                 requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_CODE);
