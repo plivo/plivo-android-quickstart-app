@@ -1,7 +1,10 @@
 package com.plivo.plivosimplequickstart;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Vibrator;
 import android.text.TextUtils;
 
@@ -9,6 +12,7 @@ import com.plivo.endpoint.CallAndMediaMetrics;
 import com.plivo.endpoint.Incoming;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class Utils {
     /*
@@ -30,6 +34,7 @@ public class Utils {
     private static PlivoBackEnd.BackendListener listener;
     private static Incoming incoming;
     private static boolean isLoggedIn = false;
+    private static boolean isLoggedInTokenGen = false;
 
     private static Vibrator vibrator;
 
@@ -67,6 +72,14 @@ public class Utils {
         isLoggedIn = status;
     }
 
+    static boolean isLoggedInWithTokenGenerator() {
+        return isLoggedInTokenGen;
+    }
+
+    static void setLoginWithTokenGenerator(boolean status) {
+        isLoggedInTokenGen = status;
+    }
+
     static Incoming getIncoming() {
         return incoming;
     }
@@ -99,5 +112,31 @@ public class Utils {
     static void stopVibrating() {
         if (vibrator != null)
             vibrator.cancel();
+    }
+
+    public static boolean isAppIsInBackground(Context context) {
+        boolean isInBackground = true;
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT_WATCH) {
+            List<ActivityManager.RunningAppProcessInfo> runningProcesses = am.getRunningAppProcesses();
+            for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
+                if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                    for (String activeProcess : processInfo.pkgList) {
+                        if (activeProcess.equals(context.getPackageName())) {
+                            isInBackground = false;
+                        }
+                    }
+                }
+            }
+        } else {
+            List<ActivityManager.RunningTaskInfo> taskInfo = am.getRunningTasks(1);
+            ComponentName componentInfo = taskInfo.get(0).topActivity;
+
+            if (componentInfo.getPackageName().equals(context.getPackageName())) {
+                isInBackground = false;
+            }
+        }
+
+        return isInBackground;
     }
 }

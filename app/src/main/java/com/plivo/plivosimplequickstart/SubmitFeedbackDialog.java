@@ -93,7 +93,8 @@ public class SubmitFeedbackDialog extends DialogFragment {
 
         submitFeedbackButton.setOnClickListener(v -> {
             if(callRatingView.getRating() == 5.0) resetValues();
-            ((App) v.getContext().getApplicationContext()).backend().submitFeedback(callRatingView.getRating(),selectedIssueList,commentTextView.getText().toString(),sendLogsBox.isChecked());
+            PlivoBackEnd plivoBackEnd = ((App) v.getContext().getApplicationContext()).backend();
+            plivoBackEnd.submitFeedback(plivoBackEnd.getCallUUID(), callRatingView.getRating(), selectedIssueList, commentTextView.getText().toString(), sendLogsBox.isChecked());
             dismiss();
         });
 

@@ -2,7 +2,9 @@ package com.plivo.plivosimplequickstart;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.plivo.endpoint.AccessTokenListener;
 import com.plivo.endpoint.Endpoint;
 import com.plivo.endpoint.EventListener;
@@ -11,14 +13,23 @@ import com.plivo.endpoint.Incoming;
 import com.plivo.endpoint.Outgoing;
 import com.plivo.endpoint.slf4j.helpers.Util;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PlivoBackEnd implements EventListener, AccessTokenListener {
-    private static final String TAG = PlivoBackEnd.class.getSimpleName();
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
-    public void submitFeedback(float rating, ArrayList<String> issue,String comment, boolean sendLogs) {
-        endpoint.submitCallQualityFeedback((int) rating, issue, comment, sendLogs, new FeedbackCallback() {
+public class PlivoBackEnd implements EventListener {
+    private static final String TAG = PlivoBackEnd.class.getSimpleName();
+    private TokenGenerator tokenGenerator;
+
+    public void submitFeedback(String callUUID, float rating, ArrayList<String> issue, String comment, boolean sendLogs) {
+        endpoint.submitCallQualityFeedback(callUUID, (int) rating, issue, comment, sendLogs, new FeedbackCallback() {
             @Override
             public void onFailure(int statusCode) {
                 Log.d("@@Feedback", "onFailure: ");
@@ -54,6 +65,7 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         HashMap options = Utils.options;
         options.put("maxAverageBitrate", 48000);
         endpoint = Endpoint.newInstance(context, log, this);
+        tokenGenerator = new TokenGenerator(context);
     }
 
     public void setListener(BackendListener listener) {
@@ -72,10 +84,10 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         return endpoint.loginWithJwtToken(JWTToken, token);
     }
 
-    public boolean loginForIncomingWithJwt(String token, String JWTToken, HashMap<String, String> incomingData) {
-        Log.d("@@Incoming", "Endpoint loginWithJwtToken");
+    public boolean loginForIncomingWithJwt(String token, String JWTToken, String certificateId, HashMap<String, String> incomingData) {
+        Log.d("@@Incoming", "Endpoint loginForIncomingWithJwt");
         Utils.setDeviceToken(token);
-        return endpoint.loginForIncomingWithJwt(JWTToken, token, incomingData);
+        return endpoint.loginForIncomingWithJwt(JWTToken, token, certificateId, incomingData);
     }
 
     public void loginWithJwtToken(String JWTToken) {
@@ -88,12 +100,21 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
         return endpoint.getSub_auth_ID();
     }
 
+    public String getCallUUID() {
+        return endpoint.getLastCallUUID();
+    }
 
     public boolean loginWithAccessTokenGenerator() {
         Log.d(TAG, "loginWithAccessTokenGenerator: ");
-        return endpoint.loginWithAccessTokenGenerator(this);
+        tokenGenerator.loginForIncoming(null, "");
+        return endpoint.loginWithAccessTokenGenerator(tokenGenerator.getListener());
     }
 
+    public boolean loginWithAccessTokenGenerator(HashMap map) {
+        Log.d(TAG, "loginWithAccessTokenGenerator with map ");
+        tokenGenerator.loginForIncoming(map, "");
+        return endpoint.loginWithAccessTokenGenerator(tokenGenerator.getListener());
+    }
 
     public void logout() {
         endpoint.logout();
@@ -237,13 +258,6 @@ public class PlivoBackEnd implements EventListener, AccessTokenListener {
     public void onPermissionDenied(String message) {
         Log.d(TAG, "onPermissionDenied: " + message);
         listener.onPermissionDenied(message);
-    }
-
-    @Override
-    public void getAccessToken() {
-        Log.d(TAG, "onTokenExpired: ");
-        if (listener != null)
-            listener.getAccessToken();
     }
 
 
