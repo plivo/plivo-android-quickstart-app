@@ -75,7 +75,7 @@ public class PlivoBackEnd implements EventListener {
     public boolean loginForIncomingWithJwt(String token, String JWTToken, HashMap<String, String> incomingData) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         Utils.setDeviceToken(token);
-        return endpoint.loginForIncomingWithJwt(JWTToken, token, incomingData);
+        return endpoint.loginForIncomingWithJwt(JWTToken, token, "", incomingData);
     }
 
     public void loginWithJwtToken(String JWTToken) {
