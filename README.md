@@ -3,22 +3,22 @@
 
 ### Introduction
 
-The Plivo Android SDK v2 allows you to make outgoing and receive incoming calls in your Android application.
+The Plivo Android SDK v3 allows you to make outgoing and receive incoming calls in your Android application.
 To get started with this quickstart application follow these steps.
 - **Outgoing Call:** Follow the below steps to start making outbound calls
-    - [Install the Plivo Android SDK using gradle](#bullet1)
-    - [Create Endpoints](#bullet2)
-    - [Register and Unregister Endpoint](#bullet3)
-    - [Run the app](#bullet4)
-    - [Making an outgoing call](#bullet5)
+  - [Install the Plivo Android SDK using gradle](#bullet1)
+  - [Create Endpoints](#bullet2)
+  - [Register and Unregister Endpoint](#bullet3)
+  - [Run the app](#bullet4)
+  - [Making an outgoing call](#bullet5)
 - **Incoming Call:** You can enable the application to receive incoming calls in the form of push notifications using Firebase.
-    
-    
+
+
 ### System Requirements
 
-   - Android SDK supports x86, x86_64, arm64-v8a, armeabi-v7a architectures and Android OS 6 & above.
-   - You can use Android Studio or Eclipse to build this quickstart app.
-   - Plivo Android SDK supports IPv6 networks. Users can make and receive calls when their device is connected to a network that uses IPv4, IPv6, or both versions of the protocol.
+- Android SDK supports x86, x86_64, arm64-v8a, armeabi-v7a architectures and Android OS 6 & above.
+- You can use Android Studio or Eclipse to build this quickstart app.
+- Plivo Android SDK supports IPv6 networks. Users can make and receive calls when their device is connected to a network that uses IPv4, IPv6, or both versions of the protocol.
 
 
 ### <a name="bullet1"></a> Install the Plivo Android SDK using gradle
@@ -28,7 +28,7 @@ It's easy to install the Android sdk if you manage your dependencies using gradl
 // Replace 2.0.16 with latest version
 implementation 'com.plivo.endpoint:endpoint:2.0.16@aar'
 ```
-If you don't want to use gradle, simply build project since we already have aar file by default under plivo-android-quickstart-app/app/libs. 
+If you don't want to use gradle, simply build project since we already have aar file by default under plivo-android-quickstart-app/app/libs.
 
 [SDK Reference](https://www.plivo.com/docs/sdk/client/android/reference) - More documentation related to the Voice Android SDK
 
@@ -60,7 +60,7 @@ You can create an endpoint from the Plivo Console and assign an application to m
 
 Implement SIP register to Plivo Communication Server
 
-To register with Plivo's SIP and Media server , use a valid sip uri account from plivo web console 
+To register with Plivo's SIP and Media server , use a valid sip uri account from plivo web console
 ```
 private Endpoint endpoint;
 Endpoint endpoint = Endpoint.newInstance(true, this);
@@ -91,7 +91,35 @@ public void logout() {
 }
 ```
 
-If the registration to an endpoint succeeds the following delegate gets called 
+#### With Access Tokens/ JWT
+You can register an endpoint using:
+
+- Access Token, device token, and certificate ID
+
+```
+public boolean loginWithJwtToken(String JWTToken, String deviceToken, String certificateId)
+```
+
+- Access Token, and device token
+
+```
+public boolean loginWithJwtToken(String JWTToken, String deviceToken)
+```
+
+- Access Token
+
+```
+public boolean loginWithJwtToken(String JWTToken)
+```
+- Access Token Generator
+
+```
+public boolean loginWithAccessTokenGenerator(AccessTokenListener accessTokenListener)
+```
+
+>Check out our [Github example](https://github.com/plivo/plivo-android-quickstart-app/tree/beta) for implementation.
+
+If the registration to an endpoint succeeds the following interface method gets called
 ```
 @Override
 public void onLogin() {
@@ -99,7 +127,7 @@ public void onLogin() {
 }
 ```
 
-If the registration to an endpoint fails the following delegate gets called 
+If the registration to an endpoint fails the following interface method gets called
 ```
 @Override
 public void onLoginFailed() {
@@ -107,18 +135,46 @@ public void onLoginFailed() {
 }
 ```
 
+If the registration to an endpoint fails with JWT the following interface method gets called
+```
+@Override
+public void onLoginFailed(String events) {
+   if (loginListener != null) loginListener.onLogin(false);
+}
+```
+
+Possible error events:
+- INVALID_ACCESS_TOKEN
+- INVALID_ACCESS_TOKEN_HEADER
+- INVALID_ACCESS_TOKEN_ISSUER
+- INVALID_ACCESS_TOKEN_SUBJECT
+- ACCESS_TOKEN_NOT_VALID_YET
+- ACCESS_TOKEN_EXPIRED
+- INVALID_ACCESS_TOKEN_SIGNATURE
+- INVALID_ACCESS_TOKEN_GRANTS
+- EXPIRATION_EXCEEDS_MAX_ALLOWED_TIME
+- MAX_ALLOWED_LOGIN_REACHED
+
+
+When the user logs in with JWT and does not have the permission to make outgoing/receive incoming calls.
+```
+@Override
+public void onPermissionDenied(String message) {
+   Log.d(TAG,message); 
+}
+```
 
 ### <a name="bullet4"></a> Run the app
-   - Clone the [repo](https://github.com/plivo/plivo-android-quickstart-app) and open plivo-android-quickstart-app.
-   - Change sip endpoint username and password in [Utils](https://github.com/plivo/plivo-android-quickstart-app/blob/refactoring/app/src/main/java/com/plivo/plivosimplequickstart/Utils.java).
-   - Build and run the app.  
-   - After successful login make VoiceCalls.
+- Clone the [repo](https://github.com/plivo/plivo-android-quickstart-app) and open plivo-android-quickstart-app.
+- Change sip endpoint username and password in [Utils](https://github.com/plivo/plivo-android-quickstart-app/blob/refactoring/app/src/main/java/com/plivo/plivosimplequickstart/Utils.java).
+- Build and run the app.
+- After successful login make VoiceCalls.
 
 
 ### <a name="bullet5"></a> Making an outgoing call
 
 ###### Make an outgoing call with destination & headers:
-Create PlivoOutgoingCall object , then make a call with destination and headers 
+Create PlivoOutgoingCall object , then make a call with destination and headers
 ```
 public Outgoing getOutgoing() {
     return endpoint.createOutgoingCall();
