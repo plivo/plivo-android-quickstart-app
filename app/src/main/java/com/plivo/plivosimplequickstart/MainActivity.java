@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     String keypadData = "";
     boolean isBackPressed = false;
     boolean isLoginFirstTime = false;
+    boolean isActivityStopped = false;
+    boolean showFeedback = false;
 
     public static boolean isInstantiated = false;
     private BroadcastReceiver callIncomingReceiver;
@@ -115,6 +117,15 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isActivityStopped = false;
+        if(showFeedback){
+            showFeedbackDialog();
+        }
+    }
+
     public JWT getDecodedJwt(String jwt) {
         return new JWT(jwt);
     }
@@ -132,14 +143,18 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void showFeedbackDialog(){
-        SubmitFeedbackDialog dialogFragment = new SubmitFeedbackDialog();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog2");
-        if (prev != null) {
-            ft.remove(prev);
+        if(!isActivityStopped) {
+            SubmitFeedbackDialog dialogFragment = new SubmitFeedbackDialog();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog2");
+            if (prev != null) {
+                ft.remove(prev);
+            }
+            ft.addToBackStack(null);
+            dialogFragment.show(ft, "feedback");
+        }else{
+           showFeedback = true;
         }
-        ft.addToBackStack(null);
-        dialogFragment.show(ft, "feedback");
     }
 
     @Override
@@ -210,6 +225,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     protected void onPause() {
         progressDialog.dismiss();
         super.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        isActivityStopped = true;
     }
 
     private void init() {
