@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         isActivityStopped = false;
         if(showFeedback){
             showFeedbackDialog();
+            showFeedback = false;
         }
     }
 
