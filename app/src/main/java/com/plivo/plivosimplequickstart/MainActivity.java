@@ -44,7 +44,6 @@ import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.auth0.android.jwt.JWT;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.plivo.endpoint.Incoming;
@@ -78,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     String keypadData = "";
     boolean isBackPressed = false;
     boolean isLoginFirstTime = false;
+    boolean isActivityStopped = false;
+    boolean showFeedback = false;
 
     public static boolean isInstantiated = false;
     private BroadcastReceiver callIncomingReceiver;
@@ -105,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         constraintLayout = findViewById(R.id.cl_main);
         progressBar = findViewById(R.id.progress_bar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PermissionChecker.PERMISSION_DENIED) {
+            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PermissionChecker.PERMISSION_DENIED) {
                 init();
             } else {
                 requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_CODE);
@@ -115,8 +116,14 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         }
     }
 
-    public JWT getDecodedJwt(String jwt) {
-        return new JWT(jwt);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isActivityStopped = false;
+        if(showFeedback){
+            showFeedbackDialog();
+            showFeedback = false;
+        }
     }
 
     @Override
@@ -132,14 +139,18 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     }
 
     private void showFeedbackDialog(){
-        SubmitFeedbackDialog dialogFragment = new SubmitFeedbackDialog();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog2");
-        if (prev != null) {
-            ft.remove(prev);
+        if(!isActivityStopped) {
+            SubmitFeedbackDialog dialogFragment = new SubmitFeedbackDialog();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            Fragment prev = getSupportFragmentManager().findFragmentByTag("dialog2");
+            if (prev != null) {
+                ft.remove(prev);
+            }
+            ft.addToBackStack(null);
+            dialogFragment.show(ft, "feedback");
+        }else{
+           showFeedback = true;
         }
-        ft.addToBackStack(null);
-        dialogFragment.show(ft, "feedback");
     }
 
     @Override
@@ -210,6 +221,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
     protected void onPause() {
         progressDialog.dismiss();
         super.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        isActivityStopped = true;
     }
 
     private void init() {
