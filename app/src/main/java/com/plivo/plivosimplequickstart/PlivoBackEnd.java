@@ -17,7 +17,7 @@ public class PlivoBackEnd implements EventListener {
     private TokenGenerator tokenGenerator;
 
     public void submitFeedback(float rating, ArrayList<String> issue,String comment, boolean sendLogs) {
-        endpoint.submitCallQualityFeedback((int) rating, issue, comment, sendLogs, new FeedbackCallback() {
+        endpoint.submitCallQualityFeedback(endpoint.getLastCallUUID(),(int) rating, issue, comment, sendLogs, new FeedbackCallback() {
             @Override
             public void onFailure(int statusCode) {
                 Log.d("@@Feedback", "onFailure: ");
@@ -75,7 +75,7 @@ public class PlivoBackEnd implements EventListener {
     public boolean loginForIncomingWithJwt(String token, String JWTToken, HashMap<String, String> incomingData) {
         Log.d("@@Incoming", "Endpoint loginWithJwtToken");
         Utils.setDeviceToken(token);
-        return endpoint.loginForIncomingWithJwt(JWTToken, token, "", incomingData);
+        return endpoint.loginForIncomingWithJwt(JWTToken, token ,"",incomingData);
     }
 
     public void loginWithJwtToken(String JWTToken) {
@@ -166,7 +166,7 @@ public class PlivoBackEnd implements EventListener {
     @Override
     public void onIncomingCall(Incoming incoming) {
         Log.d(TAG, Constants.INCOMING_CALL_RINGING);
-        Log.d(TAG, "****onIncomingCall");
+        Log.d(TAG, "****onIncomingCall incoming.getHeader()" + incoming.getHeader());
         Utils.setIncoming(incoming);
         if (listener != null) listener.onIncomingCall(incoming, STATE.RINGING);
     }

@@ -18,7 +18,6 @@ import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.plivo.endpoint.Incoming;
 
 import java.util.HashMap;
 
@@ -32,7 +31,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
         if (remoteMessage.getData() != null) {
             String deviceToken = Utils.getDeviceToken();
             HashMap<String, String> pushMap = new HashMap<>(remoteMessage.getData());
-
+            Log.d(TAG, "onMessageReceived: payload headers"+ pushMap.get("extraHeaders"));
             String username = Utils.USERNAME;
             String password = Utils.PASSWORD;
 
