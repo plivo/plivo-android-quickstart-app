@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         constraintLayout = findViewById(R.id.cl_main);
         progressBar = findViewById(R.id.progress_bar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PermissionChecker.PERMISSION_DENIED) {
+            if (PermissionChecker.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PermissionChecker.PERMISSION_DENIED) {
                 init();
             } else {
                 requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, PERMISSIONS_REQUEST_CODE);
