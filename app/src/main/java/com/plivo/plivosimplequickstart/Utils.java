@@ -23,6 +23,8 @@ public class Utils {
     // endpoint username & password
     static final String USERNAME = BuildConfig.Username;
     static final String PASSWORD = BuildConfig.Password;
+    static final String AUTH_ID = BuildConfig.AuthID;
+    static final String AUTH_TOKEN = BuildConfig.AuthToken;
 
     static final String PREFERENCE_KEY = "Plivo-Pref";
 
