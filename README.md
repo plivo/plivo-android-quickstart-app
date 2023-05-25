@@ -77,6 +77,11 @@ public void login(String username, String password, String fcmToken) {
 public void login(String username, String password, String fcmToken, String certificateId) {
    endpoint.login(username, password, fcmToken, certificateId);
 }
+
+// To logout with SIP Server
+public void logout() {
+   endpoint.logout();
+}
 ```
 #### With Access Tokens/ JWT
 You can register an endpoint using:
@@ -218,7 +223,7 @@ public class PlivoFCMService extends FirebaseMessagingService {
 
 
 NOTE: ```relayIncomingPushData``` is now deprecated. Use ```loginForIncomingWithUsername``` method
-and ``loginForIncomingWithUsername``
+and ``loginWithJwtToken``
 
 
 incomingData is the Map object forwarded by the firebase push notification. This will enable the application to receive incoming calls even the app is not in foreground.
