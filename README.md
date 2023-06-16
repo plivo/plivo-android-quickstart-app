@@ -55,6 +55,7 @@ You can create an endpoint from the Plivo Console and assign an application to m
 
 
 ### <a name="bullet3"></a> Register and Unregister Endpoints
+![plivo-android-quickstart-app](ReadMeImages/loginWithUsernamenJWT.jpg)
 
 Implement SIP register to Plivo Communication Server
 
