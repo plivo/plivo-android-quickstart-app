@@ -1,6 +1,7 @@
 package com.plivo.plivosimplequickstart;
 
 import android.content.Context;
+import android.media.AudioDeviceInfo;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -175,9 +176,10 @@ public class PlivoBackEnd implements EventListener {
     }
 
     @Override
-    public void onIncomingDigitNotification(String s) {
-        if (listener != null) listener.onIncomingDigit(s);
+    public void onIncomingDigitNotification(String digit) {
+
     }
+
 
     @Override
     public void onIncomingCall(Incoming incoming) {
@@ -258,6 +260,11 @@ public class PlivoBackEnd implements EventListener {
     public void onPermissionDenied(String message) {
         Log.d(TAG, "onPermissionDenied: " + message);
         listener.onPermissionDenied(message);
+    }
+
+    @Override
+    public void audioDeviceChange(String change, AudioDeviceInfo device) {
+        Log.d(TAG, "audioDeviceChange: ");
     }
 
 
