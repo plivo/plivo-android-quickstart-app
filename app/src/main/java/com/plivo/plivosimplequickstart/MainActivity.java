@@ -810,6 +810,10 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
         });
     }
 
+    @Override
+    public void speakingOnMute() {
+        Toast.makeText(this, "You are trying to speak on mute", Toast.LENGTH_LONG).show();
+    }
 
 
 }

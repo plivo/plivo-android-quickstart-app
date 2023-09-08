@@ -174,10 +174,7 @@ public class PlivoBackEnd implements EventListener {
         if (listener != null) listener.onLoginFailed(message);
     }
 
-    @Override
-    public void onIncomingDigitNotification(String s) {
-        if (listener != null) listener.onIncomingDigit(s);
-    }
+
 
     @Override
     public void onIncomingCall(Incoming incoming) {
@@ -260,6 +257,11 @@ public class PlivoBackEnd implements EventListener {
         listener.onPermissionDenied(message);
     }
 
+    @Override
+    public void speakingOnMute() {
+        Log.d(TAG, "speech: you are speaking on mute");
+        listener.speakingOnMute();
+    }
 
     // Your own custom listener
     public interface BackendListener {
@@ -280,5 +282,6 @@ public class PlivoBackEnd implements EventListener {
         void onPermissionDenied(String message);
 
         void getAccessToken();
+        void speakingOnMute();
     }
 }
