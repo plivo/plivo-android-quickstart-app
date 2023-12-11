@@ -4,6 +4,8 @@ Properties properties = new Properties()
 properties.load(project.rootProject.file('local.properties').newDataInputStream())
 def username = properties.getProperty("plivo.username", "") ?: "\"\""
 def password = properties.getProperty("plivo.password", "") ?: "\"\""
+def authID = properties.getProperty("plivo.authID", "") ?: "\"\""
+def authToken = properties.getProperty("plivo.authToken", "") ?: "\"\""
 
 android {
     compileSdkVersion 30
@@ -16,6 +18,8 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "Username", username
         buildConfigField "String", "Password", password
+        buildConfigField "String", "AuthID", authID
+        buildConfigField "String", "AuthToken", authToken
     }
     buildTypes {
         release {

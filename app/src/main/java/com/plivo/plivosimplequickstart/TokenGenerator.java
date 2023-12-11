@@ -63,12 +63,12 @@ public class TokenGenerator implements AccessTokenListener {
             MediaType mediaType = MediaType.parse("application/json");
             Log.d(TAG, "generateToken: sub: " + sub);
             Log.d(TAG, "generateToken: nbf: " + nbf);
-            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \"MAY2RJNZKZNJMWOTG4NT\",\n    \"sub\": \"" + sub + "\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    },\n    \"exp\": " + exp + "\n}\n");
+            RequestBody body = RequestBody.create(mediaType, "{\n    \"iss\": \""+Utils.AUTH_ID+"\",\n    \"sub\": \""+ sub +"\",\n    \"per\": {\n        \"voice\": {\n            \"incoming_allow\": true,\n            \"outgoing_allow\": true\n        }\n    }}");
             Request request = new Request.Builder()
-                    .url("https://api.plivo.com/v1/Account/MAY2RJNZKZNJMWOTG4NT/JWT/Token")
+                    .url("https://api.plivo.com/v1/Account/"+Utils.AUTH_ID+"/JWT/Token")
                     .method("POST", body)
                     .addHeader("Content-Type", "application/json")
-                    .addHeader("Authorization", "Basic TUFZMlJKTlpLWk5KTVdPVEc0TlQ6WWpJM1pXVmpPV0poTW1Kak5USXhNakJtTkdJeVlUUmtZVGd3TUdSaA==")
+                    .addHeader("Authorization", "Basic "+Utils.AUTH_TOKEN)
                     .build();
             try {
                 /*runOnUiThread(() -> {
