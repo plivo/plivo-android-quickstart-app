@@ -25,7 +25,7 @@ To get started with this quickstart application follow these steps.
 
 It's easy to install the Android sdk if you manage your dependencies using gradle. Simply add the following to your build.gradle under app folder
 ```
-implementation 'com.plivo.endpoint:endpoint:3.1.1-beta@aar'
+implementation 'com.plivo.endpoint:endpoint:3.2.1-beta@aar'
 ```
 
 [SDK Reference](https://www.plivo.com/docs/sdk/client/android/reference) - More documentation related to the Voice Android SDK
