@@ -338,12 +338,12 @@ public class MainActivity extends AppCompatActivity implements PlivoBackEnd.Back
                 callerState = (TextView) findViewById(R.id.caller_state);
                 callerState.setText(Constants.RINGING_LABEL);
                 ((ImageButton) findViewById(R.id.speaker)).setVisibility(View.VISIBLE);
-                ((ImageButton) findViewById(R.id.mute)).setVisibility(View.VISIBLE);
                 ((ImageButton) findViewById(R.id.hold)).setVisibility(View.VISIBLE);
                 break;
             case ANSWERED:
                 startTimer();
                 ((ImageButton) findViewById(R.id.keypad)).setVisibility(View.VISIBLE);
+                ((ImageButton) findViewById(R.id.mute)).setVisibility(View.VISIBLE);
                 ((TextView) findViewById(R.id.dial_numbers)).setText("");
                 activeCall = true;
                 break;
