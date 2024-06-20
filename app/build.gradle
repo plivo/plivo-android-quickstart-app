@@ -6,6 +6,16 @@ def username = properties.getProperty("plivo.username", "") ?: "\"\""
 def password = properties.getProperty("plivo.password", "") ?: "\"\""
 
 android {
+    signingConfigs {
+
+        release {
+            storeFile file("keystore-info/keystore.jks")
+            storePassword 'plivodev'
+            keyAlias 'plivodev'
+            keyPassword 'plivodev'
+        }
+    }
+
     compileSdkVersion 30
     defaultConfig {
         applicationId "com.plivo.plivosimplequickstart"
@@ -19,7 +29,9 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
